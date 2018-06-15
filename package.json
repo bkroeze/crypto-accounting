@@ -1,0 +1,10 @@
+{
+  "name": "plaintext-accounting",
+  "version": "0.0.1",
+  "description": "Multi-currency/commodity accounting using plain text files (technically YAML, but human-readable)",
+  "main": "src/cli.js",
+  "repository": "https://github.com/bkroeze/plaintext-accounting.git",
+  "author": "Bruce Kroeze <coindev@mytx.io>",
+  "license": "MIT",
+  "private": false
+}

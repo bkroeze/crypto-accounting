@@ -1,0 +1,15 @@
+#+Title: Plaintext-Accounting
+#+AUTHOR: Bruce Kroeze 
+#+EMAIL: coindev@mytx.io
+#+DESCRIPTION: Plaintext-accounting README
+#+LANGUAGE: en
+#+SETUPFILE: config/theme-bigblow.setup
+
+A library and set of tools for accounting, inspired by and mostly interoperable with [[https://www.ledger-cli.org/3.0/doc/ledger3.html][Ledger-Cli]].
+
+* Goals
+- Uses a human-readable input format.  This is YAML by default, although see the next goal.
+- Can convert or hopefully directly use a subset of the Ledger format.
+- Can insert price histories for settlement to arbitrary base currencies, USD by default
+- Can calculate lot prices, average entry price
+- The final output file (or fileset) should ideally be fully-self-contained, allowing for a full accounting to USD capital gains and income statements with no outside interface needed.
