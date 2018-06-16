@@ -1,0 +1,8 @@
+*.log
+node_modules
+*sublime*
+*config*
+dist
+yarn.lock
+*~
+\#*

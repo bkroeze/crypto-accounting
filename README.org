@@ -1,11 +1,11 @@
-#+Title: Plaintext-Accounting
+#+Title: Crypto-Accounting
 #+AUTHOR: Bruce Kroeze 
 #+EMAIL: coindev@mytx.io
-#+DESCRIPTION: Plaintext-accounting README
+#+DESCRIPTION: Basic project description for Crypto Accounting
 #+LANGUAGE: en
 #+SETUPFILE: config/theme-bigblow.setup
 
-A library and set of tools for accounting, inspired by and mostly interoperable with [[https://www.ledger-cli.org/3.0/doc/ledger3.html][Ledger-Cli]].
+A library and set of tools for accounting with multiple currencies and/or commodities, inspired by and mostly interoperable with [[https://www.ledger-cli.org/3.0/doc/ledger3.html][Ledger-Cli]], with ideas from [[https://github.com/feramhq/transity][Transity]].
 
 * Goals
 - Uses a human-readable input format.  This is YAML by default, although see the next goal.
