@@ -4,6 +4,8 @@ const DEFAULT_PROPS = {
   path: '',
   alias: '',
   note: '',
+  tags: [],
+  portfolio: '',
   parent: null,
   children: [],
 };
@@ -51,6 +53,8 @@ export default class Account {
       path: this.path,
       alias: this.alias,
       note: this.note,
+      tags: this.tags,
+      portfolio: this.portfolio,
       children: this.children.map(c => c.toObject())
     }
   }

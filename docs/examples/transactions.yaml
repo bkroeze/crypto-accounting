@@ -1,0 +1,66 @@
+transactions:
+  - note:
+      Examples of different forms of trading within one account. These will all
+      be transactions tagged to the account listed above "assets:test"
+    account: assets:test
+    utc: 2018-06-15
+    tags:
+      - test
+    entries:
+      # all these are the same result
+      # "shortcut" style entries
+      - -1000 FOO @ 1 BTC
+      - -1000 FOO = 1000 BTC
+      # short form double entry
+      - debit: 1000 FOO
+        credit: 1000 BTC
+      # long form double entry
+      - debit:
+          quantity: 1000
+          currency: BTC
+        credit:
+          quantity: 1000
+          currency: FOO
+  - note: Example with percentage fee
+    account: assets:exchanges:cb
+    fees:
+      # there can be multiple fees, which is why this is a list.
+      # Each fee can be applied to buy side, sell side, or simple flat amounts.
+      # account here is optional, and defaults to the transaction account above
+      # if not given
+      - amount: 0.1%
+        account: expenses:fees
+        feetype: buy # buy | sell | flat
+    utc: 2018-06-15
+    entries:
+      - -100 ETH @ 0.3 BTC
+  - note:
+      Example Transfer from mining pool to wallet, where the money is coming from
+      your "income:mining" account into "assets:wallets:ETH" account
+    account: income:mining
+    utc: 2018-06-15
+    entries:
+      - 100 ETH [assets:wallets:ETH]
+      - 0.001 ETH [expenses:crypto]
+      # long form of above
+      - credit:
+          quantity: 100
+          currency: ETH
+          account: assets:wallets:ETH
+      - credit:
+          quantity: 0.001
+          currency: ETH
+          account: expenses:crypto
+      # because this is not balanced, a balancing entry is auto-calculated
+      # and applied to income:mining. In this case we would generate a debit
+      # of 100.001 ETH on the default "income:mining" accout
+  - note: Example of a simple crypto spend
+    account: assets:wallets:ETH
+    utc: 2018-06-17
+    entries:
+      - -5 GIN [expenses:hosting]
+  - note: Example of a simple crypto spend, reversed accounts
+    account: expenses:hosting
+    utc: 2018-06-17
+    entries:
+      - 5 GIN [assets:wallets:ETH]

@@ -8,15 +8,19 @@ test('Account can instantiate via props', t => {
 });
 
 test('Account can instantiate a full set of props w/o children', t => {
-  const props = {path: 'test', alias: 't', note: 'notes are nice', children: []}
+  const props = {path: 'test', alias: 't', note: 'notes are nice', tags: [], portfolio: [],
+                 children: []}
   const a = new Account(props);
   t.deepEqual(a.toObject(), props);
 });
 
 test('Account can instantiate a full set of props with children', t => {
-  const props = {path: 'test', alias: 't', note: 'notes are nice', children: [
-    {path: 'c1', alias: 'c1', note: '', children: []},
-    {path: 'c2', alias: 'c2', note: 'xxx', children: []},
+  const props = {path: 'test', alias: 't', note: 'notes are nice', tags: [], portfolio: [],
+                 children: [
+                   {path: 'c1', alias: 'c1', note: '', tags: [], portfolio: [],
+                    children: []},
+                   {path: 'c2', alias: 'c2', note: 'xxx', tags: [], portfolio: [],
+                    children: []},
   ]}
   const a = new Account(props);
   t.is(a.children[0].alias, 'c1');
@@ -29,10 +33,14 @@ test('Account can instantiate a full set of props with children', t => {
 });
 
 test('Account can instantiate a full set of props with multiple children levels', t => {
-  const props = {path: 'test', alias: 't', note: 'notes are nice', children: [
-    {path: 'c1', alias: 'c1', note: '', children: [
-      {path: 'c2', alias: 'c2', note: 'xxx', children: [
-        {path: 'c3', alias: 'c3', note: '', children: []},
+  const props = {path: 'test', alias: 't', note: 'notes are nice', tags: [], portfolio: 'test',
+                 children: [
+                   {path: 'c1', alias: 'c1', note: '', tags: [], portfolio: 'test',
+                    children: [
+                      {path: 'c2', alias: 'c2', note: 'xxx', tags: [], portfolio: 'test', 
+                       children: [
+                         {path: 'c3', alias: 'c3', note: '', tags: [], portfolio: 'test', 
+                          children: []},
       ]}
     ]}
   ]}

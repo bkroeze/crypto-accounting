@@ -8,8 +8,11 @@
 A library and set of tools for accounting with multiple currencies and/or commodities, inspired by and mostly interoperable with [[https://www.ledger-cli.org/3.0/doc/ledger3.html][Ledger-Cli]], with ideas from [[https://github.com/feramhq/transity][Transity]].
 
 * Goals
+The library is intended to provide a terse, accurate, and easy to maintaine "canonical source" of all transactions.  It can then filter and export that information in a variety of ways, for use and anaylsis by other tools, such as a spreadsheet or a different accounting system.
+
 - Uses a human-readable input format.  This is YAML by default, although see the next goal.
 - Can convert or hopefully directly use a subset of the Ledger format.
 - Can insert price histories for settlement to arbitrary base currencies, USD by default
 - Can calculate lot prices, average entry price
 - The final output file (or fileset) should ideally be fully-self-contained, allowing for a full accounting to USD capital gains and income statements with no outside interface needed.
+
