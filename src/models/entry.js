@@ -1,14 +1,21 @@
 import * as R from 'ramda';
 import Moment from 'moment';
 
+import {stripFalsyExcept} from './modelUtils';
+
+// stub out credits/debits/fees
+const ZERO_CREDIT = {};
+const ZERO_DEBIT = {};
+const makeFees = (fees) => fees;
+
 const DEFAULT_PROPS = {
-  account: null,
-  amount: 0,
-  currency: null,
-  utc: null,
-  note: '',
-  tags: [],
+  id: null,
   transaction: null,
+  credit: ZERO_CREDIT,
+  debit: ZERO_DEBIT,
+  note: '',
+  fees: [],
+  tags: [],
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -23,28 +30,40 @@ export default class Entry {
    */
   constructor(props={}) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
-    let transactions = [];
+    const {fees} = merged;
 
     KEYS.forEach(key => {
-      this[key] = merged[key];
+      if (key !== 'fees') {
+        this[key] = merged[key];
+      }
     });
+    this.fees = makeFees(fees);
 
     if (!this.transaction) {
-      log.error(`Invalid Entry, must have a transaction, got: ${JSON.stringify(props)}`);
-      throw new Error('Invalid Entry, must have a transaction');
+      log.error(`Invalid Entry, must have a 'transaction', got: ${JSON.stringify(props)}`);
+      throw new Error('Invalid Entry, must have a parent transaction');
     }
   }
 
   toObject() {
-    return {
+    return stripFalsyExcept({
       id: this.id,
       note: this.note,
       tags: this.tags,
-      transactions: this.transactions.map(t => t.toObject())
-    }
+      credit: this.credit,  // change to this.credit.toObject() after object built
+      debit: this.debit,  // change to this.debit.toObject()
+      fees: this.fees.map(f => f.toObject)
+    });
   }
 
   toString() {
-    return `Currency: ${this.id}`;
+    return `Entry: ${this.note}`;
   }
+}
+
+export function makeEntry(tx) {
+  return new Entry(tx);
+}
+export function makeEntries(entries) {
+  return entries.map(makeEntry);
 }

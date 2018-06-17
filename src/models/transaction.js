@@ -1,11 +1,19 @@
 import * as R from 'ramda';
 import Moment from 'moment';
 
-import Entry from './entry';
+import Entry, {makeEntries} from './entry';
+import {stripFalsyExcept} from './modelUtils';
+
+const makeFees = (fees) => fees;  // stub out fee descriptors
+
 const DEFAULT_PROPS = {
-  from: null,
-  to: '',
-  amount: '',
+  id: '',
+  account: '',
+  utc: '',
+  note: '',
+  fees: [],
+  tags: [],
+  entries: [],
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -20,12 +28,10 @@ export default class Transaction {
    */
   constructor(props={}) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
-    let transactions = [];
+    const {entries, fees} = merged;
 
     KEYS.forEach(key => {
-      if (key === 'transactions') {
-        transactions = merged.transactions;
-      } else {
+      if (key !== 'transactions' && key !== 'fees') {
         this[key] = merged[key];
       }
     });
@@ -34,31 +40,29 @@ export default class Transaction {
       log.error(`Invalid Transaction, must have a 'utc', got: ${JSON.stringify(props)}`);
       throw new Error('Invalid Transaction, must have a utc');
     }
-    this.utc = Moment(this.utc);
-    if (this.parent) {
-      this.path = `${this.parent.path}:${this.path}`;
-    }
-    if (!this.alias) {
-      this.alias == this.path;
+    if (!this.account) {
+      log.error(`Invalid Transaction, must have a 'account', got: ${JSON.stringify(props)}`);
+      throw new Error('Invalid Transaction, must have a account');
     }
 
-    // load the transactions
-    this.transactions = transactions.map(tx => {
-      return new Transaction(tx);
-    });
+    this.utc = Moment(this.utc);
+    this.entries = makeEntries(entries);
+    this.fees = makeFees(fees);
   }
 
   toObject() {
-    return {
-      utc: this.utc.toISOString(),
+    return stripFalsyExcept({
       id: this.id,
       note: this.note,
+      account: this.account,
+      utc: this.utc.toISOString(),
       tags: this.tags,
-      transactions: this.transactions.map(t => t.toObject())
-    }
+      entries: this.entries.map(t => t.toObject()),
+      fees: this.fees,  // change to this.fees.map(f => t.toObject()) when unstub
+    }, ['entries']);
   }
 
   toString() {
-    return `Currency: ${this.id}`;
+    return `Transaction: ${this.account} ${this.utc.toISOString} [${this.entries.length} entries]`;
   }
 }
