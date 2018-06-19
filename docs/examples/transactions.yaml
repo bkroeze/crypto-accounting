@@ -12,15 +12,15 @@ transactions:
       - -1000 FOO @ 1 BTC
       - -1000 FOO = 1000 BTC
       # short form double entry
-      - debit: 1000 FOO
-        credit: 1000 BTC
+      - credits: [1000 FOO]
+        debits: [1000 BTC]
       # long form double entry
-      - debit:
-          quantity: 1000
-          currency: BTC
-        credit:
-          quantity: 1000
-          currency: FOO
+      - debits:
+          - quantity: 1000
+            currency: BTC
+      - credits:
+          - quantity: 1000
+            currency: FOO
   - note: Example with percentage fee
     account: assets:exchanges:cb
     fees:
@@ -40,8 +40,8 @@ transactions:
     account: income:mining
     utc: 2018-06-15
     entries:
-      - 100 ETH [assets:wallets:ETH]
-      - 0.001 ETH [expenses:crypto]
+      - 100 ETH ^assets:wallets:ETH
+      - 0.001 ETH ^expenses:crypto
       # long form of above
       - credit:
           quantity: 100
@@ -58,9 +58,9 @@ transactions:
     account: assets:wallets:ETH
     utc: 2018-06-17
     entries:
-      - -5 GIN [expenses:hosting]
+      - -5 GIN ^expenses:hosting
   - note: Example of a simple crypto spend, reversed accounts
     account: expenses:hosting
     utc: 2018-06-17
     entries:
-      - 5 GIN [assets:wallets:ETH]
+      - 5 GIN ^assets:wallets:ETH

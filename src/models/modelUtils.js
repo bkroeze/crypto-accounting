@@ -17,3 +17,12 @@ export function stripFalsyExcept(toStrip, butNot=[]) {
   });
   return stripped;
 }
+
+/**
+ * Simple helper for classes with "toObject" functions
+ * @param {Object} work
+ * @return {Object} work.toObject() results;
+ */
+export function toObject(work) {
+  return work.toObject();
+}

@@ -1,0 +1,2 @@
+* Add TX ID#
+* Change "income:mining" to "revenue:mining"

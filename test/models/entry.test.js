@@ -12,8 +12,8 @@ test('Entry can instantiate via props', t => {
   const note = "test note";
   const e = new Entry({
     transaction: TX,
-    credit: {quantity: 1, currency: 'BTC'},
-    debit: {quantity: 10, currency: 'ETH'},
+    credits: [{quantity: 1, currency: 'BTC'}],
+    debits: [{quantity: 10, currency: 'ETH'}],
     note
   });
   t.is(e.transaction, TX);
@@ -23,12 +23,19 @@ test('Entry can instantiate via props', t => {
 test('Entry can instantiate a full set of props', t => {
   const note = "test note 2";
   const props = {
-    credit: {quantity: 1, currency: 'BTC'},
-    debit: {quantity: 10, currency: 'ETH'},
+    credits: [{quantity: 1, currency: 'BTC'}],
+    debits: [{quantity: 10, currency: 'ETH'}],
     fees: [],
     tags: [],
     note,
   };
   const e = new Entry({...props, transaction: TX});
   t.deepEqual(e.toObject(), props);
+});
+
+test('Entry can instatiate via shortcut', t => {
+  const e = new Entry({transaction: TX, shortcut: '100 ETH'});
+  t.is(e.debits[0].quantity.toFixed(0), '100');
+  t.is(e.debits[0].currency, 'ETH');
+  t.is(e.credits.length, 0);
 });

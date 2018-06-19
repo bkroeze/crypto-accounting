@@ -1,46 +1,71 @@
 import * as R from 'ramda';
 import Moment from 'moment';
 
-import {stripFalsyExcept} from './modelUtils';
+import {Posting, shortcutToPostings} from './posting';
+import {stripFalsyExcept, toObject} from './modelUtils';
 
 // stub out credits/debits/fees
-const ZERO_CREDIT = {};
-const ZERO_DEBIT = {};
 const makeFees = (fees) => fees;
 
 const DEFAULT_PROPS = {
   id: null,
   transaction: null,
-  credit: ZERO_CREDIT,
-  debit: ZERO_DEBIT,
   note: '',
+  credits: [],
+  debits: [],
   fees: [],
   tags: [],
+  shortcut: '',
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
 
 const getProps = R.pick(KEYS);
+const isString = R.is(String);
+const shouldIgnore = R.contains(R.__, ['fees','credits','debits']);
 
 export default class Entry {
   /**
-   * Construct using a `props` object that must include "utc", and may also
-   * include "notes", "tags", and a list of transactions
+   * Construct using a `props` object that must include the parent transaction, and may also
+   * include "id", "credits", "debits", "note", "fees" and/or "tags"
    * @param {object} props
    */
   constructor(props={}) {
-    const merged = R.merge(DEFAULT_PROPS, getProps(props));
-    const {fees} = merged;
+    const work = isString(props) ? {shortcut: props} : props;
+
+    const merged = R.merge(DEFAULT_PROPS, getProps(work));
+    const {fees, credits, debits} = merged;
+
+    if (merged.shortcut && (merged.credits.length || merged.debits.length)) {
+      console.error(`Invalid Entry, can't specify a shortcut and credits/debits: ${JSON.stringify(props)}`);
+      throw new Error('Invalid Entry, conflicting shortcut');
+    }
 
     KEYS.forEach(key => {
-      if (key !== 'fees') {
+      if (!shouldIgnore(key)) {
         this[key] = merged[key];
       }
     });
     this.fees = makeFees(fees);
+    if (merged.shortcut) {
+      const postings = shortcutToPostings(merged.shortcut);
+      this.credits = postings.credits;
+      this.debits = postings.debits;
+    } else {
+      this.credits = credits.map(p => {
+        const posting = new Posting(p);
+        posting.type = 'credit';
+        return posting;
+      });
+      this.debits = debits.map(p => {
+        const posting = new Posting(p);
+        posting.type = 'debit';
+        return posting;
+      });
+    }
 
     if (!this.transaction) {
-      log.error(`Invalid Entry, must have a 'transaction', got: ${JSON.stringify(props)}`);
+      console.error(`Invalid Entry, must have a 'transaction', got: ${JSON.stringify(props)}`);
       throw new Error('Invalid Entry, must have a parent transaction');
     }
   }
@@ -50,9 +75,9 @@ export default class Entry {
       id: this.id,
       note: this.note,
       tags: this.tags,
-      credit: this.credit,  // change to this.credit.toObject() after object built
-      debit: this.debit,  // change to this.debit.toObject()
-      fees: this.fees.map(f => f.toObject)
+      credits: this.credits.map(toObject),
+      debits: this.debits.map(toObject),
+      fees: this.fees.map(toObject),
     });
   }
 
