@@ -43,3 +43,5 @@ export default class Currency {
     return `Currency: ${this.id}`;
   }
 }
+
+export const makeCurrencies = (raw) => raw.map(c => new Currency(c));

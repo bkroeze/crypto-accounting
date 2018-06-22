@@ -36,8 +36,8 @@ transactions:
       - -100 ETH @ 0.3 BTC
   - note:
       Example Transfer from mining pool to wallet, where the money is coming from
-      your "income:mining" account into "assets:wallets:ETH" account
-    account: income:mining
+      your "revenue:mining" account into "assets:wallets:ETH" account
+    account: revenue:mining
     utc: 2018-06-15
     entries:
       - 100 ETH ^assets:wallets:ETH
@@ -52,8 +52,8 @@ transactions:
           currency: ETH
           account: expenses:crypto
       # because this is not balanced, a balancing entry is auto-calculated
-      # and applied to income:mining. In this case we would generate a debit
-      # of 100.001 ETH on the default "income:mining" accout
+      # and applied to revenue:mining. In this case we would generate a debit
+      # of 100.001 ETH on the default "revenue:mining" accout
   - note: Example of a simple crypto spend
     account: assets:wallets:ETH
     utc: 2018-06-17

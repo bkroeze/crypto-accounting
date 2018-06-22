@@ -66,3 +66,5 @@ export default class Transaction {
     return `Transaction: ${this.account} ${this.utc.toISOString} [${this.entries.length} entries]`;
   }
 }
+
+export const makeTransactions = (raw) => raw.map(tx => new Transaction(tx));

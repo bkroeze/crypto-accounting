@@ -1,2 +1,13 @@
-* Add TX ID#
-* Change "income:mining" to "revenue:mining"
+#+Title: Task list for Crypto-Accounting
+
+* make sample files for currencies and accounts
+* make example of full journal
+
+* Finish the Journal loader
+* Add recursive toObject to Journal
+* DONE Add TX ID#
+  CLOSED: [2018-06-21 Thu 20:54]
+  - State "DONE"       from              [2018-06-21 Thu 20:54]
+* DONE Change "income:mining" to "revenue:mining"
+  CLOSED: [2018-06-21 Thu 20:53]
+  - State "DONE"       from              [2018-06-21 Thu 20:53]

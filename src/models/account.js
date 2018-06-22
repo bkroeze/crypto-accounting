@@ -63,3 +63,6 @@ export default class Account {
     return `Currency: ${this.id}`;
   }
 }
+
+export const makeAccounts = (raw) => raw.map(a => new Account(a));
+
