@@ -26,3 +26,17 @@ export function stripFalsyExcept(toStrip, butNot=[]) {
 export function toObject(work) {
   return work.toObject();
 }
+
+export const filterEmpty = R.filter(R.complement(R.isEmpty));
+export const isString = R.is(String);
+export const isObject = R.is(Object);
+export const mapTrim = R.map(R.trim);
+export const splitSpace = R.split(' ');
+export const numberRe = new RegExp(/^-?[0-9\.]+$/);
+export const looksNumeric = (val) => val.search(numberRe) > -1;
+export const startsWithCarat = R.startsWith('^');
+export const isConnector = R.contains(R.__, ['@', '=']);
+
+export function splitAndTrim(work) {
+  return filterEmpty(mapTrim(splitSpace(work)));
+}
