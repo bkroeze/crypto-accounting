@@ -36,13 +36,32 @@ export function loadYamlFromFilenameSync(fname, directory) {
   return loadRefs(safeLoad(activeFS.readFileSync(link, 'utf-8')), directory);
 }
 
+export function loadRef(work, reference, directory) {
+  const {link} = reference;
+  let child;
+  if (R.is(String, link)) {
+    child = loadYamlFromFilenameSync(link, directory);
+  } else {
+    const refList = link.map(l => {
+      return loadYamlFromFilenameSync(l, directory);
+    });
+    if (R.is(Array, refList[0])) {
+      // flatten array
+      child = R.flatten(refList);
+    } else {
+      // merge the results into one object
+      child = R.mergeAll(refList);
+    }
+  }
+  const merged = R.dissocPath(R.concat(reference.path, ['$ref']), work);
+  return R.assocPath(reference.path, child, merged);
+}
+
 export function loadRefs(work, directory) {
   let merged = work;
   findRefs(work).forEach(ref => {
     // and merge in the result of loading the link
-    const child = loadYamlFromFilenameSync(ref.link, directory);
-    merged = R.dissocPath(R.concat(ref.path, ['$ref']), merged);
-    merged = R.assocPath(ref.path, child, merged);
+    merged = loadRef(merged, ref, directory);
   });
   return merged;
 }

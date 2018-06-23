@@ -7,8 +7,8 @@ import * as utils from './modelUtils';
 
 const DEFAULT_PROPS = {
   id: null,
-  accounts: [],
-  currencies: [],
+  accounts: {},
+  currencies: {},
   transactions: [],
 };
 
@@ -38,5 +38,14 @@ export default class Journal {
       throw new IndexError(`Account Not Found: ${key}`);
     }
     return curr;
+  }
+
+  toObject() {
+    return utils.stripFalsyExcept({
+      id: this.id,
+      accounts: utils.objectValsToObject(this.accounts),
+      currencies: utils.objectValsToObject(this.currencies),
+      transactions: this.transactions.map(utils.toObject),
+    });
   }
 }

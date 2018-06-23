@@ -1,0 +1,14 @@
+meta:
+  name: Multi Example
+  note:
+    The sections below will be filled in by the referenced files, and the listed Transactions
+    will be assembled as a list
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  $ref:
+    - ./transactions1.yaml
+    - ./transactions2.yaml
+

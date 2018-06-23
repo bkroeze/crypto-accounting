@@ -1,6 +1,8 @@
 import test from 'ava';
+import { safeDump } from 'js-yaml';
+
 import { findRefs, loadRefs, setMockFS } from '../../src/loaders/yaml_loader';
-import MockFS from '../mockfs.js';
+import MockFS from '../mockfs';
 
 test('basic finding of refs', t => {
   const refs = findRefs({
@@ -113,3 +115,63 @@ test('can load $refs in $refs', t => {
   setMockFS(null);
 });
 
+test('finds list $refs', t => {
+  const work = {
+    '$ref': ['a','b']
+  };
+  const refs = findRefs(work);
+  t.is(refs.length, 1);
+  t.deepEqual(refs[0].link, ['a','b']);
+});
+
+test('Can load a list of $refs to an object', t => {
+  const top = {
+    top: {
+      '$ref': ['one.yaml', 'two.yaml']
+    }
+  };
+
+  const one = safeDump({
+    a: 'test a'
+  });
+
+  const two = safeDump({
+    b: 'test b'
+  });
+
+  const mockfs = new MockFS({
+    'top.yaml': top,
+    'one.yaml': one,
+    'two.yaml': two,
+  });
+  setMockFS(mockfs);
+  const result = loadRefs(top, '');
+  t.deepEqual(result, {
+    top: {a: 'test a', b: 'test b'},
+  });
+  setMockFS(null);
+});
+
+test('Can load a list of $refs to an array', t => {
+  const top = {
+    top: {
+      '$ref': ['one.yaml', 'two.yaml']
+    }
+  };
+
+  const one = safeDump([1,2,3]);
+
+  const two = safeDump([4,5,6]);
+
+  const mockfs = new MockFS({
+    'top.yaml': top,
+    'one.yaml': one,
+    'two.yaml': two,
+  });
+  setMockFS(mockfs);
+  const result = loadRefs(top, '');
+  t.deepEqual(result, {
+    top: [1,2,3,4,5,6]
+  });
+  setMockFS(null);
+});

@@ -1,4 +1,5 @@
 import * as R from 'ramda';
+import * as utils from './modelUtils';
 
 const DEFAULT_PROPS = {
   id: '',
@@ -32,11 +33,11 @@ export default class Currency {
   }
 
   toObject() {
-    return {
+    return utils.stripFalsyExcept({
       id: this.id,
       name: this.name,
       note: this.note,
-    }
+    });
   }
 
   toString() {
