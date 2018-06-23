@@ -1,4 +1,6 @@
 import fs from 'graceful-fs';
+import { safeLoad } from 'js-yaml';
+
 import Journal from './models/journal';
 
 export async function loadJournalFromFilename(fname) {
@@ -9,13 +11,14 @@ export async function loadJournalFromFilename(fname) {
           reject(err);
         }
         resolve(data);
-      });
+      }, 'utf-8');
     })
     .then(data => {
+      const yaml = safeLoad(data);
       return new Journal(data);
     });
 }
 
 export function loadJournalFromFilenameSync(fname) {
-  return new Journal(fs.readFileSync(fname));
+  return new Journal(safeLoad(fs.readFileSync(fname, 'utf-8')));
 }

@@ -1,13 +1,28 @@
 #+Title: Task list for Crypto-Accounting
 
-* make sample files for currencies and accounts
-* make example of full journal
+* Task List                                                     :crypto_acct:
+** DONE make sample file for accounts
+   CLOSED: [2018-06-22 Fri 15:39]
+   - State "DONE"       from "TODO"       [2018-06-22 Fri 15:39]
+   :LOGBOOK:
+   CLOCK: [2018-06-22 Fri 14:55]--[2018-06-22 Fri 15:20] =>  0:25
+   :END:
+** DONE make sample file for currencies
+   CLOSED: [2018-06-22 Fri 16:31]
+   - State "DONE"       from "TODO"       [2018-06-22 Fri 16:31]
+** DONE make example of full journal
+   CLOSED: [2018-06-22 Fri 16:47]
 
-* Finish the Journal loader
-* Add recursive toObject to Journal
-* DONE Add TX ID#
-  CLOSED: [2018-06-21 Thu 20:54]
-  - State "DONE"       from              [2018-06-21 Thu 20:54]
-* DONE Change "income:mining" to "revenue:mining"
-  CLOSED: [2018-06-21 Thu 20:53]
-  - State "DONE"       from              [2018-06-21 Thu 20:53]
+   - State "DONE"       from              [2018-06-22 Fri 16:47]
+** DONE Make Yaml Loader that understands $ref entries
+   CLOSED: [2018-06-22 Fri 23:54]
+   - State "DONE"       from              [2018-06-22 Fri 23:54]
+** Update Accounts for new formatting with object instead of array
+** Finish the Journal loader
+** Add recursive toObject to Journal
+** DONE Add TX ID#
+   CLOSED: [2018-06-21 Thu 20:54]
+   - State "DONE"       from              [2018-06-21 Thu 20:54]
+** DONE Change "income:mining" to "revenue:mining"
+   CLOSED: [2018-06-21 Thu 20:53]
+   - State "DONE"       from              [2018-06-21 Thu 20:53]

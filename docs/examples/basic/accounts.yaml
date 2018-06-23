@@ -1,0 +1,100 @@
+assets:
+  children:
+    banks:
+      checking:
+        tags: ['fiat']
+    exchanges:
+      Binance:
+        tags: ['crypto']
+      Cobinhood:
+        tags: ['crypto']
+      CoinBase:
+        tags: ['crypto']
+      CryptoBridge:
+        tags: ['crypto']
+      Cryptopia:
+        tags: ['crypto']
+      IDEX:
+        tags: ['crypto']
+      KuCoin:
+        tags: ['crypto']
+    wallets:
+      BTC:
+        tags: ['crypto']
+      ETH:
+        tags: ['crypto']
+      USD:
+        tags: ['fiat']
+
+expenses:
+  children:
+    education:
+      note: Subscriptions to newsletters, articles, books, classes
+    entertainment:
+      note: Games and other entertainment expenses
+    exchange:
+      note: Exchange fees
+      tags:
+        - exchange
+        - fee
+    hosting:
+      note: Cost for hosting services and Software as a Service platforms
+      tags:
+        - crypto
+    txfee:
+      note: Crypto transaction fees
+      tags:
+        - crypto
+        - fee
+
+payables:
+  children:
+    loans:
+      tags: ['loans']
+
+receivables:
+  children:
+    ico:
+      tags: ['crypto']
+    loans:
+      tags: ['loans']
+
+revenue:
+  note: Revenue accounts
+  children:
+    airdrop:
+      notes: Income from airdrops
+      tags:
+        - crypto
+        - regular-income
+    bounty:
+      notes: Income from completing bounties
+      tags:
+        - regular-income
+    development:
+      note: Income from development activities
+      tags:
+        - regular-income
+    mining:
+      note: Income from mining activities
+      portfolio: passive
+      tags:
+        - mining
+        - crypto
+        - dividend
+        - regular-income
+    masternode:
+      alias: mn
+      note: Masternode rewards
+      portfolio: passive
+      tags:
+        - masternode
+        - crypto
+        - regular-income
+    staking:
+      note: Rewards from coin staking
+      portfolio: passive
+      tags:
+        - crypto
+        - dividend
+        - regular-income

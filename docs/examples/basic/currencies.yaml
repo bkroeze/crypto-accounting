@@ -1,0 +1,25 @@
+BTC:
+  name: Bitcoin
+  tags: ['crypto']
+  base: true
+CAN:
+  name: Canya
+  tags: ['crypto', 'erc-20', 'ICO']
+  portfolio: 'long'
+ETH:
+  name: Ethereum
+  tags: ['crypto']
+  base: true
+GIN:
+  name: GIN
+  tags: ['crypto', 'mn']
+  portfolio: 'passive'
+MARCO:
+  name: Marblecoin
+  tags: ['crypto']
+USD:
+  name: US Dollar
+  tags: ['fiat']
+  fiatDefault: true
+  base: true
+  alias: ['$']

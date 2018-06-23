@@ -1,0 +1,10 @@
+meta:
+  name: Basic Example
+  note: The sections below will be filled in by the referenced files
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  $ref: ./transactions.yaml
+
