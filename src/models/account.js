@@ -1,5 +1,7 @@
 import * as R from 'ramda';
 
+import * as utils from './modelUtils';
+
 const DEFAULT_PROPS = {
   path: '',
   alias: '',
@@ -32,7 +34,7 @@ export default class Account {
     });
 
     if (!this.path) {
-      log.error(`Invalid Account, must have an id, got: ${JSON.stringify(props)}`);
+      console.error(`Invalid Account, must have a path, got: ${JSON.stringify(props)}`);
       throw new Error('Invalid Account, must have a path');
     }
     if (this.parent) {
@@ -42,21 +44,28 @@ export default class Account {
       this.alias == this.path;
     }
 
-    // recursively load the children
-    this.children = children.map(child => {
-      return new Account(R.merge(child, {parent: this}));
+    this.children = Account.makeChildAccounts(this, children);
+  }
+
+  static makeChildAccounts(parent, children) {
+    const accounts = {};
+    console.log('making children');
+    R.keysIn(children).forEach(path => {
+      const child = children[path];
+      accounts[path] = new Account(R.merge(child, {parent, path}));
     });
+    return accounts;
   }
 
   toObject() {
-    return {
+    return utils.stripFalsyExcept({
       path: this.path,
       alias: this.alias,
       note: this.note,
       tags: this.tags,
       portfolio: this.portfolio,
-      children: this.children.map(c => c.toObject())
-    }
+      children: utils.objectValsToObject(this.children)
+    });
   }
 
   toString() {
@@ -64,5 +73,14 @@ export default class Account {
   }
 }
 
-export const makeAccounts = (raw) => raw.map(a => new Account(a));
+/**
+ * Make an accounts object from a yaml description
+ */
+export function makeAccounts(raw) {
+  const accounts = {};
+  R.keysIn(raw).forEach(path => {
+    accounts[path] = new Account(R.merge(raw[path], {path}));
+  });
+  return accounts;
+}
 

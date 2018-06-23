@@ -27,6 +27,14 @@ export function toObject(work) {
   return work.toObject();
 }
 
+export function objectValsToObject(obj) {
+  const work = {};
+  R.keysIn(obj).forEach(key => {
+    work[key] = obj[key].toObject();
+  });
+  return work;
+}
+
 export const filterEmpty = R.filter(R.complement(R.isEmpty));
 export const isString = R.is(String);
 export const isObject = R.is(Object);
