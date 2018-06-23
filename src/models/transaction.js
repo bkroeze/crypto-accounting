@@ -46,8 +46,12 @@ export default class Transaction {
     }
 
     this.utc = Moment(this.utc);
-    this.entries = makeEntries(entries);
+    this.entries = makeEntries(entries, this);
     this.fees = makeFees(fees);
+  }
+
+  size() {
+    return this.entries.length;
   }
 
   toObject() {

@@ -23,3 +23,13 @@ test('Transaction can instantiate a full set of props', t => {
   const tx= new Transaction(props);
   t.deepEqual(tx.toObject(), props);
 });
+
+test('Transaction with entries are loaded', t => {
+  const tx = new Transaction({
+    utc: '2018-01-01',
+    account: 'test',
+    entries: ['10 ETH ^income']
+  });
+  t.is(tx.account, 'test');
+  t.is(tx.entries.length, 1);
+});

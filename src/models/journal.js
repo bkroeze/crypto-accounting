@@ -27,4 +27,16 @@ export default class Journal {
     this.currencies = makeCurrencies(merged.currencies);
     this.transactions = makeTransactions(merged.transactions);
   }
+
+  getAccount(key) {
+    const path = key.split(':');
+    let curr = this.accounts[path.shift()]
+    while(path.length > 0 && curr) {
+      curr = curr.children[path.shift()];
+    }
+    if (!curr) {
+      throw new IndexError(`Account Not Found: ${key}`);
+    }
+    return curr;
+  }
 }

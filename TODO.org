@@ -20,7 +20,9 @@
 ** DONE Update Accounts for new formatting with object instead of array
    CLOSED: [2018-06-23 Sat 01:15]
    - State "DONE"       from              [2018-06-23 Sat 01:15]
-** Finish the Journal loader
+** DONE Finish the Journal loader
+   CLOSED: [2018-06-23 Sat 07:30]
+   - State "DONE"       from              [2018-06-23 Sat 07:30]
 ** Add ability to use $refs in lists
 ** Add source to retrieved yaml value, and add to the object as yamlSource
 ** Add ability to load lists of files in journal

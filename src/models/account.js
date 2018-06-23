@@ -49,7 +49,6 @@ export default class Account {
 
   static makeChildAccounts(parent, children) {
     const accounts = {};
-    console.log('making children');
     R.keysIn(children).forEach(path => {
       const child = children[path];
       accounts[path] = new Account(R.merge(child, {parent, path}));

@@ -27,27 +27,24 @@ export function loadYamlFromFilename(fname) {
     });
 }
 
-export function loadYamlFromFilenameSync(fname) {
-  return safeLoad(activeFS.readFileSync(fname, 'utf-8'));
+export function loadYamlFromFilenameSync(fname, directory) {
+  let link = fname;
+  if (directory && !(R.startsWith('/', fname) || fname.slice(1,2) === ':')) {
+    link = path.normalize(`${directory}/${fname}`);
+  }
+
+  return loadRefs(safeLoad(activeFS.readFileSync(link, 'utf-8')), directory);
 }
 
 export function loadRefs(work, directory) {
   let merged = work;
   findRefs(work).forEach(ref => {
     // and merge in the result of loading the link
-    const child = loadRefLink(ref.link, directory);
+    const child = loadYamlFromFilenameSync(ref.link, directory);
     merged = R.dissocPath(R.concat(ref.path, ['$ref']), merged);
     merged = R.assocPath(ref.path, child, merged);
   });
   return merged;
-}
-
-export function loadRefLink(link, directory) {
-  let fname = link;
-  if (!(R.startsWith('/', fname) || fname.slice(1,2) === ':')) {
-    fname = path.normalize(`${directory}/${fname}`);
-  }
-  return loadRefs(loadYamlFromFilenameSync(fname), directory);
 }
 
 const hasRef = R.has('$ref');

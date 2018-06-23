@@ -44,4 +44,14 @@ export default class Currency {
   }
 }
 
-export const makeCurrencies = (raw) => raw.map(c => new Currency(c));
+/**
+ * Make a currencies object from a yaml description
+ */
+export function makeCurrencies(raw) {
+  const currencies = {};
+  R.keysIn(raw).forEach(id => {
+    currencies[id] = new Currency(R.merge(raw[id], {id}));
+  });
+  return currencies;
+}
+
