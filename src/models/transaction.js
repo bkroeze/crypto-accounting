@@ -1,14 +1,14 @@
 import * as R from 'ramda';
 import Moment from 'moment';
 
-import Entry, {makeEntries} from './entry';
-import {stripFalsyExcept} from './modelUtils';
+import Entry, { makeEntries } from './entry';
+import { stripFalsyExcept, isString } from './modelUtils';
 
 const makeFees = (fees) => fees;  // stub out fee descriptors
 
 const DEFAULT_PROPS = {
   id: '',
-  account: '',
+  account: {credit: '', debit: ''},
   utc: '',
   note: '',
   fees: [],
@@ -32,7 +32,11 @@ export default class Transaction {
 
     KEYS.forEach(key => {
       if (key !== 'transactions' && key !== 'fees') {
-        this[key] = merged[key];
+        let val = merged[key];
+        if (key === 'account' && isString(val)) {
+          val = {debit: val, credit: val};
+        }
+        this[key] = val;
       }
     });
 
@@ -40,11 +44,6 @@ export default class Transaction {
       log.error(`Invalid Transaction, must have a 'utc', got: ${JSON.stringify(props)}`);
       throw new Error('Invalid Transaction, must have a utc');
     }
-    if (!this.account) {
-      log.error(`Invalid Transaction, must have a 'account', got: ${JSON.stringify(props)}`);
-      throw new Error('Invalid Transaction, must have a account');
-    }
-
     this.utc = Moment(this.utc);
     this.entries = makeEntries(entries, this);
     this.fees = makeFees(fees);

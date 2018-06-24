@@ -43,5 +43,9 @@ test('Should render toObject', t => {
     quantity: '100.00000000',
     type: 'debit',
   }];
+  work.transactions[0].account = {
+    credit: 'test',
+    debit: 'test',
+  }
   t.deepEqual(journal.toObject(), work);
 });

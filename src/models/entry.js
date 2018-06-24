@@ -47,9 +47,6 @@ export default class Entry {
     if (R.isNil(this.quantity)) {
       throw new Error('Invalid Entry, no Quantity');
     }
-    if (!this.account) {
-      this.account = this.transaction.account;
-    }
 
     // doesn't hurt to re-wrap if it isn't already a BigNumber
     this.quantity = new BigNumber(this.quantity);
@@ -102,6 +99,10 @@ export default class Entry {
       this.type === entry.type;
   }
 
+  getAccount() {
+    return this.account || this.transaction.account[this.type];
+  }
+
   /**
    * Multiplies the current quantity by the quantity in the passed `Posting`.
    * @param {Posting} posting
@@ -117,7 +118,7 @@ export default class Entry {
       id: this.id,
       quantity: this.quantity.toFixed(8),
       currency: this.currency,
-      account: this.account,
+      account: this.getAccount(),
       type: this.type,
       note: this.note,
     });
@@ -196,7 +197,7 @@ export function arrayToEntries(rawArray, entryType, transaction) {
 /**
  * Parses an entry "shortcut" into one or more Entries.
  * Shortcut can be in two forms:
- * Single posting: "number currency", "currency number"
+ * Single posting (debit): "number currency", "currency number"
  * Pair posting: debit [@|=] credit
  * @param {String} shortcut
  * @return {Object<string: Array<Posting>>} postings, keyed by "credits" and "debits"

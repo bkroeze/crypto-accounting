@@ -29,14 +29,17 @@ test('Entry can instantiate a full set of props', t => {
     note: "test note 2",
   };
   const e = new Entry({...props, transaction: TX});
-  t.deepEqual(e.toObject(), {...props, quantity: '1.00000000'});
+  t.deepEqual(e.toObject(), {
+    ...props,
+    quantity: '1.00000000'
+  });
 });
 
 test('Entry can instatiate via shortcut', t => {
   const e = new Entry({transaction: TX, shortcut: '100 ETH'});
   t.is(e.quantity.toFixed(0), '100');
   t.is(e.currency, 'ETH');
-  t.is(e.account, 'test');
+  t.is(e.getAccount(), 'test');
 });
 
 test('Can instantiate a trade pair of entries from a shortcut', t => {
