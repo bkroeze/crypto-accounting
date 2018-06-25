@@ -34,5 +34,6 @@ test('Transaction with entries are loaded', t => {
     entries: ['10 ETH ^income']
   });
   t.deepEqual(tx.account, {credit: 'test', debit: 'test'});
-  t.is(tx.entries.length, 1);
+  t.is(tx.entries.length, 2);
+  t.is(tx.isBalanced(), true);
 });

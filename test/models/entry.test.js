@@ -110,3 +110,14 @@ test('Can load a list of mixed types', t => {
   t.is(entries[1].equals(entries[3]), true);
   t.is(entries[1].equals(entries[5]), true);
 });
+
+test('Can check whether entry is balanced', t => {
+  const good = shortcutToEntries('10 ETH ^revenue', TX);
+  t.is(good[0].isBalanced(), true);
+  t.is(good[1].isBalanced(), true);
+
+  // invalid because it is in the same account and is the same currency
+  const bad = shortcutToEntries('10 ETH', TX); 
+  t.is(bad[0].isBalanced(), false);
+  t.is(bad[1].isBalanced(), false);
+});

@@ -61,13 +61,16 @@
     Example of a set of entries, where I've set the default debit and credit accounts
     imaging an Ethereum game series of transactions , where each is small, and all
     are paid for from the same wallet.
-    This will result in 4 debits to expenses:entertainment, and 4 credits to assets:ETH
+    This example will result in
+    4 ETH debit entries to expenses:entertainment
+    3 ETH credit entries to assets:wallets ETH
+    1 ETH credit entry to assets:wallets:cold:ETH
   utc: 2018-06-23
   account:
     debit: expenses:entertainment
-    credit: assets:ETH
+    credit: assets:wallets:ETH
   entries:
     - .0001 ETH
     - .0001 ETH
     - .00025 ETH
-    - .01 ETH
+    - .01 ETH ^assets:wallets:cold:ETH

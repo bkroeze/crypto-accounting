@@ -12,6 +12,7 @@ const DEFAULT_PROPS = {
   type: 'debit',
   note: '',
   shortcut: '',
+  pair: null,
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -103,6 +104,14 @@ export default class Entry {
     return this.account || this.transaction.account[this.type];
   }
 
+  isBalanced() {
+    //console.log(`check balanced: ${this.pair} && ${this.pair.currency !== this.currency} || ${this.pair.getAccount() !== this.getAccount()}`);
+    return !!(this.pair &&
+            (this.pair.currency !== this.currency ||
+             this.pair.getAccount() !== this.getAccount()
+            ));
+  }
+
   /**
    * Multiplies the current quantity by the quantity in the passed `Posting`.
    * @param {Posting} posting
@@ -113,19 +122,32 @@ export default class Entry {
     return this;
   }
 
-  toObject() {
+  setPair(partner, priceEach) {
+    this.pair = partner;
+    if (priceEach && partner.type === 'credit') {
+      // price specified as 'each', so it needs to be multiplied by
+      // this quantity
+      partner.multiplyBy(this);
+    }
+    if (partner.pair !== this) {
+      partner.setPair(this, priceEach);
+    }
+  }
+
+  toObject(shallow) {
     return utils.stripFalsyExcept({
       id: this.id,
       quantity: this.quantity.toFixed(8),
       currency: this.currency,
       account: this.getAccount(),
       type: this.type,
+      pair: (!this.pair || shallow) ? null : this.pair.toObject(true),
       note: this.note,
     });
   }
 
   toString() {
-    return `Entry ({$this.type}): ${this.quantity.toFixed(8)} ${this.currency} ^${this.account}`;
+    return `Entry (${this.type}): ${this.quantity.toFixed(8)} ${this.currency} ^${this.getAccount()}`;
   }
 }
 
@@ -195,10 +217,12 @@ export function arrayToEntries(rawArray, entryType, transaction) {
 }
 
 /**
- * Parses an entry "shortcut" into one or more Entries.
+ * Parses an entry "shortcut" into balanced Entries.
  * Shortcut can be in two forms:
- * Single posting (debit): "number currency", "currency number"
- * Pair posting: debit [@|=] credit
+ * - Single posting (credit): "number currency [^account]", "currency number",
+ *   which will have a balancing debit created for it using the transaction debit account.
+ * - Pair posting: debit [@|=] credit
+ *
  * @param {String} shortcut
  * @return {Object<string: Array<Posting>>} postings, keyed by "credits" and "debits"
  * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
@@ -210,24 +234,17 @@ export function shortcutToEntries(raw_shortcut, transaction) {
     throw new Error(`Invalid shortcut: ${raw_shortcut}`);
   }
 
-  const entries = [];
-
   let accum = [];
   let connector = '';
   let current;
+  let shortcuts = [];
+
   while (parts.length > 0) {
     current = parts.shift();
     if (!utils.isConnector(current)) {
       accum.push(current);
     } else {
-      if (connector) {
-        throw new Error(`Invalid shortcut, two connectors: ${raw_shortcut}`);
-      }
-      // must have enough in accumulator for current entry, and enough left to make another
-      if (accum.length < 2 || parts.length < 2) {
-        throw new Error(`Invalid shortcut: ${raw_shortcut} ${accum} ${parts}`);
-      }
-      entries.push(new Entry({shortcut: accum.join(' '), transaction}));
+      shortcuts.push(accum);
       connector = current;
       accum = [];
     }
@@ -235,16 +252,33 @@ export function shortcutToEntries(raw_shortcut, transaction) {
   if (accum.length < 2) {
     throw new Error(`Invalid shortcut: ${raw_shortcut}`);
   }
-  const entry = new Entry({
-    shortcut: accum.join(' '),
-    transaction,
-    type: connector ? 'credit' : 'debit'
-  });
-  if (connector === '@') {
-    // if it was specified as price/each, then multiply by the amount we purchased
-    entry.multiplyBy(entries[0]);
-  }
-  entries.push(entry);
+  shortcuts.push(accum);
 
+  if (shortcuts.length === 1) {
+    // insert a debit at the front, without a specified account
+    // this allows the default action to be from and to the same accuont
+    // but if one is specified, then that is the credit account.
+    shortcuts = [shortcuts[0].slice(0,2), shortcuts[0]];
+    connector = '=';
+  }
+  let ix=0;
+  let debit, credit;
+  const entries = [];
+  while (ix < shortcuts.length) {
+    debit = new Entry({
+      shortcut: shortcuts[ix].join(' '),
+      transaction,
+      type: 'debit'
+    });
+    credit = new Entry({
+      shortcut: shortcuts[ix+1].join(' '),
+      transaction,
+      type: 'credit'
+    });
+    debit.setPair(credit, connector === '@');
+    entries.push(debit);
+    entries.push(credit);
+    ix = ix+2;
+  }
   return entries;
 }

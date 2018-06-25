@@ -19,6 +19,9 @@ const DEFAULT_PROPS = {
 const KEYS = R.keysIn(DEFAULT_PROPS);
 
 const getProps = R.pick(KEYS);
+const allBalanced = R.all(e => e.isBalanced());
+const getDebits = R.reject(R.propEq('type', 'debit'));
+const getCredits = R.reject(R.propEq('type', 'credit'));
 
 export default class Transaction {
   /**
@@ -47,6 +50,18 @@ export default class Transaction {
     this.utc = Moment(this.utc);
     this.entries = makeEntries(entries, this);
     this.fees = makeFees(fees);
+  }
+
+  getCredits() {
+    return getDebits(this.entries);
+  }
+
+  getDebits() {
+    return getCredits(this.entries);
+  }
+
+  isBalanced() {
+    return allBalanced(this.getDebits());
   }
 
   size() {

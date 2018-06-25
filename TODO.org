@@ -1,11 +1,6 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** TODO add auto-pairing of shortcuts
-ex: "1 ETH ^acct" would make a debit of 1 ETH to acct, and a credit of 1 ETH to tx.account.credit
-"1 eth" would make a debit of 1 eth to tx.account.debit and a credit of 1 ETH to tx.account.credit
-** TODO add isBalanced to transaction.
-Must have equal # of debits and credits.
 ** add account.getTotal()
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
 ** Add journal.isValid()
@@ -14,6 +9,16 @@ Must have equal # of debits and credits.
 *** all transactions balanced
 
 * Done - Unreleased
+** DONE add isBalanced to transaction.
+   CLOSED: [2018-06-24 Sun 18:18]
+   - State "DONE"       from "TODO"       [2018-06-24 Sun 18:18]
+Must have equal # of debits and credits.
+** DONE add auto-pairing of shortcuts
+   CLOSED: [2018-06-24 Sun 17:50]
+   - State "DONE"       from "TODO"       [2018-06-24 Sun 17:50]
+ex: "1 ETH ^acct" would make a debit of 1 ETH to acct, and a credit of 1 ETH to tx.account.credit
+"1 eth" would make a debit of 1 eth to tx.account.debit and a credit of 1 ETH to tx.account.credit
+
 ** DONE add automatic handling of transaction.account list for debit/credit.
    CLOSED: [2018-06-23 Sat 18:38]
    - State "DONE"       from "TODO"       [2018-06-23 Sat 18:38]
