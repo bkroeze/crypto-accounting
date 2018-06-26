@@ -104,7 +104,7 @@ test('Can load a full journal', t => {
     },
     transactions: [{
       utc: '2018-01-01',
-      account: 'test',
+      account: 'testa',
       entries: [
         '100 ETH @ 0.1 BTC',
       ]

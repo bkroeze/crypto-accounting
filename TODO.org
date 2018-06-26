@@ -1,12 +1,13 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** add account.getTotal()
-** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
+** TODO Add journal total by account
 ** Add journal.isValid()
 *** currencies all defined
 *** accounts declared
 *** all transactions balanced
+** add account.getTotal()
+** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
 
 * Done - Unreleased
 ** DONE add isBalanced to transaction.

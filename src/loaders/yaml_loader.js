@@ -5,6 +5,10 @@ import { safeLoad } from 'js-yaml';
 
 let activeFS = fs;
 
+function isRelativePath(fname) {
+  return !R.startsWith('/', fname) && fname.slice(1,2) !== ':';
+}
+
 export function setMockFS(mock) {
   activeFS = mock || fs;
 }
@@ -29,10 +33,9 @@ export function loadYamlFromFilename(fname) {
 
 export function loadYamlFromFilenameSync(fname, directory) {
   let link = fname;
-  if (directory && !(R.startsWith('/', fname) || fname.slice(1,2) === ':')) {
+  if (directory && isRelativePath(fname)) {
     link = path.normalize(`${directory}/${fname}`);
   }
-
   return loadRefs(safeLoad(activeFS.readFileSync(link, 'utf-8')), directory);
 }
 

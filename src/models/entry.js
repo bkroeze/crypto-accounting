@@ -92,6 +92,10 @@ export default class Entry {
     this.currency = currency;
   }
 
+  applyToAccount(accountGetter) {
+    accountGetter(this.getAccount()).addEntry(this);
+  }
+
   equals(entry) {
     return entry &&
       R.is(Entry, entry) &&
@@ -102,6 +106,10 @@ export default class Entry {
 
   getAccount() {
     return this.account || this.transaction.account[this.type];
+  }
+
+  getUtc() {
+    return this.transaction.utc;
   }
 
   isBalanced() {

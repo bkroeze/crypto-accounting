@@ -23,21 +23,55 @@ export default class Journal {
   constructor(props) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
     this.id = merged.id;
-    this.accounts = makeAccounts(merged.accounts);
-    this.currencies = makeCurrencies(merged.currencies);
-    this.transactions = makeTransactions(merged.transactions);
+    this.setAccounts(makeAccounts(merged.accounts));
+    this.setCurrencies(makeCurrencies(merged.currencies));
+    this.setTransactions(makeTransactions(merged.transactions));
   }
 
-  getAccount(key) {
-    const path = key.split(':');
-    let curr = this.accounts[path.shift()]
-    while(path.length > 0 && curr) {
-      curr = curr.children[path.shift()];
+  checkAndApply() {
+    if (this.transactions && this.transactions.length > 0 && !R.isEmpty(this.accounts)) {
+      this.transactions.forEach(tx => {
+        tx.applyToAccounts(this.getAccount);
+      });
     }
-    if (!curr) {
-      throw new IndexError(`Account Not Found: ${key}`);
+  }
+
+  getAccount = (key) => {
+    let path = key;
+    if (utils.isString(path)) {
+      path = path.split(':');
     }
-    return curr;
+    let account = this.accounts[path.shift()];
+    if (path.length) {
+      account = account.getAccount(path);
+    }
+    if (!account) {
+      throw new ReferenceError(`Account Not Found: ${key}`);
+    }
+    return account;
+  }
+
+  getBalancesByAccount() {
+    let balances = {};
+    Object.keys(this.accounts).forEach(account => {
+      balances = R.merge(balances, this.accounts[account].getBalancesByAccount());
+    });
+    return balances;
+  }
+
+  setAccounts(accounts) {
+    this.accounts = accounts;
+    this.checkAndApply();
+  }
+
+  setCurrencies(currencies) {
+    this.currencies = currencies;
+    // this.checkAndApply();
+  }
+
+  setTransactions(transactions) {
+    this.transactions = transactions;
+    this.checkAndApply();
   }
 
   toObject() {

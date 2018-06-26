@@ -52,6 +52,10 @@ export default class Transaction {
     this.fees = makeFees(fees);
   }
 
+  applyToAccounts(accountGetter) {
+    this.entries.forEach(e => e.applyToAccount(accountGetter));
+  }
+
   getCredits() {
     return getDebits(this.entries);
   }
