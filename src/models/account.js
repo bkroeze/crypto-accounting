@@ -69,9 +69,6 @@ export default class Account {
     if (this.parent) {
       this.path = `${this.parent.path}:${this.path}`;
     }
-    if (!this.alias) {
-      this.alias = this.path;
-    }
 
     this.children = Account.makeChildAccounts(this, children);
   }
