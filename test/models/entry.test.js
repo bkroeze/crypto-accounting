@@ -121,3 +121,15 @@ test('Can check whether entry is balanced', t => {
   t.is(bad[0].isBalanced(), false);
   t.is(bad[1].isBalanced(), false);
 });
+
+test('Handles negative shortcuts', t => {
+  const entries = shortcutToEntries('-10 GIN @ 10 USD', TX);
+  //console.log(JSON.stringify(entries.map(e => e.toObject()), null, 2));
+  t.is(entries.length, 2);
+  t.is(entries[1].type, 'credit');
+  t.is(entries[1].quantity.toFixed(0), '10');
+  t.is(entries[1].currency, 'GIN');
+  t.is(entries[0].type, 'debit');
+  t.is(entries[0].quantity.toFixed(0), '100');
+  t.is(entries[0].currency, 'USD');
+});

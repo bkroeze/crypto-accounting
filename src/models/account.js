@@ -98,7 +98,6 @@ export default class Account {
       throw new ReferenceError(`Account Not Found: ${this.path}:${nextChild}`);
     }
     if (path.length > 0) {
-      console.log('getting child', path);
       child = child.getAccount(path);
     }
     return child;

@@ -2,6 +2,7 @@ import * as R from 'ramda';
 import Moment from 'moment';
 import BigNumber from 'bignumber.js';
 import * as utils from './modelUtils';
+import { isNegativeString, positiveString } from '../utils/numbers';
 
 const DEFAULT_PROPS = {
   id: null,
@@ -132,13 +133,14 @@ export default class Entry {
 
   setPair(partner, priceEach) {
     this.pair = partner;
-    if (priceEach && partner.type === 'credit') {
+    if (priceEach) {
       // price specified as 'each', so it needs to be multiplied by
       // this quantity
-      partner.multiplyBy(this);
+        partner.multiplyBy(this);
     }
     if (partner.pair !== this) {
-      partner.setPair(this, priceEach);
+      // set the partnet, but don't multiply
+      partner.setPair(this, false);
     }
   }
 
@@ -264,7 +266,7 @@ export function shortcutToEntries(raw_shortcut, transaction) {
 
   if (shortcuts.length === 1) {
     // insert a debit at the front, without a specified account
-    // this allows the default action to be from and to the same accuont
+    // this allows the default action to be from and to the same account
     // but if one is specified, then that is the credit account.
     shortcuts = [shortcuts[0].slice(0,2), shortcuts[0]];
     connector = '=';
@@ -273,17 +275,36 @@ export function shortcutToEntries(raw_shortcut, transaction) {
   let debit, credit;
   const entries = [];
   while (ix < shortcuts.length) {
+    let debitIx = ix;
+    let creditIx = ix + 1;
+
+    const firstAmount = shortcuts[debitIx][0];
+    const negativeFirst = isNegativeString(firstAmount);
+    if (negativeFirst) {
+      // this is a credit, not a debit
+      // take the positive value
+      shortcuts[debitIx][0] = positiveString(firstAmount);
+      // and swap the shortcuts
+      debitIx = ix+1;
+      creditIx = ix;
+    }
+
     debit = new Entry({
-      shortcut: shortcuts[ix].join(' '),
+      shortcut: shortcuts[debitIx].join(' '),
       transaction,
       type: 'debit'
     });
     credit = new Entry({
-      shortcut: shortcuts[ix+1].join(' '),
+      shortcut: shortcuts[creditIx].join(' '),
       transaction,
       type: 'credit'
     });
-    debit.setPair(credit, connector === '@');
+
+    if (negativeFirst) {
+      credit.setPair(debit, connector === '@');
+    } else {
+      debit.setPair(credit, connector === '@');
+    }
     entries.push(debit);
     entries.push(credit);
     ix = ix+2;

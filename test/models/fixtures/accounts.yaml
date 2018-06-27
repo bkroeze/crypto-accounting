@@ -17,6 +17,10 @@ assets:
       tags: ['crypto']
     USD:
       tags: ['fiat']
+
+equity:
+  tags: ['fiat']
+
 expenses:
   children:
     exchange:
