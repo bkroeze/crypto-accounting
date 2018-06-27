@@ -4,11 +4,11 @@
 ** TODO Add total-by-filter to journal
 ** TODO Add total-by-currency
 ** TODO Make a wallet-export converter
+*** Add basic CLI framework
+*** Can I do this via JSONRPC call?
+**** add dotenv for JSONRPC auth
 ** Figure out a plan for fees
 ** Add fees to tests
-** DONE Add total-to-date
-   CLOSED: [2018-06-26 Tue 21:22]
-   - State "DONE"       from              [2018-06-26 Tue 21:22]
 ** Add journal.isValid()
 *** currencies all defined
 *** accounts declared
@@ -18,6 +18,12 @@
 ** Settle lots
 
 * Done - Unreleased
+** DONE Remove carat from account shortcuts
+   CLOSED: [2018-06-27 Wed 11:46]
+   - State "DONE"       from              [2018-06-27 Wed 11:46]
+** DONE Add total-to-date
+   CLOSED: [2018-06-26 Tue 21:22]
+   - State "DONE"       from              [2018-06-26 Tue 21:22]
 ** DONE Add journal total by account
    CLOSED: [2018-06-26 Tue 19:08]
    - State "DONE"       from "TODO"       [2018-06-26 Tue 19:08]

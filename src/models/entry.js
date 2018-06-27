@@ -70,11 +70,7 @@ export default class Entry {
     const numeric2 = utils.looksNumeric(parts[1]);
 
     if (parts.length === 3) {
-      if (!utils.startsWithCarat(parts[2])) {
-        throw new Error(`Invalid Posting, third word in shortcut is not recognized: ${shortcut}`);
-      } else {
-        this.account = parts[2].slice(1);
-      }
+      this.account = parts[2];
     }
 
     if (numeric1 && numeric2) {
@@ -159,7 +155,7 @@ export default class Entry {
   }
 
   toString() {
-    return `Entry (${this.type}): ${this.quantity.toFixed(8)} ${this.currency} ^${this.getAccount()}`;
+    return `Entry (${this.type}): ${this.quantity.toFixed(8)} ${this.currency} ${this.getAccount()}`;
   }
 }
 
@@ -202,7 +198,7 @@ export function objectToEntries(raw, transaction) {
 /**
  * Parses an entry "shortcut" into balanced Entries.
  * Shortcut can be in two forms:
- * - Single posting (credit): "number currency [^account]", "currency number",
+ * - Single posting (credit): "number currency [account]", "currency number",
  *   which will have a balancing debit created for it using the transaction debit account.
  * - Pair posting: debit [@|=] credit
  *

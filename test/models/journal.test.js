@@ -29,7 +29,7 @@ test('Should get accounts', (t) => {
     transactions: [{
       utc: '2018-01-01T01:01:01.001Z',
       account: 'test',
-      entries: ['100 ETH ^test:revenue'],
+      entries: ['100 ETH test:revenue'],
     }],
   };
   const journal = new Journal(work);
@@ -62,7 +62,7 @@ test('Should render toObject', (t) => {
       account: 'test',
       fees: [],
       tags: [],
-      entries: ['100 ETH ^revenue'],
+      entries: ['100 ETH revenue'],
     }],
   };
   const journal = new Journal(work);

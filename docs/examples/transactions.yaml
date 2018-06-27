@@ -25,15 +25,15 @@
   utc: 2018-06-15
   entries:
     - -100 ETH @ 0.3 BTC
-    - 0.001 ETH ^expenses:exchanges
+    - 0.001 ETH expenses:exchanges
 - note:
     Example Transfer from mining pool to wallet, where the money is coming from
     your revenue:mining account into assets:wallets:ETH account
   account: revenue:mining
   utc: 2018-06-15
   entries:
-    - 100 ETH ^assets:wallets:ETH
-    - 0.001 ETH ^expenses:crypto
+    - 100 ETH assets:wallets:ETH
+    - 0.001 ETH expenses:crypto
     # long form of above
     - credit:
         quantity: 100
@@ -51,12 +51,12 @@
   account: assets:wallets:ETH
   utc: 2018-06-17
   entries:
-    - -5 GIN ^expenses:hosting
+    - -5 GIN expenses:hosting
 - note: Example of a simple crypto spend, reversed accounts
   account: expenses:hosting
   utc: 2018-06-17
   entries:
-    - 5 GIN ^assets:wallets:ETH
+    - 5 GIN assets:wallets:ETH
 - note:
     Example of a set of entries, where I've set the default debit and credit accounts
     imaging an Ethereum game series of transactions , where each is small, and all
@@ -73,4 +73,4 @@
     - .0001 ETH
     - .0001 ETH
     - .00025 ETH
-    - .01 ETH ^assets:wallets:cold:ETH
+    - .01 ETH assets:wallets:cold:ETH

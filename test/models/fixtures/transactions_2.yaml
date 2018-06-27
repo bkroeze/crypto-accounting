@@ -8,18 +8,18 @@
   utc: 2018-06-15
   note: equity into bank
   entries:
-    - 500 USD ^equity
+    - 500 USD equity
 - account: assets:exchanges:coinbase
   utc: 2018-06-16
   note: Sending $500 from bank, and buying 1.1 ETH with $440 of it.
   entries:
-    - 500 USD ^assets:banks:checking
+    - 500 USD assets:banks:checking
     - 1.1 ETH @ 400 USD
 - account: assets:exchanges:binance
   utc: 2018-06-17
   note: sending 1 ETH to Binance, and buying 40 GIN with it
   entries:
-    - 1 ETH ^assets:exchanges:coinbase
+    - 1 ETH assets:exchanges:coinbase
     - 40 GIN = 1 ETH
 - account: assets:exchanges:binance
   utc: 2018-06-18
@@ -31,13 +31,13 @@
   utc: 2018-06-19
   note: cashing out 2 ETH
   entries:
-    - 2 ETH ^assets:exchanges:binance
+    - 2 ETH assets:exchanges:binance
     - -2 ETH @ 500 USD
 - account: assets:banks:checking
   utc: 2018-06-20
   note: sending cash to bank
   entries:
-    - 1000 USD ^assets:exchanges:coinbase
+    - 1000 USD assets:exchanges:coinbase
 # - totals:
 #     assets:exchanges:coinbase:
 #       USD: 60

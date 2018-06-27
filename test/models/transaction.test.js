@@ -31,7 +31,7 @@ test('Transaction with entries are loaded', (t) => {
   const tx = new Transaction({
     utc: '2018-01-01',
     account: 'test',
-    entries: ['10 ETH ^income'],
+    entries: ['10 ETH income'],
   });
   t.deepEqual(tx.account, { credit: 'test', debit: 'test' });
   t.is(tx.entries.length, 2);
