@@ -7,7 +7,7 @@ export default class MockFS {
   }
 
   readFileSync(fname) {
-    const {mocks} = this;
+    const { mocks } = this;
 
     if (R.has(fname, mocks)) {
       return mocks[fname];
@@ -20,17 +20,5 @@ export default class MockFS {
       return mocks['*'];
     }
     throw new Error(`MockFS cannot find: ${fname}`);
-  }
-
-  readFile(fname) {
-    return new Promise(
-      (resolve, reject) => {
-        try {
-          resolve(readFileSync(fname));
-        } catch (e) {
-          reject(e);
-        }
-      }
-    );
   }
 }

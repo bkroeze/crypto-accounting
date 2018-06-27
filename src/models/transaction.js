@@ -1,14 +1,16 @@
+/* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
 import Moment from 'moment';
 
-import Entry, { makeEntries } from './entry';
+import { makeEntries } from './entry';
 import { stripFalsyExcept, isString } from './modelUtils';
 
-const makeFees = (fees) => fees;  // stub out fee descriptors
+// stub out fee descriptors
+const makeFees = fees => fees;
 
 const DEFAULT_PROPS = {
   id: '',
-  account: {credit: '', debit: ''},
+  account: { credit: '', debit: '' },
   utc: '',
   note: '',
   fees: [],
@@ -29,22 +31,22 @@ export default class Transaction {
    * include "notes", "tags", and a list of transactions
    * @param {object} props
    */
-  constructor(props={}) {
+  constructor(props = {}) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
-    const {entries, fees} = merged;
+    const { entries, fees } = merged;
 
-    KEYS.forEach(key => {
+    KEYS.forEach((key) => {
       if (key !== 'transactions' && key !== 'fees') {
         let val = merged[key];
         if (key === 'account' && isString(val)) {
-          val = {debit: val, credit: val};
+          val = { debit: val, credit: val };
         }
         this[key] = val;
       }
     });
 
     if (!this.utc) {
-      log.error(`Invalid Transaction, must have a 'utc', got: ${JSON.stringify(props)}`);
+      console.error(`Invalid Transaction, must have a 'utc', got: ${JSON.stringify(props)}`);
       throw new Error('Invalid Transaction, must have a utc');
     }
     this.utc = Moment(this.utc);
@@ -80,7 +82,7 @@ export default class Transaction {
       utc: this.utc.toISOString(),
       tags: this.tags,
       entries: this.entries.map(t => t.toObject()),
-      fees: this.fees,  // change to this.fees.map(f => t.toObject()) when unstub
+      fees: this.fees, // change to this.fees.map(f => t.toObject()) when unstub
     }, ['entries']);
   }
 
@@ -89,4 +91,4 @@ export default class Transaction {
   }
 }
 
-export const makeTransactions = (raw) => raw.map(tx => new Transaction(tx));
+export const makeTransactions = raw => raw.map(tx => new Transaction(tx));

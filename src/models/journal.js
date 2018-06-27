@@ -1,8 +1,8 @@
 import * as R from 'ramda';
 
-import Account, {makeAccounts} from './account';
-import Transaction, {makeTransactions} from './transaction';
-import Currency, {makeCurrencies} from './currency';
+import { makeAccounts } from './account';
+import { makeTransactions } from './transaction';
+import { makeCurrencies } from './currency';
 import * as utils from './modelUtils';
 
 const DEFAULT_PROPS = {
@@ -14,6 +14,21 @@ const DEFAULT_PROPS = {
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
+
+function getAccount(accounts, key) {
+  let path = key;
+  if (utils.isString(path)) {
+    path = path.split(':');
+  }
+  let account = accounts[path.shift()];
+  if (path.length) {
+    account = account.getAccount(path);
+  }
+  if (!account) {
+    throw new ReferenceError(`Account Not Found: ${key}`);
+  }
+  return account;
+}
 
 export default class Journal {
   /**
@@ -30,30 +45,20 @@ export default class Journal {
 
   checkAndApply() {
     if (this.transactions && this.transactions.length > 0 && !R.isEmpty(this.accounts)) {
-      this.transactions.forEach(tx => {
-        tx.applyToAccounts(this.getAccount);
+      const getter = R.curry(getAccount)(this.accounts);
+      this.transactions.forEach((tx) => {
+        tx.applyToAccounts(getter);
       });
     }
   }
 
-  getAccount = (key) => {
-    let path = key;
-    if (utils.isString(path)) {
-      path = path.split(':');
-    }
-    let account = this.accounts[path.shift()];
-    if (path.length) {
-      account = account.getAccount(path);
-    }
-    if (!account) {
-      throw new ReferenceError(`Account Not Found: ${key}`);
-    }
-    return account;
+  getAccount(key) {
+    return getAccount(this.accounts, key);
   }
 
   getBalancesByAccount() {
     let balances = {};
-    Object.keys(this.accounts).forEach(account => {
+    Object.keys(this.accounts).forEach((account) => {
       balances = R.merge(balances, this.accounts[account].getBalancesByAccount());
     });
     return balances;

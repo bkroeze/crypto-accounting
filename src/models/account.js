@@ -1,3 +1,4 @@
+/* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
 
 import * as utils from './modelUtils';
@@ -30,28 +31,34 @@ function entrySorter(a, b) {
     return 1;
   }
   if (a.addIndex < b.addIndex) {
-    return 0;
+    return -1;
   }
+  if (a.addIndex > b.addIndex) {
+    return 1;
+  }
+  return 0;
 }
 
 export default class Account {
   /**
-   * Construct using a `props` object that must include "path", and may also include "name" and "notes"
+   * Construct using a `props` object that must include "path", and may also
+   * include "name" and "notes"
    * @param {object} props
    */
-  constructor(props={}) {
+  constructor(props = {}) {
     this.dirty = {
       entries: false,
-    }
+    };
     this.entries = []; // not constructed using "props" at this point
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
     let children = [];
 
-    KEYS.forEach(key => {
+    KEYS.forEach((key) => {
+      const val = merged[key];
       if (key === 'children') {
-        children = merged.children;
+        children = val;
       } else {
-        this[key] = merged[key];
+        this[key] = val;
       }
     });
 
@@ -63,7 +70,7 @@ export default class Account {
       this.path = `${this.parent.path}:${this.path}`;
     }
     if (!this.alias) {
-      this.alias == this.path;
+      this.alias = this.path;
     }
 
     this.children = Account.makeChildAccounts(this, children);
@@ -71,9 +78,9 @@ export default class Account {
 
   static makeChildAccounts(parent, children) {
     const accounts = {};
-    R.keysIn(children).forEach(path => {
+    R.keysIn(children).forEach((path) => {
       const child = children[path];
-      accounts[path] = new Account(R.merge(child, {parent, path}));
+      accounts[path] = new Account(R.merge(child, { parent, path }));
     });
     return accounts;
   }
@@ -117,35 +124,36 @@ export default class Account {
    * @param {function) filter to apply to the entries
    */
   getBalances(balances = {}, entryFilter = null) {
+    const work = R.clone(balances);
     let entries = this.getEntries();
     if (entryFilter) {
       entries = entries.filter(entryFilter);
     }
-    entries.forEach(e => {
+    entries.forEach((e) => {
       const qty = getBalanceQty(e);
-      if (!R.has(e.currency, balances)) {
-        balances[e.currency] = qty;
+      if (!R.has(e.currency, work)) {
+        work[e.currency] = qty;
       } else {
-        balances[e.currency] = balances[e.currency].plus(qty);
+        work[e.currency] = work[e.currency].plus(qty);
       }
     });
-    return balances;
+    return work;
   }
 
   getBalancesByAccount() {
     let balances = {};
     balances[this.path] = this.getBalances();
-    Object.values(this.children).forEach(child => {
-      balances = R.merge(balances, child.getBalancesByAccount())
+    Object.values(this.children).forEach((child) => {
+      balances = R.merge(balances, child.getBalancesByAccount());
     });
     return balances;
   }
 
   getTotalBalances() {
     const balances = this.getBalances();
-    Object.values(this.children).forEach(child => {
+    Object.values(this.children).forEach((child) => {
       const childBalances = child.getTotalBalances();
-      Object.keys(childBalances).forEach(currency => {
+      Object.keys(childBalances).forEach((currency) => {
         if (!R.has(currency, balances)) {
           balances[currency] = childBalances[currency];
         } else {
@@ -178,9 +186,8 @@ export default class Account {
  */
 export function makeAccounts(raw) {
   const accounts = {};
-  R.keysIn(raw).forEach(path => {
-    accounts[path] = new Account(R.merge(raw[path], {path}));
+  R.keysIn(raw).forEach((path) => {
+    accounts[path] = new Account(R.merge(raw[path], { path }));
   });
   return accounts;
 }
-

@@ -1,15 +1,17 @@
+/* eslint no-underscore-dangle: off */
 import * as R from 'ramda';
 
 /**
- * Returns a copy of an object, with all members having falsy values removed, except for those in the `butNot` list.
+ * Returns a copy of an object, with all members having falsy values removed,
+ * except for those in the `butNot` list.
  * @param {object} toStrip
  * @param {array} (optional) list of keys to retain even if falsy
  * @return {object} stripped copy
  */
-export function stripFalsyExcept(toStrip, butNot=[]) {
+export function stripFalsyExcept(toStrip, butNot = []) {
   const stripped = {};
 
-  Object.keys(toStrip).forEach(key => {
+  Object.keys(toStrip).forEach((key) => {
     const val = toStrip[key];
     if (R.indexOf(key, butNot) > -1 || val) {
       stripped[key] = val;
@@ -29,7 +31,7 @@ export function toObject(work) {
 
 export function objectValsToObject(obj) {
   const work = {};
-  R.keysIn(obj).forEach(key => {
+  R.keysIn(obj).forEach((key) => {
     work[key] = obj[key].toObject();
   });
   return work;
@@ -40,8 +42,8 @@ export const isString = R.is(String);
 export const isObject = R.is(Object);
 export const mapTrim = R.map(R.trim);
 export const splitSpace = R.split(' ');
-export const numberRe = new RegExp(/^-?[0-9\.]+$/);
-export const looksNumeric = (val) => val.search(numberRe) > -1;
+export const numberRe = new RegExp(/^-?[0-9.]+$/);
+export const looksNumeric = val => val.search(numberRe) > -1;
 export const startsWithCarat = R.startsWith('^');
 export const isConnector = R.contains(R.__, ['@', '=']);
 

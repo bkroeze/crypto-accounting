@@ -1,7 +1,10 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** TODO Add total-by-curreny
+** TODO Add total-by-filter to journal
+** TODO Add total-by-currency
+** TODO Make a wallet-export converter
+** Figure out a plan for fees
 ** Add fees to tests
 ** DONE Add total-to-date
    CLOSED: [2018-06-26 Tue 21:22]
@@ -11,6 +14,8 @@
 *** accounts declared
 *** all transactions balanced
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
+** find lots
+** Settle lots
 
 * Done - Unreleased
 ** DONE Add journal total by account

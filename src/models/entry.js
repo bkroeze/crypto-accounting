@@ -1,5 +1,5 @@
+/* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
-import Moment from 'moment';
 import BigNumber from 'bignumber.js';
 import * as utils from './modelUtils';
 import { isNegativeString, positiveString } from '../utils/numbers';
@@ -18,14 +18,16 @@ const DEFAULT_PROPS = {
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
+const hasCredits = R.has('credits');
+const hasDebits = R.has('debits');
 
 export default class Entry {
   /**
    * Construct using a `props` object that must include the parent transaction
    * @param {object} props
    */
-  constructor(props={}) {
-    const work = utils.isString(props) ? {shortcut: props} : props;
+  constructor(props = { }) {
+    const work = utils.isString(props) ? { shortcut: props } : props;
     const merged = R.merge(DEFAULT_PROPS, getProps(work));
 
     if (!merged.transaction) {
@@ -34,11 +36,11 @@ export default class Entry {
     }
 
     if (merged.shortcut && (merged.currency || merged.amount)) {
-      log.error(`Invalid Entry, can't specify a shortcut and currency/amount: ${JSON.stringify(props)}`);
+      console.error(`Invalid Entry, can't specify a shortcut and currency/amount: ${JSON.stringify(props)}`);
       throw new Error('Invalid Entry, conflicting shortcut');
     }
 
-    KEYS.forEach(key => {
+    KEYS.forEach((key) => {
       this[key] = merged[key];
     });
 
@@ -57,11 +59,12 @@ export default class Entry {
   applyShortcut(shortcut) {
     const parts = utils.splitAndTrim(shortcut);
     // minimal shortcut: "10 BTC"
-    if (parts.length != 2 && parts.length != 3) {
+    if (parts.length !== 2 && parts.length !== 3) {
       throw new Error(`Invalid shortcut: ${shortcut}`);
     }
     // determine which part is the currency
-    let quantity, currency;
+    let quantity;
+    let currency;
 
     const numeric1 = utils.looksNumeric(parts[0]);
     const numeric2 = utils.looksNumeric(parts[1]);
@@ -75,19 +78,17 @@ export default class Entry {
     }
 
     if (numeric1 && numeric2) {
-      throw new Error(`Invalid Posting, two numeric in shortcut: ${shortcut}`)
+      throw new Error(`Invalid Posting, two numeric in shortcut: ${shortcut}`);
     }
 
     if (!(numeric1 || numeric2)) {
-      throw new Error(`Invalid Posting, no numeric in shortcut: ${shortcut}`)
+      throw new Error(`Invalid Posting, no numeric in shortcut: ${shortcut}`);
     }
 
     if (numeric1) {
-      quantity = parts[0];
-      currency = parts[1];
+      [quantity, currency] = parts;
     } else {
-      quantity = parts[1];
-      currency = parts[0];
+      [currency, quantity] = parts;
     }
     this.quantity = BigNumber(quantity);
     this.currency = currency;
@@ -98,11 +99,13 @@ export default class Entry {
   }
 
   equals(entry) {
-    return entry &&
-      R.is(Entry, entry) &&
-      this.quantity.eq(entry.quantity) &&
-      this.currency === entry.currency &&
-      this.type === entry.type;
+    return (
+      entry
+        && R.is(Entry, entry)
+        && this.quantity.eq(entry.quantity)
+        && this.currency === entry.currency
+        && this.type === entry.type
+    );
   }
 
   getAccount() {
@@ -114,11 +117,10 @@ export default class Entry {
   }
 
   isBalanced() {
-    //console.log(`check balanced: ${this.pair} && ${this.pair.currency !== this.currency} || ${this.pair.getAccount() !== this.getAccount()}`);
-    return !!(this.pair &&
-            (this.pair.currency !== this.currency ||
-             this.pair.getAccount() !== this.getAccount()
-            ));
+    return !!(this.pair && (
+      this.pair.currency !== this.currency
+        || this.pair.getAccount() !== this.getAccount()
+    ));
   }
 
   /**
@@ -126,7 +128,7 @@ export default class Entry {
    * @param {Posting} posting
    * @return {Posting} this
    */
-  multiplyBy(posting, flipSign) {
+  multiplyBy(posting) {
     this.quantity = this.quantity.times(posting.quantity);
     return this;
   }
@@ -136,7 +138,7 @@ export default class Entry {
     if (priceEach) {
       // price specified as 'each', so it needs to be multiplied by
       // this quantity
-        partner.multiplyBy(this);
+      partner.multiplyBy(this);
     }
     if (partner.pair !== this) {
       // set the partnet, but don't multiply
@@ -162,35 +164,21 @@ export default class Entry {
 }
 
 /**
- * Parse an entire list of shortcut or object entries and return a list of Entries
- * @param {Array<Object|String}} entries
- * @param {Transaction} transaction parent
+ * parses a list of entries, which may be objects or strings
+ * @param {Array<Object|String} rawArray input
+ * @param {String} entryType credit or debit
  */
-export function makeEntries(entries, transaction) {
-  return R.flatten(entries.map(entry => flexibleToEntries(entry, transaction)));
+export function arrayToEntries(rawArray, entryType, transaction) {
+  return rawArray.map((entry) => {
+    let props;
+    if (utils.isString(entry)) {
+      props = { shortcut: entry, transaction, type: entryType };
+    } else {
+      props = { ...entry, transaction, type: entryType };
+    }
+    return new Entry(props);
+  });
 }
-
-/**
- * Parses an one or more entries from a yaml-style "entry".
- * This means it may be:
- * - A string: shortcut
- * - An object: with one or both of "credits" or "debits" fields
- * @param {Object|String} raw object to parse
- * @return {Array<Entry>} List of entries parsed
- */
-export function flexibleToEntries(raw, transaction) {
-  if (utils.isString(raw)) {
-    return shortcutToEntries(raw, transaction);
-  }
-  if (utils.isObject(raw)) {
-    return objectToEntries(raw, transaction);
-  }
-  console.error('Invalid Entry', raw);
-  throw new Error('Invalid Entry: cannot parse');
-}
-
-const hasCredits = R.has('credits');
-const hasDebits = R.has('debits');
 
 export function objectToEntries(raw, transaction) {
   /**
@@ -212,21 +200,6 @@ export function objectToEntries(raw, transaction) {
 }
 
 /**
- * parses a list of entries, which may be objects or strings
- * @param {Array<Object|String} rawArray input
- * @param {String} entryType credit or debit
- */
-export function arrayToEntries(rawArray, entryType, transaction) {
-  return rawArray.map(entry => {
-    const props = utils.isString(entry) ?
-          {shortcut: entry, transaction, type: entryType}
-          :
-          {...entry, transaction, type: entryType};
-    return new Entry(props);
-  });
-}
-
-/**
  * Parses an entry "shortcut" into balanced Entries.
  * Shortcut can be in two forms:
  * - Single posting (credit): "number currency [^account]", "currency number",
@@ -237,11 +210,11 @@ export function arrayToEntries(rawArray, entryType, transaction) {
  * @return {Object<string: Array<Posting>>} postings, keyed by "credits" and "debits"
  * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
  */
-export function shortcutToEntries(raw_shortcut, transaction) {
-  const parts = utils.splitAndTrim(raw_shortcut);
+export function shortcutToEntries(rawShortcut, transaction) {
+  const parts = utils.splitAndTrim(rawShortcut);
   // minimal shortcut: "10 BTC"
   if (parts.length < 2) {
-    throw new Error(`Invalid shortcut: ${raw_shortcut}`);
+    throw new Error(`Invalid shortcut: ${rawShortcut}`);
   }
 
   let accum = [];
@@ -260,7 +233,7 @@ export function shortcutToEntries(raw_shortcut, transaction) {
     }
   }
   if (accum.length < 2) {
-    throw new Error(`Invalid shortcut: ${raw_shortcut}`);
+    throw new Error(`Invalid shortcut: ${rawShortcut}`);
   }
   shortcuts.push(accum);
 
@@ -268,11 +241,12 @@ export function shortcutToEntries(raw_shortcut, transaction) {
     // insert a debit at the front, without a specified account
     // this allows the default action to be from and to the same account
     // but if one is specified, then that is the credit account.
-    shortcuts = [shortcuts[0].slice(0,2), shortcuts[0]];
+    shortcuts = [shortcuts[0].slice(0, 2), shortcuts[0]];
     connector = '=';
   }
-  let ix=0;
-  let debit, credit;
+  let ix = 0;
+  let debit;
+  let credit;
   const entries = [];
   while (ix < shortcuts.length) {
     let debitIx = ix;
@@ -285,19 +259,19 @@ export function shortcutToEntries(raw_shortcut, transaction) {
       // take the positive value
       shortcuts[debitIx][0] = positiveString(firstAmount);
       // and swap the shortcuts
-      debitIx = ix+1;
+      debitIx = ix + 1;
       creditIx = ix;
     }
 
     debit = new Entry({
       shortcut: shortcuts[debitIx].join(' '),
       transaction,
-      type: 'debit'
+      type: 'debit',
     });
     credit = new Entry({
       shortcut: shortcuts[creditIx].join(' '),
       transaction,
-      type: 'credit'
+      type: 'credit',
     });
 
     if (negativeFirst) {
@@ -307,7 +281,35 @@ export function shortcutToEntries(raw_shortcut, transaction) {
     }
     entries.push(debit);
     entries.push(credit);
-    ix = ix+2;
+    ix += 2;
   }
   return entries;
+}
+
+/**
+ * Parses an one or more entries from a yaml-style "entry".
+ * This means it may be:
+ * - A string: shortcut
+ * - An object: with one or both of "credits" or "debits" fields
+ * @param {Object|String} raw object to parse
+ * @return {Array<Entry>} List of entries parsed
+ */
+export function flexibleToEntries(raw, transaction) {
+  if (utils.isString(raw)) {
+    return shortcutToEntries(raw, transaction);
+  }
+  if (utils.isObject(raw)) {
+    return objectToEntries(raw, transaction);
+  }
+  console.error('Invalid Entry', raw);
+  throw new Error('Invalid Entry: cannot parse');
+}
+
+/**
+ * Parse an entire list of shortcut or object entries and return a list of Entries
+ * @param {Array<Object|String}} entries
+ * @param {Transaction} transaction parent
+ */
+export function makeEntries(entries, transaction) {
+  return R.flatten(entries.map(entry => flexibleToEntries(entry, transaction)));
 }

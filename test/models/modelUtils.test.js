@@ -1,7 +1,7 @@
 import test from 'ava';
-import {stripFalsyExcept} from '../../src/models/modelUtils.js';
+import { stripFalsyExcept } from '../../src/models/modelUtils';
 
-test('StripFalsy simple', t => {
+test('StripFalsy simple', (t) => {
   const raw = {
     lame: null,
     bad: 0,
@@ -12,11 +12,11 @@ test('StripFalsy simple', t => {
   const stripped = stripFalsyExcept(raw);
   t.deepEqual(stripped, {
     that: 1,
-    theother: 'x'
+    theother: 'x',
   });
 });
 
-test('StripFalsy with exceptions', t => {
+test('StripFalsy with exceptions', (t) => {
   const raw = {
     lame: null,
     bad: 0,
@@ -29,7 +29,6 @@ test('StripFalsy with exceptions', t => {
     bad: 0,
     empty: '',
     that: 1,
-    theother: 'x'
+    theother: 'x',
   });
 });
-
