@@ -1,0 +1,20 @@
+- account: assets:wallets:ETH
+  utc: 2018-06-01
+  entries:
+    - .001 ETH ^revenue:mining
+- account: assets:wallets:ETH
+  utc: 2018-06-02
+  entries:
+    - .001 ETH ^revenue:mining
+- account: assets:wallets:ETH
+  utc: 2018-06-03
+  entries:
+    - .001 ETH ^revenue:mining
+- account: assets:wallets:ETH
+  utc: 2018-06-04
+  entries:
+    - .001 ETH ^revenue:mining
+- account: assets:wallets:ETH
+  utc: 2018-06-05
+  entries:
+    - .001 ETH ^revenue:mining

@@ -10,13 +10,14 @@ assets:
           tags: ['crypto']
         coinbase:
           tags: ['crypto']
-  wallets:
-    BTC:
-      tags: ['crypto']
-    ETH:
-      tags: ['crypto']
-    USD:
-      tags: ['fiat']
+    wallets:
+      children:
+        BTC:
+          tags: ['crypto']
+        ETH:
+          tags: ['crypto']
+        USD:
+          tags: ['fiat']
 
 equity:
   tags: ['fiat']

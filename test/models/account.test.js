@@ -4,6 +4,8 @@ import { safeDump } from 'js-yaml';
 import Account, { makeAccounts } from '../../src/models/account';
 import Transaction from '../../src/models/transaction';
 import { objectValsToObject } from '../../src/models/modelUtils';
+import { journalFinder } from '../utils';
+import Moment from 'moment';
 
 test('Account can instantiate via props', t => {
   const a = new Account({path: 'test'});
@@ -191,4 +193,17 @@ test('Accounts can get balances with or without children', t => {
   const byAccount = account.getBalancesByAccount();
   t.is(byAccount['test'].BTC.toFixed(0), '-20');
   t.is(byAccount['test:child'].ETH.toFixed(0), '-1');
+});
+
+const getJournal = journalFinder(__dirname);
+
+test('getBalances can apply filters', t => {
+  const journal = getJournal('journal_mining.yaml');
+  const acct = journal.getAccount('assets:wallets:ETH');
+  const total = acct.getBalances();
+  t.is(total.ETH.toFixed(3), '0.005');
+
+  const day3 = Moment('2018-06-03');
+  const threeDays = acct.getBalances({}, (e) => e.getUtc().isSameOrBefore(day3));
+  t.is(threeDays.ETH.toFixed(3), '0.003');
 });

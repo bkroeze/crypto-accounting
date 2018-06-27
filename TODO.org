@@ -1,15 +1,24 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** TODO Add journal total by account
+** TODO Add total-by-curreny
+** Add fees to tests
+** DONE Add total-to-date
+   CLOSED: [2018-06-26 Tue 21:22]
+   - State "DONE"       from              [2018-06-26 Tue 21:22]
 ** Add journal.isValid()
 *** currencies all defined
 *** accounts declared
 *** all transactions balanced
-** add account.getTotal()
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
 
 * Done - Unreleased
+** DONE Add journal total by account
+   CLOSED: [2018-06-26 Tue 19:08]
+   - State "DONE"       from "TODO"       [2018-06-26 Tue 19:08]
+** DONE add account.getTotal()
+   CLOSED: [2018-06-26 Tue 19:08]
+   - State "DONE"       from              [2018-06-26 Tue 19:08]
 ** DONE add isBalanced to transaction.
    CLOSED: [2018-06-24 Sun 18:18]
    - State "DONE"       from "TODO"       [2018-06-24 Sun 18:18]

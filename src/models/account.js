@@ -111,8 +111,17 @@ export default class Account {
     return this.entries;
   }
 
-  getBalances(balances = {}) {
-    this.getEntries().forEach(e => {
+  /**
+   * Get current balance of each currency.
+   * @param {object} balances
+   * @param {function) filter to apply to the entries
+   */
+  getBalances(balances = {}, entryFilter = null) {
+    let entries = this.getEntries();
+    if (entryFilter) {
+      entries = entries.filter(entryFilter);
+    }
+    entries.forEach(e => {
       const qty = getBalanceQty(e);
       if (!R.has(e.currency, balances)) {
         balances[e.currency] = qty;
