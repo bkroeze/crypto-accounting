@@ -1,0 +1,9 @@
+meta:
+  note: Test Fixture
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  $ref: ./transactions_2.yaml
+

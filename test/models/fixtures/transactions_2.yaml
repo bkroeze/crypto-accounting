@@ -1,0 +1,56 @@
+# Test transactions showing:
+#   - cash in from equity
+#   - move to exchange
+#   - coin-to-coin trade
+#   - transfer back
+#   - partial cash-out
+- account: assets:banks:checking
+  utc: 2018-06-15
+  note: equity into bank
+  entries:
+    - 500 USD ^equity
+- account: assets:exchanges:coinbase
+  utc: 2018-06-16
+  note: Sending $500 from bank, and buying 1.1 ETH with $440 of it.
+  entries:
+    - 500 USD ^assets:banks:checking
+    - 1.1 ETH @ 400 USD
+- account: assets:exchanges:binance
+  utc: 2018-06-17
+  note: sending 1 ETH to Binance, and buying 40 GIN with it
+  entries:
+    - 1 ETH ^assets:exchanges:coinbase
+    - 40 GIN = 1 ETH
+- account: assets:exchanges:binance
+  utc: 2018-06-18
+  note: selling 40 GIN for 2 ETH total, nice profit!
+  entries:
+    - -20 GIN @ 0.05 ETH
+    - -20 GIN = 1 ETH
+- account: assets:exchanges:coinbase
+  utc: 2018-06-19
+  note: cashing out 2 ETH
+  entries:
+    - 2 ETH ^assets:exchanges:binance
+    - -2 ETH @ 500 USD
+- account: assets:banks:checking
+  utc: 2018-06-20
+  note: sending cash to bank
+  entries:
+    - 1000 USD ^assets:exchanges:coinbase
+# - totals:
+#     assets:exchanges:coinbase:
+#       USD: 60
+#       ETH: 0.1
+#     assets:exchanges:binance:
+#       ETH: 0
+#       GIN: 0
+#     assets:banks:checking:
+#       USD: 1000
+
+
+
+
+
+
+  
