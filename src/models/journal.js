@@ -56,10 +56,15 @@ export default class Journal {
     return getAccount(this.accounts, key);
   }
 
-  getBalancesByAccount() {
+  /**
+   * Get balances for all accounts
+   * @param {Function} filter to apply to entries
+   * @return {object} balances keyed by account path
+   */
+  getBalancesByAccount(entryFilter) {
     let balances = {};
     Object.keys(this.accounts).forEach((account) => {
-      balances = R.merge(balances, this.accounts[account].getBalancesByAccount());
+      balances = R.merge(balances, this.accounts[account].getBalancesByAccount(entryFilter));
     });
     return balances;
   }

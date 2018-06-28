@@ -1,4 +1,6 @@
 import test from 'ava';
+import Moment from 'moment';
+
 import Journal from '../../src/models/journal';
 import { journalFinder } from '../utils';
 
@@ -156,4 +158,14 @@ test('Tracks sales through multiple hops', (t) => {
   t.is(coinbase.USD.toFixed(2), '60.00');
   t.is(binance.ETH.toFixed(1), '0.0');
   t.is(binance.GIN.toFixed(1), '0.0');
+});
+
+test('getBalancesByAccount can apply filters', (t) => {
+  const journal = getJournalFromYaml('journal_mining.yaml');
+  const total = journal.getBalancesByAccount();
+  t.is(total['assets:wallets:ETH'].ETH.toFixed(3), '0.005');
+
+  const day3 = Moment('2018-06-03');
+  const threeDays = journal.getBalancesByAccount(e => e.getUtc().isSameOrBefore(day3));
+  t.is(threeDays['assets:wallets:ETH'].ETH.toFixed(3), '0.003');
 });

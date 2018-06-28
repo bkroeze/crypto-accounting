@@ -1,5 +1,6 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
+import { isFunction } from 'ramda-adjunct';
 
 import * as utils from './modelUtils';
 
@@ -117,39 +118,38 @@ export default class Account {
 
   /**
    * Get current balance of each currency.
-   * @param {object} balances
    * @param {function) filter to apply to the entries
    */
-  getBalances(balances = {}, entryFilter = null) {
-    const work = R.clone(balances);
+  getBalances(entryFilter) {
+    const balances = {};
     let entries = this.getEntries();
-    if (entryFilter) {
+    if (isFunction(entryFilter)) {
       entries = entries.filter(entryFilter);
     }
     entries.forEach((e) => {
       const qty = getBalanceQty(e);
-      if (!R.has(e.currency, work)) {
-        work[e.currency] = qty;
+      if (!R.has(e.currency, balances)) {
+        balances[e.currency] = qty;
       } else {
-        work[e.currency] = work[e.currency].plus(qty);
+        balances[e.currency] = balances[e.currency].plus(qty);
       }
-    });
-    return work;
-  }
-
-  getBalancesByAccount() {
-    let balances = {};
-    balances[this.path] = this.getBalances();
-    Object.values(this.children).forEach((child) => {
-      balances = R.merge(balances, child.getBalancesByAccount());
     });
     return balances;
   }
 
-  getTotalBalances() {
-    const balances = this.getBalances();
+  getBalancesByAccount(entryFilter) {
+    let balances = {};
+    balances[this.path] = this.getBalances(entryFilter);
     Object.values(this.children).forEach((child) => {
-      const childBalances = child.getTotalBalances();
+      balances = R.merge(balances, child.getBalancesByAccount(entryFilter));
+    });
+    return balances;
+  }
+
+  getTotalBalances(entryFilter) {
+    const balances = this.getBalances(entryFilter);
+    Object.values(this.children).forEach((child) => {
+      const childBalances = child.getTotalBalances(entryFilter);
       Object.keys(childBalances).forEach((currency) => {
         if (!R.has(currency, balances)) {
           balances[currency] = childBalances[currency];
