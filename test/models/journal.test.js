@@ -169,3 +169,21 @@ test('getBalancesByAccount can apply filters', (t) => {
   const threeDays = journal.getBalancesByAccount(e => e.getUtc().isSameOrBefore(day3));
   t.is(threeDays['assets:wallets:ETH'].ETH.toFixed(3), '0.003');
 });
+
+test('getBalancesByCurrency is accurate for multiple accounts', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const byCurrency = journal.getBalancesByCurrency();
+  //console.log(`byCurrency ${JSON.stringify(byCurrency, null, 2)}`);
+  t.is(byCurrency.USD.quantity.toFixed(0), '560');
+  t.deepEqual(byCurrency.USD.accounts, ['assets:banks:checking', 'assets:exchanges:coinbase', 'equity'])
+  t.is(byCurrency.ETH.quantity.toFixed(2), '0.10');
+});
+
+test('getBalancesByCurrency can use filters', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const byCurrency = journal.getBalancesByCurrency(e => e.account !== 'equity');
+  //console.log(`byCurrency ${JSON.stringify(byCurrency, null, 2)}`);
+  t.is(byCurrency.USD.quantity.toFixed(0), '1060');
+  t.deepEqual(byCurrency.USD.accounts, ['assets:banks:checking', 'assets:exchanges:coinbase'])
+  t.is(byCurrency.ETH.quantity.toFixed(2), '0.10');
+});

@@ -4,6 +4,7 @@ import { makeAccounts } from './account';
 import { makeTransactions } from './transaction';
 import { makeCurrencies } from './currency';
 import * as utils from './modelUtils';
+import { BIG_0 } from '../utils/numbers';
 
 const DEFAULT_PROPS = {
   id: null,
@@ -15,6 +16,13 @@ const DEFAULT_PROPS = {
 const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
 
+/**
+ * Get an account by following the key path, splitting on colons.
+ * @param {Object<String, Account>} accounts
+ * @param {String} key such as "assets:banks"
+ * @return {Account} account
+ * @throws {ReferenceError} if account not found
+ */
 function getAccount(accounts, key) {
   let path = key;
   if (utils.isString(path)) {
@@ -43,6 +51,10 @@ export default class Journal {
     this.setTransactions(makeTransactions(merged.transactions));
   }
 
+  /**
+   * Test to see if sufficient information exists to fill in transaction
+   * information, and do so if conditions are met.
+   */
   checkAndApply() {
     if (this.transactions && this.transactions.length > 0 && !R.isEmpty(this.accounts)) {
       const getter = R.curry(getAccount)(this.accounts);
@@ -52,6 +64,13 @@ export default class Journal {
     }
   }
 
+  /**
+   * Get an account from this Journal by following the key path, splitting on
+   * colons.
+   * @param {String} key such as "assets:banks"
+   * @return {Account} account
+   * @throws {ReferenceError} if account not found
+   */
   getAccount(key) {
     return getAccount(this.accounts, key);
   }
@@ -66,6 +85,35 @@ export default class Journal {
     Object.keys(this.accounts).forEach((account) => {
       balances = R.merge(balances, this.accounts[account].getBalancesByAccount(entryFilter));
     });
+    return balances;
+  }
+
+  /**
+   * Get balances of currencies, with account subtotals
+   * @param {Function} filter to apply to entries
+   * @return {Object} balances keyed by currency
+   */
+  getBalancesByCurrency(entryFilter) {
+    const balances = {};
+    const byAccount = this.getBalancesByAccount(entryFilter);
+    const getter = R.curry(getAccount)(this.accounts);
+
+    Object.keys(byAccount).forEach((accountPath) => {
+      const acct = getter(accountPath);
+      const acctBal = byAccount[accountPath];
+      Object.keys(acctBal).forEach((curr) => {
+        const quantity = acctBal[curr];
+        if (!quantity.eq(BIG_0)) {
+          if (!R.has(curr, balances)) {
+            balances[curr] = {quantity, accounts: [accountPath]};
+          } else {
+            balances[curr].quantity = balances[curr].quantity.plus(quantity);
+            balances[curr].accounts.push(accountPath);
+          }
+        }
+      });
+    });
+
     return balances;
   }
 

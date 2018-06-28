@@ -1,7 +1,6 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** TODO Add total-by-currency
 ** TODO Make a wallet-export converter
 *** Add basic CLI framework
 *** Can I do this via JSONRPC call?
@@ -15,70 +14,3 @@
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
 ** find lots
 ** Settle lots
-
-* Done - Unreleased
-** DONE Add total-by-filter to journal
-   CLOSED: [2018-06-27 Wed 18:02]
-   - State "DONE"       from "TODO"       [2018-06-27 Wed 18:02]
-** DONE Remove carat from account shortcuts
-   CLOSED: [2018-06-27 Wed 11:46]
-   - State "DONE"       from              [2018-06-27 Wed 11:46]
-** DONE Add total-to-date
-   CLOSED: [2018-06-26 Tue 21:22]
-   - State "DONE"       from              [2018-06-26 Tue 21:22]
-** DONE Add journal total by account
-   CLOSED: [2018-06-26 Tue 19:08]
-   - State "DONE"       from "TODO"       [2018-06-26 Tue 19:08]
-** DONE add account.getTotal()
-   CLOSED: [2018-06-26 Tue 19:08]
-   - State "DONE"       from              [2018-06-26 Tue 19:08]
-** DONE add isBalanced to transaction.
-   CLOSED: [2018-06-24 Sun 18:18]
-   - State "DONE"       from "TODO"       [2018-06-24 Sun 18:18]
-Must have equal # of debits and credits.
-** DONE add auto-pairing of shortcuts
-   CLOSED: [2018-06-24 Sun 17:50]
-   - State "DONE"       from "TODO"       [2018-06-24 Sun 17:50]
-ex: "1 ETH ^acct" would make a debit of 1 ETH to acct, and a credit of 1 ETH to tx.account.credit
-"1 eth" would make a debit of 1 eth to tx.account.debit and a credit of 1 ETH to tx.account.credit
-
-** DONE add automatic handling of transaction.account list for debit/credit.
-   CLOSED: [2018-06-23 Sat 18:38]
-   - State "DONE"       from "TODO"       [2018-06-23 Sat 18:38]
-** DONE make sample file for accounts
-   CLOSED: [2018-06-22 Fri 15:39]
-   - State "DONE"       from "TODO"       [2018-06-22 Fri 15:39]
-   :LOGBOOK:
-   CLOCK: [2018-06-22 Fri 14:55]--[2018-06-22 Fri 15:20] =>  0:25
-   :END:
-** DONE make sample file for currencies
-   CLOSED: [2018-06-22 Fri 16:31]
-   - State "DONE"       from "TODO"       [2018-06-22 Fri 16:31]
-** DONE make example of full journal
-   CLOSED: [2018-06-22 Fri 16:47]
-
-   - State "DONE"       from              [2018-06-22 Fri 16:47]
-** DONE Make Yaml Loader that understands $ref entries
-   CLOSED: [2018-06-22 Fri 23:54]
-   - State "DONE"       from              [2018-06-22 Fri 23:54]
-** DONE Update Accounts for new formatting with object instead of array
-   CLOSED: [2018-06-23 Sat 01:15]
-   - State "DONE"       from              [2018-06-23 Sat 01:15]
-** DONE Finish the Journal loader
-   CLOSED: [2018-06-23 Sat 07:30]
-   - State "DONE"       from              [2018-06-23 Sat 07:30]
-** DONE Add ability to use $refs in lists
-   CLOSED: [2018-06-23 Sat 08:50]
-   - State "DONE"       from "TODO"       [2018-06-23 Sat 08:50]
-** DONE Add ability to load lists of files in journal
-   CLOSED: [2018-06-23 Sat 08:51]
-   - State "DONE"       from              [2018-06-23 Sat 08:51]
-** DONE Add recursive toObject to Journal
-   CLOSED: [2018-06-23 Sat 09:10]
-   - State "DONE"       from              [2018-06-23 Sat 09:10]
-** DONE Add TX ID#
-   CLOSED: [2018-06-21 Thu 20:54]
-   - State "DONE"       from              [2018-06-21 Thu 20:54]
-** DONE Change "income:mining" to "revenue:mining"
-   CLOSED: [2018-06-21 Thu 20:53]
-   - State "DONE"       from              [2018-06-21 Thu 20:53]
