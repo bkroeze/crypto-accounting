@@ -4,6 +4,9 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Add alias support for accounts
+   CLOSED: [2018-06-28 Thu 12:38]
+   - State "DONE"       from              [2018-06-28 Thu 12:38]
 ** DONE Add total-by-currency
    CLOSED: [2018-06-27 Wed 18:31]
    - State "DONE"       from "TODO"       [2018-06-27 Wed 18:31]

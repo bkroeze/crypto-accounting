@@ -1,5 +1,5 @@
 import test from 'ava';
-import { stripFalsyExcept } from '../../src/models/modelUtils';
+import { stripFalsyExcept, getAccountPathMap, getAccountAliasMap } from '../../src/models/modelUtils';
 
 test('StripFalsy simple', (t) => {
   const raw = {
@@ -31,4 +31,105 @@ test('StripFalsy with exceptions', (t) => {
     that: 1,
     theother: 'x',
   });
+});
+
+test('getAccountPathMap flattens', (t) => {
+  const accounts = {
+    top: {
+      path: 'top',
+      children: {
+        one: { path: 'top:one' },
+        two: {
+          path: 'top:two',
+          children: {
+            three: { path: 'top:one:three'}
+          }
+        },
+      }
+    },
+    next: {
+      path: 'next'
+    }
+  };
+  const result = getAccountPathMap(accounts);
+  //console.log('results', JSON.stringify(result, null, 2));
+  t.deepEqual(result, {
+    top: {
+      path: 'top',
+      children: {
+        one: {
+          path: 'top:one',
+        },
+        two: {
+          path: 'top:two',
+          children: {
+            three: {
+              path: 'top:one:three',
+            },
+          },
+        },
+      }
+    },
+    'top:one': {
+      path: 'top:one',
+    },
+    'top:two': {
+      path: 'top:two',
+      children: {
+        three: {
+          path: 'top:one:three',
+        },
+      },
+    },
+    'top:one:three': {
+      path: 'top:one:three',
+    },
+    next: {
+      path: 'next',
+    },
+  });
+});
+
+test('getAccountAliasMap gets aliases', (t) => {
+  const accounts = {
+    top: {
+      path: 'top',
+      children: {
+        one: { path: 'top:one', alias: 'one' },
+        two: {
+          path: 'top:two',
+          alias: 'two',
+          children: {
+            three: { path: 'top:one:three'}
+          }
+        },
+      }
+    },
+    next: {
+      path: 'next',
+      alias: 'n',
+    }
+  };
+  const result = getAccountAliasMap(accounts);
+  //console.log('results', JSON.stringify(result, null, 2));
+  t.deepEqual(result, {
+    one: {
+      path: 'top:one',
+      alias: 'one',
+    },
+    two: {
+      path: 'top:two',
+      alias: 'two',
+      children: {
+        three: {
+          path: 'top:one:three',
+        },
+      },
+    },
+    n: {
+      path: 'next',
+      alias: 'n',
+    },
+  });
+
 });

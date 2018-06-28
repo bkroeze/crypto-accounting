@@ -16,28 +16,6 @@ const DEFAULT_PROPS = {
 const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
 
-/**
- * Get an account by following the key path, splitting on colons.
- * @param {Object<String, Account>} accounts
- * @param {String} key such as "assets:banks"
- * @return {Account} account
- * @throws {ReferenceError} if account not found
- */
-function getAccount(accounts, key) {
-  let path = key;
-  if (utils.isString(path)) {
-    path = path.split(':');
-  }
-  let account = accounts[path.shift()];
-  if (path.length) {
-    account = account.getAccount(path);
-  }
-  if (!account) {
-    throw new ReferenceError(`Account Not Found: ${key}`);
-  }
-  return account;
-}
-
 export default class Journal {
   /**
    * Construct using a `props` object from YAML
@@ -57,7 +35,7 @@ export default class Journal {
    */
   checkAndApply() {
     if (this.transactions && this.transactions.length > 0 && !R.isEmpty(this.accounts)) {
-      const getter = R.curry(getAccount)(this.accounts);
+      const getter = R.curry(utils.getAccount)(this.accounts);
       this.transactions.forEach((tx) => {
         tx.applyToAccounts(getter);
       });
@@ -72,7 +50,13 @@ export default class Journal {
    * @throws {ReferenceError} if account not found
    */
   getAccount(key) {
-    return getAccount(this.accounts, key);
+    if (key.indexOf(':') === -1) {
+      const aliasMap = utils.getAccountAliasMap(this.accounts);
+      if (R.has(key, aliasMap)) {
+        return aliasMap[key];
+      }
+    }
+    return utils.getAccount(this.accounts, key);
   }
 
   /**
@@ -96,7 +80,7 @@ export default class Journal {
   getBalancesByCurrency(entryFilter) {
     const balances = {};
     const byAccount = this.getBalancesByAccount(entryFilter);
-    const getter = R.curry(getAccount)(this.accounts);
+    const getter = R.curry(utils.getAccount)(this.accounts);
 
     Object.keys(byAccount).forEach((accountPath) => {
       const acct = getter(accountPath);

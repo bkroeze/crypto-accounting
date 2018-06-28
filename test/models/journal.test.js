@@ -39,6 +39,12 @@ test('Should get accounts', (t) => {
   t.truthy(testAcc);
 });
 
+test('Should get account by alias', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const acct = journal.getAccount('cb');
+  t.is(acct.path, "assets:exchanges:coinbase");
+});
+
 test('Should render toObject', (t) => {
   const work = {
     accounts: {
