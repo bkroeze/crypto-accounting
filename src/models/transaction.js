@@ -11,6 +11,7 @@ const makeFees = fees => fees;
 const DEFAULT_PROPS = {
   id: '',
   account: { credit: '', debit: '' },
+  status: '',
   party: '',
   address: '',
   utc: '',
@@ -82,6 +83,7 @@ export default class Transaction {
       id: this.id,
       note: this.note,
       account: this.account,
+      status: this.status,
       utc: this.utc.toISOString(),
       address: this.address,
       party: this.party,

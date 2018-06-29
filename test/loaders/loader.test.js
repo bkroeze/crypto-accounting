@@ -1,7 +1,7 @@
 import test from 'ava';
 import { safeDump } from 'js-yaml';
 
-import { setMockFS } from '../../src/loaders/yaml_loader';
+import { setMockFS } from '../../src/loaders/common';
 import { loadJournalFromFilenameSync } from '../../src/loaders/loader';
 import MockFS from '../mockfs';
 

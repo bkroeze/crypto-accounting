@@ -1,0 +1,14 @@
+BTC:
+  name: Bitcoin
+  tags: ['crypto']
+  base: true
+XMX:
+  name: XMX
+  tags: ['crypto', 'mn']
+  portfolio: 'passive'
+USD:
+  name: US Dollar
+  tags: ['fiat']
+  fiatDefault: true
+  base: true
+  aliases: ['$']

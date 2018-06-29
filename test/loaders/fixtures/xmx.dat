@@ -1,0 +1,35 @@
+2018/03/27 17:11 * Graviex
+    Assets:Crypto:Wallet:XMX       10010.0518700 XMX
+    Expenses:Exchanges:Fees        0.002 XMX
+    Assets:Exchanges:Graviex
+
+2018/03/27 20:12 * XMX Wallet
+    ; Note: Xuma MN Activation Fee
+    Expenses:Crypto:Fees           0.00002260 XMX
+    Assets:Crypto:Wallet:XMX
+
+2018-03-29 04:01 * XMX
+    ; Address: XCruAtMRza8YHVJSvv4J53TFdZzTvGsKL4
+    Assets:Crypto:Wallet:XMX  150.00000000 XMX
+    Income:Crypto:MN
+
+2018-03-29 15:45 * XMX
+    ; Address: XCruAtMRza8YHVJSvv4J53TFdZzTvGsKL4
+    Assets:Crypto:Wallet:XMX  150.00000000 XMX
+    Income:Crypto:MN
+
+2018-03-30 01:53 * XMX
+    ; Address: XCruAtMRza8YHVJSvv4J53TFdZzTvGsKL4
+    Assets:Crypto:Wallet:XMX  150.00000000 XMX
+    Income:Crypto:MN
+
+2018/04/05 22:08 * Some Person
+    ; confirmed: Trezor
+    ; Note, not capital gains, XMX is earned income
+    Assets:Crypto:Wallet:XMX       -2400.00025855 XMX @@ 0.62687731 ETH
+    Assets:Crypto:Wallet:Trezor
+
+2018-04-06 04:22 * XMX
+    ; Address: XCruAtMRza8YHVJSvv4J53TFdZzTvGsKL4
+    Assets:Crypto:Wallet:XMX  150.00000000 XMX
+    Income:Crypto:MN

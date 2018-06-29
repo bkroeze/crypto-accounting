@@ -197,9 +197,10 @@ export function objectToEntries(raw, transaction) {
 
 /**
  * Parses an entry "shortcut" into balanced Entries.
- * Shortcut can be in two forms:
- * - Single posting (credit): "number currency [account]", "currency number",
+ * Shortcut can be in three forms:
+ * - Single posting (credit): "quantity currency [account]"
  *   which will have a balancing debit created for it using the transaction debit account.
+ * - Single posting (debit): "= quantity currency [account]"
  * - Pair posting: debit [@|=] credit
  *
  * @param {String} shortcut
@@ -223,7 +224,9 @@ export function shortcutToEntries(rawShortcut, transaction) {
     if (!utils.isConnector(current)) {
       accum.push(current);
     } else {
-      shortcuts.push(accum);
+      if (accum.length > 0) {
+        shortcuts.push(accum);
+      }
       connector = current;
       accum = [];
     }
@@ -234,11 +237,18 @@ export function shortcutToEntries(rawShortcut, transaction) {
   shortcuts.push(accum);
 
   if (shortcuts.length === 1) {
-    // insert a debit at the front, without a specified account
-    // this allows the default action to be from and to the same account
-    // but if one is specified, then that is the credit account.
-    shortcuts = [shortcuts[0].slice(0, 2), shortcuts[0]];
-    connector = '=';
+    if (connector !== '=') {
+      // insert a debit at the front, without a specified account
+      // this allows the default action to be from and to the same account
+      // but if one is specified, then that is the credit account.
+      shortcuts = [shortcuts[0].slice(0, 2), shortcuts[0]];
+      connector = '=';
+    } else {
+      // a leading "=" connector means that this single-entry is a debit
+      // so add a matching credit.
+      shortcuts = [shortcuts[0], shortcuts[0].slice(0,2)];
+    }
+
   }
   let ix = 0;
   let debit;

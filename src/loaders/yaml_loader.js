@@ -1,19 +1,14 @@
 /* eslint no-use-before-define: off */
-import fs from 'graceful-fs';
 import * as R from 'ramda';
 import path from 'path';
 import { safeLoad } from 'js-yaml';
 import { isRelativePath } from '../utils/files';
+import { loadTransactionsFromFilenameSync as loadLedgerTransactions } from './ledger_loader';
+import { getFS } from './common';
 
 const hasRef = R.has('$ref');
 const isObjectByKey = (obj, key) => R.is(Object, R.prop(key, obj));
 const objectTester = R.curry(isObjectByKey);
-
-let activeFS = fs;
-
-export function setMockFS(mock) {
-  activeFS = mock || fs;
-}
 
 /**
  * Finds the paths for every instance of "$ref" as a key
@@ -43,16 +38,24 @@ export function loadYamlFromFilenameSync(fname, directory) {
   if (directory && isRelativePath(fname)) {
     link = path.normalize(`${directory}/${fname}`);
   }
-  return loadRefs(safeLoad(activeFS.readFileSync(link, 'utf-8')), directory);
+  return loadRefs(safeLoad(getFS().readFileSync(link, 'utf-8')), directory);
+}
+
+export function flexibleLoadByExtSync(fname, directory) {
+  const ext = path.extname(fname).toLowerCase();
+  if (ext === '.dat' || ext === '.ledger' || ext === '.ldr') {
+    return loadLedgerTransactions(fname, directory);
+  }
+  return loadYamlFromFilenameSync(fname, directory);
 }
 
 export function loadRef(work, reference, directory) {
   const { link } = reference;
   let child;
   if (R.is(String, link)) {
-    child = loadYamlFromFilenameSync(link, directory);
+    child = flexibleLoadByExtSync(link, directory);
   } else {
-    const refList = link.map(l => loadYamlFromFilenameSync(l, directory));
+    const refList = link.map(l => flexibleLoadByExtSync(l, directory));
     if (R.is(Array, refList[0])) {
       // flatten array
       child = R.flatten(refList);

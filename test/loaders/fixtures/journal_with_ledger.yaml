@@ -1,0 +1,9 @@
+meta:
+  note: Test Fixture simulating a set of mining transactions
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  $ref: ./xmx.dat
+

@@ -1,8 +1,13 @@
 import test from 'ava';
 import { safeDump } from 'js-yaml';
 
-import { findRefs, loadRefs, setMockFS } from '../../src/loaders/yaml_loader';
+import { findRefs, loadRefs } from '../../src/loaders/yaml_loader';
+import { setMockFS } from '../../src/loaders/common';
+import { journalFinder } from '../utils';
+
 import MockFS from '../mockfs';
+
+const getJournal = journalFinder(__dirname);
 
 test('basic finding of refs', (t) => {
   const refs = findRefs({
@@ -172,4 +177,9 @@ test('Can load a list of $refs to an array', (t) => {
     top: [1, 2, 3, 4, 5, 6],
   });
   setMockFS(null);
+});
+
+test('Can load a journal that includes ledger transactions', t => {
+  const journal = getJournal('journal_with_ledger.yaml');
+  t.truthy(journal);
 });

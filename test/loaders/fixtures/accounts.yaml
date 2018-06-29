@@ -1,0 +1,49 @@
+assets:
+  children:
+    banks:
+      children:
+        checking:
+          tags: ['fiat']
+    exchanges:
+      children:
+        binance:
+          aliases: ['binance']
+          tags: ['crypto']
+        coinbase:
+          aliases: ['cb']
+          tags: ['crypto']
+    wallets:
+      children:
+        BTC:
+          tags: ['crypto']
+        ETH:
+          tags: ['crypto']
+        USD:
+          tags: ['fiat']
+
+equity:
+  tags: ['fiat']
+
+expenses:
+  children:
+    exchange:
+      note: Exchange fees
+      tags:
+        - exchange
+        - fee
+    txfee:
+      note: Crypto transaction fees
+      tags:
+        - crypto
+        - fee
+revenue:
+  note: Revenue accounts
+  children:
+    mining:
+      note: Income from mining activities
+      portfolio: passive
+      tags:
+        - mining
+        - crypto
+        - dividend
+        - regular-income
