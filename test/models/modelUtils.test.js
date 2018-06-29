@@ -95,10 +95,10 @@ test('getAccountAliasMap gets aliases', (t) => {
     top: {
       path: 'top',
       children: {
-        one: { path: 'top:one', alias: 'one' },
+        one: { path: 'top:one', aliases: ['one'] },
         two: {
           path: 'top:two',
-          alias: 'two',
+          aliases: ['two'],
           children: {
             three: { path: 'top:one:three'}
           }
@@ -107,19 +107,19 @@ test('getAccountAliasMap gets aliases', (t) => {
     },
     next: {
       path: 'next',
-      alias: 'n',
+      aliases: ['n'],
     }
   };
   const result = getAccountAliasMap(accounts);
-  //console.log('results', JSON.stringify(result, null, 2));
+  // console.log('results', JSON.stringify(result, null, 2));
   t.deepEqual(result, {
     one: {
       path: 'top:one',
-      alias: 'one',
+      aliases: ['one'],
     },
     two: {
       path: 'top:two',
-      alias: 'two',
+      aliases: ['two'],
       children: {
         three: {
           path: 'top:one:three',
@@ -128,7 +128,7 @@ test('getAccountAliasMap gets aliases', (t) => {
     },
     n: {
       path: 'next',
-      alias: 'n',
+      aliases: ['n'],
     },
   });
 

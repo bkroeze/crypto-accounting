@@ -4,6 +4,13 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Add multiple aliases to accounts
+   CLOSED: [2018-06-29 Fri 08:40]
+   - State "DONE"       from              [2018-06-29 Fri 08:40]
+** DONE Add party and address fields to Accounts
+   CLOSED: [2018-06-29 Fri 08:40]
+   - State "DONE"       from "TODO"       [2018-06-29 Fri 08:40]
+
 ** DONE Add alias support for accounts
    CLOSED: [2018-06-28 Thu 12:38]
    - State "DONE"       from              [2018-06-28 Thu 12:38]

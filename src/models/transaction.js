@@ -11,11 +11,14 @@ const makeFees = fees => fees;
 const DEFAULT_PROPS = {
   id: '',
   account: { credit: '', debit: '' },
+  party: '',
+  address: '',
   utc: '',
   note: '',
   fees: [],
   tags: [],
   entries: [],
+  details: {},
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -80,9 +83,12 @@ export default class Transaction {
       note: this.note,
       account: this.account,
       utc: this.utc.toISOString(),
+      address: this.address,
+      party: this.party,
       tags: this.tags,
       entries: this.entries.map(t => t.toObject()),
       fees: this.fees, // change to this.fees.map(f => t.toObject()) when unstub
+      details: this.details,
     }, ['entries']);
   }
 

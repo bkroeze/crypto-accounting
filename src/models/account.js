@@ -6,12 +6,13 @@ import * as utils from './modelUtils';
 
 const DEFAULT_PROPS = {
   path: '',
-  alias: '',
+  aliases: [],
   note: '',
   tags: [],
   portfolio: '',
   parent: null,
   children: {},
+  details: {}, // additional key-value pairs
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -164,12 +165,13 @@ export default class Account {
   toObject() {
     return utils.stripFalsyExcept({
       path: this.path,
-      alias: this.alias,
+      aliases: this.aliases,
       note: this.note,
       tags: this.tags,
       portfolio: this.portfolio,
       children: utils.objectValsToObject(this.children),
       entries: this.entries.map(utils.toObject),
+      details: this.details,
     });
   }
 

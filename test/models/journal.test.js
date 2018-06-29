@@ -105,15 +105,11 @@ test('Should render toObject', (t) => {
       test: {
         path: 'test',
         note: 'test a',
-        tags: [],
-        children: {},
         entries: [debit],
       },
       revenue: {
         path: 'revenue',
         note: 'test b',
-        tags: [],
-        children: {},
         entries: [credit],
       },
     },
@@ -134,9 +130,7 @@ test('Should render toObject', (t) => {
           credit: 'test',
         },
         utc: '2018-01-01T01:01:01.001Z',
-        tags: [],
         entries: [debit, credit],
-        fees: [],
       },
     ],
   });

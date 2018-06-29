@@ -1,13 +1,16 @@
 /* eslint no-underscore-dangle: off */
 import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
 
 export function getAccountAliasMap(accounts) {
   let aliases = {};
   const accountPaths = getAccountPathMap(accounts);
 
   R.valuesIn(accountPaths).forEach((account) => {
-    if (account.alias) {
-      aliases[account.alias] = account;
+    if (account.aliases) {
+      account.aliases.forEach(a => {
+        aliases[a] = account;
+      });
     }
   });
   return aliases;
@@ -66,7 +69,7 @@ export function stripFalsyExcept(toStrip, butNot = []) {
 
   Object.keys(toStrip).forEach((key) => {
     const val = toStrip[key];
-    if (R.indexOf(key, butNot) > -1 || val) {
+    if (R.indexOf(key, butNot) > -1 || (val && RA.isNotEmpty(val))) {
       stripped[key] = val;
     }
   });

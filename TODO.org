@@ -2,6 +2,9 @@
 
 * Active Task List                                              :crypto_acct:
 ** Make sample QuickBooks COA
+*** With numbers for aliases
+** Solve "where do assets sold to me by an exchange get credited?"
+    Answer - designated equity account
 ** TODO Add journal.isValid()
 *** currencies all defined
 *** accounts declared
@@ -16,3 +19,6 @@
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
 ** find lots
 ** Settle lots
+*** Capital gains from sales should be entered as Entries against capital gains & revenue
+** Update version to 1.0.0 for release
+

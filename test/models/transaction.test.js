@@ -20,8 +20,9 @@ test('Transaction can instantiate a full set of props', (t) => {
     },
     utc: '2018-12-25T00:00:00.000Z',
     tags: ['test'],
+    party: 'Mr. Happy',
+    address: 12345,
     entries: [],
-    fees: [],
   };
   const tx = new Transaction(props);
   t.deepEqual(tx.toObject(), props);
@@ -32,6 +33,9 @@ test('Transaction with entries are loaded', (t) => {
     utc: '2018-01-01',
     account: 'test',
     entries: ['10 ETH income'],
+    details: {
+      zip: 'zap',
+    },
   });
   t.deepEqual(tx.account, { credit: 'test', debit: 'test' });
   t.is(tx.entries.length, 2);

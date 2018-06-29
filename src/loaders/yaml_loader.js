@@ -3,16 +3,13 @@ import fs from 'graceful-fs';
 import * as R from 'ramda';
 import path from 'path';
 import { safeLoad } from 'js-yaml';
+import { isRelativePath } from '../utils/files';
 
 const hasRef = R.has('$ref');
 const isObjectByKey = (obj, key) => R.is(Object, R.prop(key, obj));
 const objectTester = R.curry(isObjectByKey);
 
 let activeFS = fs;
-
-function isRelativePath(fname) {
-  return !R.startsWith('/', fname) && fname.slice(1, 2) !== ':';
-}
 
 export function setMockFS(mock) {
   activeFS = mock || fs;

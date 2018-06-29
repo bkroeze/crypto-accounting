@@ -7,10 +7,10 @@ assets:
     exchanges:
       children:
         binance:
-          alias: binance
+          aliases: ['binance']
           tags: ['crypto']
         coinbase:
-          alias: cb
+          aliases: ['cb']
           tags: ['crypto']
     wallets:
       children:

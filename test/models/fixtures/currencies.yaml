@@ -22,4 +22,4 @@ USD:
   tags: ['fiat']
   fiatDefault: true
   base: true
-  alias: ['$']
+  aliases: ['$']
