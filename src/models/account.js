@@ -6,6 +6,7 @@ import * as utils from './modelUtils';
 
 const DEFAULT_PROPS = {
   path: '',
+  balancing_account: '',
   aliases: [],
   note: '',
   tags: [],
@@ -59,6 +60,8 @@ export default class Account {
       const val = merged[key];
       if (key === 'children') {
         children = val;
+      } else if (key === 'balancing_account' && val !== '') {
+        this.balancingAccount = val;
       } else {
         this[key] = val;
       }
@@ -107,6 +110,16 @@ export default class Account {
       child = child.getAccount(path);
     }
     return child;
+  }
+
+  getBalancingAccount(key) {
+    if (this.balancingAccount) {
+      return this.balancingAccount;
+    }
+    if (this.parent) {
+      return this.parent.getBalancingAccount();
+    }
+    return '';
   }
 
   getEntries() {
@@ -166,6 +179,7 @@ export default class Account {
     return utils.stripFalsyExcept({
       path: this.path,
       aliases: this.aliases,
+      balancing_account: this.balancingAccount,
       note: this.note,
       tags: this.tags,
       portfolio: this.portfolio,

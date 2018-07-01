@@ -1,8 +1,6 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** Make sample QuickBooks COA
-*** With numbers for aliases
 ** Solve "where do assets sold to me by an exchange get credited?"
     Answer - designated equity account
 ** TODO Add journal.isValid()
@@ -22,3 +20,6 @@
 *** Capital gains from sales should be entered as Entries against capital gains & revenue
 ** Update version to 1.0.0 for release
 
+* Someday / Maybe
+** Make sample QuickBooks COA
+*** With numbers for aliases

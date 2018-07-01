@@ -5,11 +5,13 @@ assets:
         checking:
           tags: ['fiat']
     exchanges:
+      balancing_account: equity:internet
       children:
         binance:
           aliases: ['binance']
           tags: ['crypto']
         coinbase:
+          balancing_account: equity:test
           aliases: ['cb']
           tags: ['crypto']
     wallets:

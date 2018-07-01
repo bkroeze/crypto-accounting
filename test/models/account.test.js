@@ -225,3 +225,13 @@ test('getBalances can apply filters', (t) => {
   const threeDays = acct.getBalances(e => e.getUtc().isSameOrBefore(day3));
   t.is(threeDays.ETH.toFixed(3), '0.003');
 });
+
+test('Account finds and inherits balancingAccount', (t) => {
+  const journal = getJournal('journal_mining.yaml');
+  const ex = journal.getAccount('assets:exchanges');
+  t.is(ex.getBalancingAccount(), 'equity:internet');
+  const binance = journal.getAccount('assets:exchanges:binance');
+  t.is(binance.getBalancingAccount(), 'equity:internet');
+  const coinbase = journal.getAccount('cb');
+  t.is(coinbase.getBalancingAccount(), 'equity:test');
+});

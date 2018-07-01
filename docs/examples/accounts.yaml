@@ -4,27 +4,34 @@ assets:
       checking:
         tags: ['fiat']
     exchanges:
-      Binance:
-        tags: ['crypto']
-      Cobinhood:
-        tags: ['crypto']
-      CoinBase:
-        tags: ['crypto']
-      CryptoBridge:
-        tags: ['crypto']
-      Cryptopia:
-        tags: ['crypto']
-      IDEX:
-        tags: ['crypto']
-      KuCoin:
-        tags: ['crypto']
+      # This "balancing_account" entry causes virtual balancing entries to be made
+      # if needed when doing trades with these entities.  This allows for the transfer
+      # in of ETH or other currencies from an exchange.
+      # it is inherited by all children, but can be overridden by any sub-account
+      balancing_account: equity:internet
+      children:
+        Binance:
+          tags: ['crypto']
+        Cobinhood:
+          tags: ['crypto']
+        CoinBase:
+          tags: ['crypto']
+        CryptoBridge:
+          tags: ['crypto']
+        Cryptopia:
+          tags: ['crypto']
+        IDEX:
+          tags: ['crypto']
+        KuCoin:
+          tags: ['crypto']
     wallets:
-      BTC:
-        tags: ['crypto']
-      ETH:
-        tags: ['crypto']
-      USD:
-        tags: ['fiat']
+      children:
+        BTC:
+          tags: ['crypto']
+        ETH:
+          tags: ['crypto']
+        USD:
+          tags: ['fiat']
 
 expenses:
   children:
