@@ -235,3 +235,14 @@ test('Account finds and inherits balancingAccount', (t) => {
   const coinbase = journal.getAccount('cb');
   t.is(coinbase.getBalancingAccount(), 'equity:test');
 });
+
+test('Account finds and inherits virtual', (t) => {
+  const journal = getJournal('journal_mining.yaml');
+  const equity = journal.getAccount('equity');
+  t.true(equity.isVirtual());
+  const tv = journal.getAccount('equity:test');
+  t.true(tv.isVirtual());
+  const tnv = journal.getAccount('equity:testNotVirtual');
+  t.false(tnv.isVirtual());
+});
+

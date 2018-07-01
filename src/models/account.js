@@ -4,6 +4,8 @@ import { isFunction } from 'ramda-adjunct';
 
 import * as utils from './modelUtils';
 
+const INHERIT = '%INHERIT%';
+
 const DEFAULT_PROPS = {
   path: '',
   balancing_account: '',
@@ -13,6 +15,7 @@ const DEFAULT_PROPS = {
   portfolio: '',
   parent: null,
   children: {},
+  virtual: '%INHERIT%',
   details: {}, // additional key-value pairs
 };
 
@@ -175,6 +178,13 @@ export default class Account {
     return balances;
   }
 
+  isVirtual() {
+    if (this.virtual === INHERIT && this.parent) {
+      return this.parent.isVirtual();
+    }
+    return this.virtual;
+  }
+
   toObject() {
     return utils.stripFalsyExcept({
       path: this.path,
@@ -185,6 +195,7 @@ export default class Account {
       portfolio: this.portfolio,
       children: utils.objectValsToObject(this.children),
       entries: this.entries.map(utils.toObject),
+      virtual: this.virtual === INHERIT ? null : this.virtual,
       details: this.details,
     });
   }

@@ -23,9 +23,6 @@ assets:
         USD:
           tags: ['fiat']
 
-equity:
-  tags: ['fiat']
-
 expenses:
   children:
     exchange:
@@ -49,3 +46,14 @@ revenue:
         - crypto
         - dividend
         - regular-income
+
+equity:
+  note: This is a virtual account, and will not show up on reports unless explicitly requested.
+  virtual: true
+  children:
+    internet:
+      note: Where crypto lives
+    test:
+      note: for tests
+    testNotVirtual:
+      virtual: false

@@ -105,3 +105,12 @@ revenue:
         - crypto
         - dividend
         - regular-income
+
+equity:
+  note: This is a virtual account, and won't show up on reports unless explicitly requested.
+  virtual: true
+  children:
+    internet:
+      note: Where crypto lives
+    test:
+      note: for tests
