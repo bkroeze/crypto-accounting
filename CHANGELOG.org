@@ -4,6 +4,20 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Solve "where do assets sold to me by an exchange get credited?"
+   CLOSED: [2018-07-04 Wed 12:59]
+   - State "DONE"       from              [2018-07-04 Wed 12:59]
+    Answer - designated equity account
+** DONE Add virtual entries
+   CLOSED: [2018-07-04 Wed 13:01]
+   - State "DONE"       from              [2018-07-04 Wed 13:01]
+** DONE Add balancing entries
+   CLOSED: [2018-07-04 Wed 13:01]
+   - State "DONE"       from              [2018-07-04 Wed 13:01]
+** DONE Make getAccounts faster and easier to use
+   CLOSED: [2018-07-04 Wed 13:01]
+   - State "DONE"       from              [2018-07-04 Wed 13:01]
+
 ** DONE Add multiple aliases to accounts
    CLOSED: [2018-06-29 Fri 08:40]
    - State "DONE"       from              [2018-06-29 Fri 08:40]

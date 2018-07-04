@@ -1,6 +1,6 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
-import { isFunction } from 'ramda-adjunct';
+import * as RA from 'ramda-adjunct';
 
 import * as utils from './modelUtils';
 
@@ -42,6 +42,12 @@ function entrySorter(a, b) {
   if (a.addIndex > b.addIndex) {
     return 1;
   }
+  if (a.type === 'debit' && b.type === 'credit') {
+    return 1;
+  }
+  if (a.type === 'credit' && b.type === 'debit') {
+    return -1;
+  }
   return 0;
 }
 
@@ -81,6 +87,18 @@ export default class Account {
     this.children = Account.makeChildAccounts(this, children);
   }
 
+  static hasBalancingAccount(account) {
+    return !!account.getBalancingAccount();
+  }
+
+  static isVirtualAccount(account) {
+    return account.isVirtual();
+  }
+
+  static isNotVirtualAccount(account) {
+    return !account.isVirtual();
+  }
+
   static makeChildAccounts(parent, children) {
     const accounts = {};
     R.keysIn(children).forEach((path) => {
@@ -97,11 +115,39 @@ export default class Account {
   }
 
   /**
+   * Create virtual "balancing" entries (debits) for virtual accounts to bring
+   * the total books to 0
+   * @param {Account} account which will get the balancing entries
+   * @throws {ReferenceError} if balancing account is not found
+   */
+  createBalancingEntries(balancingAccount) {
+    try {
+      if (!balancingAccount) {
+        return false;
+      }
+      const entries = this.getEntries();
+      entries.forEach((entry)=> {
+        if (!entry.balancing && (!entry.pair || entry.currency !== entry.pair.currency)) {
+          //console.log(`Adding balancing ${this.path} -> ${balancingAccount.path}`);
+          //console.log(`entry: ${JSON.stringify(entry.toObject(), null, 2)}`);
+          balancingAccount.addEntry(entry.makeBalancingClone(balancingAccount));
+        }
+      });
+    } catch (e) {
+      if (R.is(ReferenceError, e)) {
+        console.log(e);
+        throw new ReferenceError(`Cannot find balancing account ${this.getBalancingAccount()}`);
+      }
+      throw e;
+    }
+  }
+
+  /**
    * Get a child account
    */
   getAccount(key) {
     let path = R.clone(key);
-    if (utils.isString(path)) {
+    if (RA.isString(path)) {
       path = path.split(':');
     }
     const nextChild = path.shift();
@@ -115,7 +161,7 @@ export default class Account {
     return child;
   }
 
-  getBalancingAccount(key) {
+  getBalancingAccount() {
     if (this.balancingAccount) {
       return this.balancingAccount;
     }
@@ -125,12 +171,20 @@ export default class Account {
     return '';
   }
 
-  getEntries() {
+  /**
+   * Get sorted entries.
+   * @param {String} typename for filter, no filtering if not given
+   * @return {Array<Entry>} Entries
+   */
+  getEntries(ofType) {
     if (this.dirty.entries) {
       this.entries.sort(entrySorter);
       this.dirty.entries = false;
     }
-    return this.entries;
+    if (!ofType) {
+      return this.entries;
+    }
+    return this.entries.filter(R.propEq('type', ofType));
   }
 
   /**
@@ -140,7 +194,7 @@ export default class Account {
   getBalances(entryFilter) {
     const balances = {};
     let entries = this.getEntries();
-    if (isFunction(entryFilter)) {
+    if (RA.isFunction(entryFilter)) {
       entries = entries.filter(entryFilter);
     }
     entries.forEach((e) => {
@@ -178,9 +232,27 @@ export default class Account {
     return balances;
   }
 
+  /**
+   * Test path to see if this account matches, or any of its parents.
+   * @param {String} path
+   * @return {Boolean} true if this or parent matches
+   */
+  inPath(path) {
+    if (this.path === path) {
+      return true;
+    }
+    if (this.parent) {
+      return this.parent.inPath(path);
+    }
+    return false;
+  }
+
   isVirtual() {
-    if (this.virtual === INHERIT && this.parent) {
-      return this.parent.isVirtual();
+    if (this.virtual === INHERIT) {
+      if (this.parent) {
+        return this.parent.isVirtual();
+      }
+      return false;
     }
     return this.virtual;
   }
@@ -203,15 +275,4 @@ export default class Account {
   toString() {
     return `Currency: ${this.id}`;
   }
-}
-
-/**
- * Make an accounts object from a yaml description
- */
-export function makeAccounts(raw) {
-  const accounts = {};
-  R.keysIn(raw).forEach((path) => {
-    accounts[path] = new Account(R.merge(raw[path], { path }));
-  });
-  return accounts;
 }

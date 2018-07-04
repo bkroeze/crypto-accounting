@@ -1,6 +1,8 @@
 import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
 
-import { makeAccounts } from './account';
+import Accounts from './accounts';
+import Account from './account';
 import { makeTransactions } from './transaction';
 import { makeCurrencies } from './currency';
 import * as utils from './modelUtils';
@@ -24,9 +26,10 @@ export default class Journal {
   constructor(props) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
     this.id = merged.id;
-    this.setAccounts(makeAccounts(merged.accounts));
-    this.setCurrencies(makeCurrencies(merged.currencies));
-    this.setTransactions(makeTransactions(merged.transactions));
+    this.accounts = new Accounts(merged.accounts);
+    this.currencies = makeCurrencies(merged.currencies);
+    this.transactions = makeTransactions(merged.transactions);
+    this.checkAndApply();
   }
 
   /**
@@ -34,11 +37,14 @@ export default class Journal {
    * information, and do so if conditions are met.
    */
   checkAndApply() {
-    if (this.transactions && this.transactions.length > 0 && !R.isEmpty(this.accounts)) {
-      const getter = R.curry(utils.getAccount)(this.accounts);
-      this.transactions.forEach((tx) => {
-        tx.applyToAccounts(getter);
+    const { accounts, transactions } = this;
+    if (accounts && !accounts.isEmpty() && transactions && transactions.length > 0) {
+      transactions.forEach((tx) => {
+        tx.applyToAccounts(accounts);
       });
+      accounts.createBalancingEntries();
+    } else {
+      console.log('not applying');
     }
   }
 
@@ -50,13 +56,7 @@ export default class Journal {
    * @throws {ReferenceError} if account not found
    */
   getAccount(key) {
-    if (key.indexOf(':') === -1) {
-      const aliasMap = utils.getAccountAliasMap(this.accounts);
-      if (R.has(key, aliasMap)) {
-        return aliasMap[key];
-      }
-    }
-    return utils.getAccount(this.accounts, key);
+    return this.accounts.get(key);
   }
 
   /**
@@ -66,8 +66,8 @@ export default class Journal {
    */
   getBalancesByAccount(entryFilter) {
     let balances = {};
-    Object.keys(this.accounts).forEach((account) => {
-      balances = R.merge(balances, this.accounts[account].getBalancesByAccount(entryFilter));
+    this.accounts.forEach((account) => {
+      balances = R.merge(balances, account.getBalancesByAccount(entryFilter));
     });
     return balances;
   }
@@ -75,45 +75,33 @@ export default class Journal {
   /**
    * Get balances of currencies, with account subtotals
    * @param {Function} filter to apply to entries
+   * @param {Boolean} includeVirtual [default false] 
    * @return {Object} balances keyed by currency
    */
-  getBalancesByCurrency(entryFilter) {
+  getBalancesByCurrency(entryFilter, includeVirtual=false) {
+    const { accounts } = this;
     const balances = {};
     const byAccount = this.getBalancesByAccount(entryFilter);
-    const getter = R.curry(utils.getAccount)(this.accounts);
 
     Object.keys(byAccount).forEach((accountPath) => {
-      const acct = getter(accountPath);
-      const acctBal = byAccount[accountPath];
-      Object.keys(acctBal).forEach((curr) => {
-        const quantity = acctBal[curr];
-        if (!quantity.eq(BIG_0)) {
-          if (!R.has(curr, balances)) {
-            balances[curr] = {quantity, accounts: [accountPath]};
-          } else {
-            balances[curr].quantity = balances[curr].quantity.plus(quantity);
-            balances[curr].accounts.push(accountPath);
+      const acct = accounts.get(accountPath);
+      if (includeVirtual || !acct.isVirtual()) {
+        const acctBal = byAccount[accountPath];
+        Object.keys(acctBal).forEach((curr) => {
+          const quantity = acctBal[curr];
+          if (!quantity.eq(BIG_0)) {
+            if (!R.has(curr, balances)) {
+              balances[curr] = {quantity, accounts: {[accountPath]: quantity}};
+            } else {
+              balances[curr].quantity = balances[curr].quantity.plus(quantity);
+              balances[curr].accounts[accountPath] = quantity;
+            }
           }
-        }
-      });
+        });
+      }
     });
 
     return balances;
-  }
-
-  setAccounts(accounts) {
-    this.accounts = accounts;
-    this.checkAndApply();
-  }
-
-  setCurrencies(currencies) {
-    this.currencies = currencies;
-    // this.checkAndApply();
-  }
-
-  setTransactions(transactions) {
-    this.transactions = transactions;
-    this.checkAndApply();
   }
 
   toObject() {

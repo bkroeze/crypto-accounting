@@ -47,7 +47,12 @@
 #       GIN: 0
 #     assets:banks:checking:
 #       USD: 1000
-
+#     (virtual)
+#     equity:
+#       USD: -500
+#     equity:internet
+#       ETH: -.1 ETH
+#       USD: -1000
 
 
 

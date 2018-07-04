@@ -1,8 +1,6 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** Solve "where do assets sold to me by an exchange get credited?"
-    Answer - designated equity account
 ** TODO Add journal.isValid()
 *** currencies all defined
 *** accounts declared

@@ -1,7 +1,7 @@
 import test from 'ava';
 import Moment from 'moment';
 
-import Account, { makeAccounts } from '../../src/models/account';
+import Account from '../../src/models/account';
 import Transaction from '../../src/models/transaction';
 import { objectValsToObject } from '../../src/models/modelUtils';
 import { journalFinder } from '../utils';
@@ -104,56 +104,6 @@ test('Account can instantiate a full set of props with multiple children levels'
   t.is(child111.parent, child11);
 });
 
-test('makeAccounts will load a raw object into an Accounts object', (t) => {
-  const raw = {
-    top1: {
-      children: {
-        a1: { note: 'test one' },
-        b1: { note: 'test two' },
-      },
-    },
-    top2: {
-      children: {
-        a2: {
-          children: {
-            aa2: { note: 'top2.a2.aa2' },
-          },
-        },
-      },
-    },
-  };
-  const accounts = makeAccounts(raw);
-  t.deepEqual(objectValsToObject(accounts), {
-    top1: {
-      path: 'top1',
-      children: {
-        a1: {
-          path: 'top1:a1',
-          note: 'test one',
-        },
-        b1: {
-          path: 'top1:b1',
-          note: 'test two',
-        },
-      },
-    },
-    top2: {
-      path: 'top2',
-      children: {
-        a2: {
-          path: 'top2:a2',
-          children: {
-            aa2: {
-              path: 'top2:a2:aa2',
-              note: 'top2.a2.aa2',
-            },
-          },
-        },
-      },
-    },
-  });
-});
-
 test('Accounts can get simple balances', (t) => {
   const account = new Account({ path: 'test' });
   const tx = new Transaction({
@@ -215,6 +165,15 @@ test('Accounts can get balances with or without children', (t) => {
 
 const getJournal = journalFinder(__dirname);
 
+test('getEntries can find types', (t) => {
+  const journal = getJournal('journal_mining.yaml');
+  const acct = journal.getAccount('assets:wallets:ETH');
+  console.log(JSON.stringify(acct.toObject(), null, 2));
+  const debits = acct.getEntries('debit');
+  t.is(debits.length, 5);
+});
+
+
 test('getBalances can apply filters', (t) => {
   const journal = getJournal('journal_mining.yaml');
   const acct = journal.getAccount('assets:wallets:ETH');
@@ -244,5 +203,15 @@ test('Account finds and inherits virtual', (t) => {
   t.true(tv.isVirtual());
   const tnv = journal.getAccount('equity:testNotVirtual');
   t.false(tnv.isVirtual());
+});
+
+test('Accounts can test their path', (t) => {
+  const journal = getJournal('journal_mining.yaml');
+  const binance = journal.getAccount('assets:exchanges:binance');
+
+  t.true(binance.inPath('assets'));
+  t.true(binance.inPath('assets:exchanges'));
+  t.true(binance.inPath('assets:exchanges:binance'));
+  t.false(binance.inPath('equity'));
 });
 

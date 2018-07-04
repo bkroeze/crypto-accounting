@@ -1,10 +1,3 @@
-yaml = require('js-yaml');
-fs   = require('fs');
-
-// Get document, or throw exception on error
-try {
-  var doc = yaml.safeLoadAll(fs.readFileSync('docs/examples/journal.yaml', 'utf8'));
-  console.log(JSON.stringify(doc, null, 2));
-} catch (e) {
-  console.log(e);
-}
+var loader = require('./src/loaders/loader');
+var journal = loader.loadJournalFromFilenameSync('journal_2.yaml', 'test/models/fixtures/');
+var acct = journal.getAccount('cb');

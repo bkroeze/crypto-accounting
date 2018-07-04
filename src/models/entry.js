@@ -1,5 +1,6 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
 import BigNumber from 'bignumber.js';
 import * as utils from './modelUtils';
 import { isNegativeString, positiveString } from '../utils/numbers';
@@ -14,6 +15,8 @@ const DEFAULT_PROPS = {
   note: '',
   shortcut: '',
   pair: null,
+  balancing: null,    // the other entry in a balancing pair
+  virtual: false,
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -27,7 +30,7 @@ export default class Entry {
    * @param {object} props
    */
   constructor(props = { }) {
-    const work = utils.isString(props) ? { shortcut: props } : props;
+    const work = RA.isString(props) ? { shortcut: props } : props;
     const merged = R.merge(DEFAULT_PROPS, getProps(work));
 
     if (!merged.transaction) {
@@ -90,8 +93,9 @@ export default class Entry {
     this.currency = currency;
   }
 
-  applyToAccount(accountGetter) {
-    accountGetter(this.getAccount()).addEntry(this);
+  applyToAccount(accounts) {
+    const acct = accounts.get(this.getAccountPath());
+    acct.addEntry(this);
   }
 
   equals(entry) {
@@ -108,8 +112,24 @@ export default class Entry {
     return this.account || this.transaction.account[this.type];
   }
 
+  getAccountPath() {
+    const account = this.getAccount();
+    if (RA.isString(account)) {
+      return account;
+    }
+    return account.path;
+  }
+
   getUtc() {
     return this.transaction.utc;
+  }
+
+  inAccount(path) {
+    const acct = this.getAccount();
+    if (RA.isString(acct)) {
+      return RA.contained(acct.split(':'), path);
+    }
+    return acct.inPath(path);
   }
 
   isBalanced() {
@@ -117,6 +137,23 @@ export default class Entry {
       this.pair.currency !== this.currency
         || this.pair.getAccount() !== this.getAccount()
     ));
+  }
+
+  isBalancingEntry() {
+    return this.balancing && this.virtual;
+  }
+
+  makeBalancingClone(account) {
+    this.balancing = new Entry({
+      transaction: this.transaction,
+      quantity: this.quantity,
+      currency: this.currency,
+      account,
+      type: this.type === 'credit' ? 'debit' : 'credit',
+      balancing: this,
+      virtual: true,
+    });
+    return this.balancing;
   }
 
   /**
@@ -147,10 +184,12 @@ export default class Entry {
       id: this.id,
       quantity: this.quantity.toFixed(8),
       currency: this.currency,
-      account: this.getAccount(),
+      account: this.getAccountPath(),
       type: this.type,
       pair: (!this.pair || shallow) ? null : this.pair.toObject(true),
+      balancing: (!this.balancing || shallow) ? null : this.balancing.toObject(true),
       note: this.note,
+      virtual: this.virtual,
     });
   }
 
@@ -167,7 +206,7 @@ export default class Entry {
 export function arrayToEntries(rawArray, entryType, transaction) {
   return rawArray.map((entry) => {
     let props;
-    if (utils.isString(entry)) {
+    if (RA.isString(entry)) {
       props = { shortcut: entry, transaction, type: entryType };
     } else {
       props = { ...entry, transaction, type: entryType };
@@ -301,10 +340,10 @@ export function shortcutToEntries(rawShortcut, transaction) {
  * @return {Array<Entry>} List of entries parsed
  */
 export function flexibleToEntries(raw, transaction) {
-  if (utils.isString(raw)) {
+  if (RA.isString(raw)) {
     return shortcutToEntries(raw, transaction);
   }
-  if (utils.isObject(raw)) {
+  if (RA.isObj(raw)) {
     return objectToEntries(raw, transaction);
   }
   console.error('Invalid Entry', raw);

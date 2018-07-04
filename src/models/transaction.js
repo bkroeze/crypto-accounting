@@ -1,9 +1,10 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
 import Moment from 'moment';
 
 import { makeEntries } from './entry';
-import { stripFalsyExcept, isString } from './modelUtils';
+import { stripFalsyExcept } from './modelUtils';
 
 // stub out fee descriptors
 const makeFees = fees => fees;
@@ -42,7 +43,7 @@ export default class Transaction {
     KEYS.forEach((key) => {
       if (key !== 'transactions' && key !== 'fees') {
         let val = merged[key];
-        if (key === 'account' && isString(val)) {
+        if (key === 'account' && RA.isString(val)) {
           val = { debit: val, credit: val };
         }
         this[key] = val;
@@ -58,8 +59,8 @@ export default class Transaction {
     this.fees = makeFees(fees);
   }
 
-  applyToAccounts(accountGetter) {
-    this.entries.forEach(e => e.applyToAccount(accountGetter));
+  applyToAccounts(accounts) {
+    this.entries.forEach(e => e.applyToAccount(accounts));
   }
 
   getCredits() {

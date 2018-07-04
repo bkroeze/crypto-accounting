@@ -3,5 +3,11 @@
     "env",
     "stage-2"
   ],
+  "env": {
+        "development": {
+            "sourceMaps": "inline",
+            "plugins": ["source-map-support"]
+        }
+    },
   "plugins": ["transform-decorators-legacy"]
 }

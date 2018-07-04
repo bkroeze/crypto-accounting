@@ -20,7 +20,7 @@ test('Can load a journal with just a list of accounts', (t) => {
   const mockfs = new MockFS({ 'journal.yaml': yaml });
   setMockFS(mockfs);
   const result = loadJournalFromFilenameSync('journal.yaml');
-  t.is(result.accounts.testa.note, 'test a');
+  t.is(result.accounts.get('testa').note, 'test a');
   setMockFS(null);
 });
 
@@ -41,7 +41,7 @@ test('Can load a journal with just a list accounts including children', (t) => {
   const mockfs = new MockFS({ 'journal.yaml': yaml });
   setMockFS(mockfs);
   const result = loadJournalFromFilenameSync('journal.yaml');
-  t.is(result.accounts.testa.note, 'test a');
+  t.is(result.accounts.get('testa').note, 'test a');
   t.is(result.getAccount('testa').path, 'testa');
   t.is(result.getAccount('testa:childa').note, 'child a');
   setMockFS(null);
@@ -113,7 +113,7 @@ test('Can load a full journal', (t) => {
   const mockfs = new MockFS({ 'journal.yaml': yaml });
   setMockFS(mockfs);
   const result = loadJournalFromFilenameSync('journal.yaml');
-  t.is(result.accounts.testa.note, 'test a');
+  t.is(result.accounts.get('testa').note, 'test a');
   t.is(result.currencies.ETH.name, 'Ethereum');
   t.is(result.transactions[0].entries.length, 2);
   t.is(result.transactions[0].size(), 2);
