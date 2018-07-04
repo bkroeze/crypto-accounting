@@ -43,8 +43,6 @@ export default class Journal {
         tx.applyToAccounts(accounts);
       });
       accounts.createBalancingEntries();
-    } else {
-      console.log('not applying');
     }
   }
 

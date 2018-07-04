@@ -11,6 +11,7 @@ const DEFAULT_PROPS = {
   quantity: null,
   currency: '',
   account: '',
+  lot: '',
   type: 'debit',
   note: '',
   shortcut: '',
@@ -124,6 +125,10 @@ export default class Entry {
     return this.transaction.utc;
   }
 
+  setLot(lot) {
+    this.lot = lot;
+  }
+
   inAccount(path) {
     const acct = this.getAccount();
     if (RA.isString(acct)) {
@@ -188,6 +193,7 @@ export default class Entry {
       type: this.type,
       pair: (!this.pair || shallow) ? null : this.pair.toObject(true),
       balancing: (!this.balancing || shallow) ? null : this.balancing.toObject(true),
+      lot: !this.lot ? null : this.lot.toObject(),
       note: this.note,
       virtual: this.virtual,
     });

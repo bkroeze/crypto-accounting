@@ -6,6 +6,9 @@ const DEFAULT_PROPS = {
   id: '',
   name: '',
   note: '',
+  base: '',
+  fiatDefault: false,
+  tags: [],
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -15,7 +18,7 @@ const getProps = R.pick(KEYS);
 export default class Currency {
   /**
    * Construct using a `props` object that must include "id", and may also
-   * include "name" and "notes"
+   * include "name" and "note"
    * @param {object} props
    */
   constructor(props = {}) {
@@ -39,6 +42,9 @@ export default class Currency {
       id: this.id,
       name: this.name,
       note: this.note,
+      base: this.base,
+      fiatDefault: this.fiatDefault,
+      tags: this.tags,
     });
   }
 

@@ -1,6 +1,10 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
+** TODO Find lots
+*** Add multiple entries (for bucketing)
+*** Add disbursement entries
+*** Add isClosed
 ** TODO Add journal.isValid()
 *** currencies all defined
 *** accounts declared
@@ -10,10 +14,9 @@
 *** Add basic CLI framework
 *** Can I do this via JSONRPC call?
 **** add dotenv for JSONRPC auth
-** Figure out a plan for fees
+** Figure out a way to specify commissions in a transaction
 ** Add fees to tests
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
-** find lots
 ** Settle lots
 *** Capital gains from sales should be entered as Entries against capital gains & revenue
 ** Update version to 1.0.0 for release

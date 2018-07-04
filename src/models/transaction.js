@@ -27,8 +27,8 @@ const KEYS = R.keysIn(DEFAULT_PROPS);
 
 const getProps = R.pick(KEYS);
 const allBalanced = R.all(e => e.isBalanced());
-const getDebits = R.reject(R.propEq('type', 'debit'));
-const getCredits = R.reject(R.propEq('type', 'credit'));
+const getDebits = R.filter(R.propEq('type', 'debit'));
+const getCredits = R.filter(R.propEq('type', 'credit'));
 
 export default class Transaction {
   /**
@@ -64,11 +64,11 @@ export default class Transaction {
   }
 
   getCredits() {
-    return getDebits(this.entries);
+    return getCredits(this.entries);
   }
 
   getDebits() {
-    return getCredits(this.entries);
+    return getDebits(this.entries);
   }
 
   isBalanced() {

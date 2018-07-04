@@ -5,6 +5,8 @@ import * as RA from 'ramda-adjunct';
 import * as utils from './modelUtils';
 
 const INHERIT = '%INHERIT%';
+const CREDIT = 'credit';
+const DEBIT = 'debit';
 
 const DEFAULT_PROPS = {
   path: '',
@@ -42,10 +44,10 @@ function entrySorter(a, b) {
   if (a.addIndex > b.addIndex) {
     return 1;
   }
-  if (a.type === 'debit' && b.type === 'credit') {
+  if (a.type === DEBIT && b.type === CREDIT) {
     return 1;
   }
-  if (a.type === 'credit' && b.type === 'debit') {
+  if (a.type === CREDIT && b.type === DEBIT) {
     return -1;
   }
   return 0;
@@ -59,9 +61,11 @@ export default class Account {
    */
   constructor(props = {}) {
     this.dirty = {
-      entries: false,
+      entries: true,
+      lots: true,
     };
     this.entries = []; // not constructed using "props" at this point
+    this.lots = [];
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
     let children = [];
 
@@ -180,11 +184,20 @@ export default class Account {
     if (this.dirty.entries) {
       this.entries.sort(entrySorter);
       this.dirty.entries = false;
+      this.dirty.lots = true;
+      this.lots = null;
     }
     if (!ofType) {
       return this.entries;
     }
     return this.entries.filter(R.propEq('type', ofType));
+  }
+
+  getLots() {
+    if (this.dirty.lots) {
+      this.lots = Lot.makeLots(this.getEntries(DEBIT));
+    }
+    return this.lots;
   }
 
   /**

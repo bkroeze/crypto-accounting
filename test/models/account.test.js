@@ -168,7 +168,7 @@ const getJournal = journalFinder(__dirname);
 test('getEntries can find types', (t) => {
   const journal = getJournal('journal_mining.yaml');
   const acct = journal.getAccount('assets:wallets:ETH');
-  console.log(JSON.stringify(acct.toObject(), null, 2));
+  //console.log(JSON.stringify(acct.toObject(), null, 2));
   const debits = acct.getEntries('debit');
   t.is(debits.length, 5);
 });
@@ -215,3 +215,4 @@ test('Accounts can test their path', (t) => {
   t.false(binance.inPath('equity'));
 });
 
+test.todo('Account.getLots');
