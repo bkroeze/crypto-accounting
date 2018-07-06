@@ -6,6 +6,8 @@ import Transaction from '../../src/models/transaction';
 import { objectValsToObject } from '../../src/models/modelUtils';
 import { journalFinder } from '../utils';
 
+const getJournal = journalFinder(__dirname);
+
 test('Account can instantiate via props', (t) => {
   const a = new Account({ path: 'test' });
   t.is(a.path, 'test');
@@ -163,8 +165,6 @@ test('Accounts can get balances with or without children', (t) => {
   t.is(byAccount['test:child'].ETH.toFixed(0), '-1');
 });
 
-const getJournal = journalFinder(__dirname);
-
 test('getEntries can find types', (t) => {
   const journal = getJournal('journal_mining.yaml');
   const acct = journal.getAccount('assets:wallets:ETH');
@@ -215,4 +215,26 @@ test('Accounts can test their path', (t) => {
   t.false(binance.inPath('equity'));
 });
 
-test.todo('Account.getLots');
+test('Account.getLots with no entries', (t) => {
+  const journal = getJournal('journal_2.yaml');
+  const ex = journal.getAccount('assets:exchanges');
+  const lots = ex.getLots(journal.currencies);
+  t.is(lots.length, 0);
+});
+
+test('Account.getLots with entries', (t) => {
+  const journal = getJournal('journal_2.yaml');
+  const coinbase = journal.getAccount('cb');
+  const lots = coinbase.getLots(journal.currencies);
+  t.is(lots.length, 1);
+  t.is(lots[0].total.toFixed(1), '1.1');
+});
+
+test('getLots should not create lots unless it is a transfer in', (t) => {
+  const journal = getJournal('journal_2.yaml');
+  const acct = journal.getAccount('binance');
+  const lots = acct.getLots(journal.currencies);
+  t.is(lots.length, 3);
+  t.deepEqual(lots.map(l => [l.currency, l.total.toFixed(0)]),
+              [['GIN', '40'], ['ETH', '1'], ['ETH', '1']]);
+});

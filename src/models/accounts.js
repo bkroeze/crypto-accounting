@@ -1,6 +1,7 @@
 import * as R from 'ramda';
 
 import Account from './account';
+import Lot from './lot';
 import * as utils from './modelUtils';
 
 /**
@@ -23,6 +24,7 @@ function getAccountPathMap(accounts) {
 export default class Accounts {
   constructor(accounts) {
     this.accounts = accounts;
+    this.lots = [];
     R.keysIn(accounts).forEach((path) => {
       accounts[path] = new Account(R.merge(accounts[path], { path }));
     });
@@ -72,7 +74,6 @@ export default class Accounts {
    * Get a list of all accounts and subaccounts matching the filter, in a flat list
    * @param {Function} filter
    */
-
   filter(accountFilter) {
     const accounts = this.asList();
     if (!accountFilter) {
@@ -108,6 +109,15 @@ export default class Accounts {
     return this.filter(Account.hasBalancingAccount)
   }
 
+  getLots(currencies, force) {
+    if (force || this.lots.length === 0) {
+      const lots = R.flatten(this.map(a => a.getLots(currencies, force)));
+      lots.sort(Lot.compare);
+      this.lots = lots;
+    }
+    return this.lots;
+  }
+
   getPath(path) {
     if (R.isEmpty(this.paths)) {
       this.calculatePaths();
@@ -117,6 +127,18 @@ export default class Accounts {
 
   isEmpty() {
     return R.isEmpty(this.accounts);
+  }
+
+  /**
+   * Apply a function to all accounts.
+   * @param {Function} filter
+   */
+  map(fn) {
+    const accounts = this.asList();
+    if (!fn) {
+      return accounts;
+    }
+    return accounts.map(fn);
   }
 
   toObject() {

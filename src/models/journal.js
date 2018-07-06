@@ -102,6 +102,10 @@ export default class Journal {
     return balances;
   }
 
+  getLots(force) {
+    return this.accounts.getLots(this.currencies, force)
+  }
+
   toObject() {
     return utils.stripFalsyExcept({
       id: this.id,

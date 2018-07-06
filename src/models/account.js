@@ -3,6 +3,7 @@ import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 
 import * as utils from './modelUtils';
+import Lot from './lot';
 
 const INHERIT = '%INHERIT%';
 const CREDIT = 'credit';
@@ -187,15 +188,28 @@ export default class Account {
       this.dirty.lots = true;
       this.lots = null;
     }
-    if (!ofType) {
-      return this.entries;
+    const {entries} = this;
+    if (!entries) {
+      return [];
     }
-    return this.entries.filter(R.propEq('type', ofType));
+    if (R.isEmpty(entries)) {
+      return [];
+    }
+    if (!ofType) {
+      return entries;
+    }
+    return entries.filter(e => e.type === ofType);
   }
 
-  getLots() {
+  getLots(currencies) {
+    if (this.isVirtual()) {
+      console.log(`skipping virtual ${this.path}`);
+      return [];
+    }
     if (this.dirty.lots) {
-      this.lots = Lot.makeLots(this.getEntries(DEBIT));
+      const debits = this.getEntries(DEBIT);
+      this.lots = Lot.makeLots(currencies, debits);
+      //console.log('made lots:', this.lots.map(l => l.toObject(true)));
     }
     return this.lots;
   }

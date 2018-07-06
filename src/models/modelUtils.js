@@ -30,6 +30,15 @@ export function toObject(work) {
   return work.toObject();
 }
 
+/**
+ * Simple helper for classes with "toObject" functions
+ * @param {Object} work
+ * @return {Object} work.toObject() results;
+ */
+export function toShallowObject(work) {
+  return work.toObject(true);
+}
+
 export function objectValsToObject(obj) {
   const work = {};
   R.keysIn(obj).forEach((key) => {

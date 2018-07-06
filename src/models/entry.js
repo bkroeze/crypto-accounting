@@ -153,7 +153,7 @@ export default class Entry {
       transaction: this.transaction,
       quantity: this.quantity,
       currency: this.currency,
-      account,
+      account: account.path,
       type: this.type === 'credit' ? 'debit' : 'credit',
       balancing: this,
       virtual: true,
@@ -193,7 +193,7 @@ export default class Entry {
       type: this.type,
       pair: (!this.pair || shallow) ? null : this.pair.toObject(true),
       balancing: (!this.balancing || shallow) ? null : this.balancing.toObject(true),
-      lot: !this.lot ? null : this.lot.toObject(),
+      lot: shallow || !this.lot ? null : this.lot.toObject(true),
       note: this.note,
       virtual: this.virtual,
     });

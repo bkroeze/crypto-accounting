@@ -1,5 +1,8 @@
 import test from 'ava';
 import Accounts from '../../src/models/accounts';
+import { journalFinder } from '../utils';
+
+const getJournal = journalFinder(__dirname);
 
 test('Accounts.paths is flat', (t) => {
   const accounts = {
@@ -135,4 +138,19 @@ test('loading a raw object into an Accounts object', (t) => {
       },
     },
   });
+});
+
+test('getLots', (t) => {
+  const journal = getJournal('journal_2.yaml');
+  const lots = journal.accounts.getLots(journal.currencies)
+  //console.log(lots.map(l => l.toObject(true)));
+  t.is(lots.length, 4);
+  t.deepEqual(lots.map(l => [l.account, l.currency, l.total.toFixed(1)]),
+              [
+                ['assets:exchanges:coinbase', 'ETH', '1.1'],
+                ['assets:exchanges:binance', 'GIN', '40.0'],
+                ['assets:exchanges:binance', 'ETH', '1.0'],
+                ['assets:exchanges:binance', 'ETH', '1.0']
+              ]);
+
 });
