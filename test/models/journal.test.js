@@ -112,12 +112,26 @@ test('Testing with virtual entries', (t) => {
 
 test('Lots have remaining balances calculated', (t) => {
   const journal = getJournalFromYaml('journal_2.yaml');
-  const lots = journal.accounts.getLots(journal.currencies)
+  const lots = journal.accounts.getLots(journal.currencies);
   // console.log('lots');
   // lots.forEach((l) => {
   //   console.log(l.toObject());
   // });
   t.is(lots.length, 4);
   const remaining = lots[0].getRemaining();
-  t.is(remaining.toFixed(1), '0.0');
+  t.is(lots[0].getRemaining().toFixed(1), '0.0');
+  t.is(lots[0].currency, 'ETH');
+  t.is(lots[1].getRemaining().toFixed(1), '0.0');
+  t.is(lots[1].currency, 'GIN');
+  t.is(lots[2].getRemaining().toFixed(1), '0.0');
+  t.is(lots[2].currency, 'ETH');
+  t.is(lots[3].getRemaining().toFixed(1), '0.1');
+  t.is(lots[3].currency, 'ETH');
+});
+
+test('Can get lots by currency', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const lots = journal.getLotsByCurrency();
+  t.is(lots.ETH.length, 3);
+  t.is(lots.GIN.length, 1);
 });

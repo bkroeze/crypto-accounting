@@ -1,6 +1,8 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
+** TODO Add LIFO
+** TODO Add more lot tests
 ** TODO Add journal.isValid()
 *** currencies all defined
 *** accounts declared

@@ -106,6 +106,18 @@ export default class Journal {
     return this.accounts.getLots(this.currencies, force)
   }
 
+  getLotsByCurrency(force) {
+    const lots = {};
+    this.getLots(force).forEach(l => {
+      if (!R.has(l.currency, lots)) {
+        lots[l.currency] = [l];
+      } else {
+        lots[l.currency].push(l);
+      }
+    });
+    return lots;
+  }
+
   toObject() {
     return utils.stripFalsyExcept({
       id: this.id,
