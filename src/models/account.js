@@ -3,11 +3,8 @@ import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 
 import * as utils from './modelUtils';
+import { CREDIT, DEBIT, INHERIT } from './constants';
 import Lot from './lot';
-
-const INHERIT = '%INHERIT%';
-const CREDIT = 'credit';
-const DEBIT = 'debit';
 
 const DEFAULT_PROPS = {
   path: '',
@@ -27,7 +24,7 @@ const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
 
 function getBalanceQty(e) {
-  return e.type === 'debit' ? e.quantity : e.quantity.times(-1);
+  return e.type === DEBIT ? e.quantity : e.quantity.times(-1);
 }
 
 function entrySorter(a, b) {
@@ -201,15 +198,14 @@ export default class Account {
     return entries.filter(e => e.type === ofType);
   }
 
-  getLots(currencies) {
+  getLots(currencies, force) {
     if (this.isVirtual()) {
-      console.log(`skipping virtual ${this.path}`);
       return [];
     }
-    if (this.dirty.lots) {
+    if (this.dirty.lots || force) {
       const debits = this.getEntries(DEBIT);
       this.lots = Lot.makeLots(currencies, debits);
-      //console.log('made lots:', this.lots.map(l => l.toObject(true)));
+      // console.log('made lots:', this.lots.map(l => l.toObject(true)));
     }
     return this.lots;
   }

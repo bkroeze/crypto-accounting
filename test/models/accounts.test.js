@@ -145,7 +145,7 @@ test('getLots', (t) => {
   const lots = journal.accounts.getLots(journal.currencies)
   //console.log(lots.map(l => l.toObject(true)));
   t.is(lots.length, 4);
-  t.deepEqual(lots.map(l => [l.account, l.currency, l.total.toFixed(1)]),
+  t.deepEqual(lots.map(l => [l.account, l.currency, l.getTotal().toFixed(1)]),
               [
                 ['assets:exchanges:coinbase', 'ETH', '1.1'],
                 ['assets:exchanges:binance', 'GIN', '40.0'],

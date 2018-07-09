@@ -2,7 +2,12 @@ import * as R from 'ramda';
 
 import Account from './account';
 import Lot from './lot';
+import { CREDIT, DEBIT } from './constants';
 import * as utils from './modelUtils';
+import { BIG_0 } from '../utils/numbers';
+
+const fifoSearch = R.find;
+const lifoSearch = R.findLast;
 
 /**
  * Get all accounts, keyed by full path
@@ -109,10 +114,48 @@ export default class Accounts {
     return this.filter(Account.hasBalancingAccount)
   }
 
-  getLots(currencies, force) {
+  getLots(currencies, force, lifo) {
+    const search = lifo ? lifoSearch : fifoSearch;
     if (force || this.lots.length === 0) {
       const lots = R.flatten(this.map(a => a.getLots(currencies, force)));
       lots.sort(Lot.compare);
+      // we've got lots, now go through credits for all accounts and apply
+
+      const isTrade = (entry) => {
+        if (entry.isBalancingEntry()) {
+          return false;
+        }
+        const currency = currencies[entry.currency];
+        //console.log(`isNotFiat: ${entry.currency}, ${currency ? 'found' : 'missing'}`);
+        if (!currency || currency.isFiat()) {
+          return false;
+        }
+        return entry.pair && entry.currency !== entry.pair.currency;
+      };
+
+      const applyCreditToLots = (c) => {
+        const findLot = l => (l.currency === c.currency && l.isOpen());
+        let qty = c.quantity;
+        while (qty.gt(BIG_0)) {
+          // console.log('-- qty now', qty.toFixed(2));
+          const lot = search(findLot, lots);
+          if (!lot) {
+            throw new Error(`Ran out of lots looking for ${c.currency}`);
+          }
+          // console.log('going to add to', lot.toObject(true));
+          const applied = lot.addCredit(c, qty);
+          // console.log(`applied ${applied.toFixed(2)}`);
+          qty = qty.minus(applied);
+        }
+      };
+
+      this.asList()
+        .filter(Account.isNotVirtualAccount)
+        .forEach((a) => {
+          a.getEntries(CREDIT)
+            .filter(isTrade)
+            .forEach(applyCreditToLots);
+        });
       this.lots = lots;
     }
     return this.lots;

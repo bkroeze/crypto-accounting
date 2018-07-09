@@ -27,7 +27,7 @@ export function stripFalsyExcept(toStrip, butNot = []) {
  * @return {Object} work.toObject() results;
  */
 export function toObject(work) {
-  return work.toObject();
+  return (work && R.has(toObject, work)) ? work.toObject() : null;
 }
 
 /**
@@ -36,7 +36,7 @@ export function toObject(work) {
  * @return {Object} work.toObject() results;
  */
 export function toShallowObject(work) {
-  return work.toObject(true);
+  return (work && R.has(toObject, work)) ? work.toObject(true) : null;
 }
 
 export function objectValsToObject(obj) {

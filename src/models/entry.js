@@ -3,7 +3,8 @@ import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 import BigNumber from 'bignumber.js';
 import * as utils from './modelUtils';
-import { isNegativeString, positiveString } from '../utils/numbers';
+import { BIG_0, addBigNumbers, isNegativeString, positiveString } from '../utils/numbers';
+import { CREDIT, DEBIT } from './constants';
 
 const DEFAULT_PROPS = {
   id: null,
@@ -11,8 +12,8 @@ const DEFAULT_PROPS = {
   quantity: null,
   currency: '',
   account: '',
-  lot: '',
-  type: 'debit',
+  lots: [],
+  type: DEBIT,
   note: '',
   shortcut: '',
   pair: null,
@@ -24,6 +25,12 @@ const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
 const hasCredits = R.has('credits');
 const hasDebits = R.has('debits');
+
+function getLotCredits(currency, lots) {
+  return lots
+    .filter(R.propEq('currency', currency))
+    .map(R.prop('applied'));
+}
 
 export default class Entry {
   /**
@@ -115,18 +122,41 @@ export default class Entry {
 
   getAccountPath() {
     const account = this.getAccount();
+    if (!account) {
+      console.error('no account!', this);
+      throw new Error('invalid account path');
+    }
     if (RA.isString(account)) {
       return account;
     }
     return account.path;
   }
 
+  getLotCreditRemaining() {
+    if (this.TYPE === DEBIT) {
+      return BIG_0;
+    }
+
+    const credits = addBigNumbers(getLotCredits(this.currency, this.lots));
+    return this.quantity.minus(credits);
+  }
+
   getUtc() {
     return this.transaction.utc;
   }
 
-  setLot(lot) {
-    this.lot = lot;
+  setLot(lot, maxQuantity) {
+    let applied = this.quantity;
+    if (this.type === CREDIT) {
+      const remainingLot = lot.getRemaining();
+      const remainingCredit = this.getLotCreditRemaining();
+      applied = BigNumber.min(remainingCredit, remainingLot, maxQuantity);
+      //console.log(`rl = ${remainingLot.toFixed(2)} rc = ${remainingCredit.toFixed(2)} max = ${maxQuantity.toFixed(2)} ap = ${applied}`);
+    }
+    if (applied.gt(BIG_0)) {
+      this.lots.push({lot, applied});
+    }
+    return applied;
   }
 
   inAccount(path) {
@@ -154,7 +184,7 @@ export default class Entry {
       quantity: this.quantity,
       currency: this.currency,
       account: account.path,
-      type: this.type === 'credit' ? 'debit' : 'credit',
+      type: this.type === CREDIT ? DEBIT : CREDIT,
       balancing: this,
       virtual: true,
     });
@@ -193,7 +223,7 @@ export default class Entry {
       type: this.type,
       pair: (!this.pair || shallow) ? null : this.pair.toObject(true),
       balancing: (!this.balancing || shallow) ? null : this.balancing.toObject(true),
-      lot: shallow || !this.lot ? null : this.lot.toObject(true),
+      lots: shallow ? null : describeLots(this.lots),
       note: this.note,
       virtual: this.virtual,
     });
@@ -202,6 +232,15 @@ export default class Entry {
   toString() {
     return `Entry (${this.type}): ${this.quantity.toFixed(8)} ${this.currency} ${this.getAccount()}`;
   }
+}
+
+function describeLots(wrappers) {
+  return  wrappers.map((wrapper) => {
+    return {
+      ...wrapper.lot,
+      applied: wrapper.applied.toFixed(8),
+    }
+  });
 }
 
 /**
@@ -231,10 +270,10 @@ export function objectToEntries(raw, transaction) {
    */
   let entries = [];
   if (hasDebits(raw)) {
-    entries = arrayToEntries(raw.debits, 'debit', transaction);
+    entries = arrayToEntries(raw.debits, DEBIT, transaction);
   }
   if (hasCredits(raw)) {
-    entries = R.concat(entries, arrayToEntries(raw.credits, 'credit', transaction));
+    entries = R.concat(entries, arrayToEntries(raw.credits, CREDIT, transaction));
   }
 
   return entries;
@@ -317,12 +356,12 @@ export function shortcutToEntries(rawShortcut, transaction) {
     debit = new Entry({
       shortcut: shortcuts[debitIx].join(' '),
       transaction,
-      type: 'debit',
+      type: DEBIT,
     });
     credit = new Entry({
       shortcut: shortcuts[creditIx].join(' '),
       transaction,
-      type: 'credit',
+      type: CREDIT,
     });
 
     if (negativeFirst) {

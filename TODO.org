@@ -1,10 +1,6 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** TODO Find lots
-*** Add multiple entries (for bucketing)
-*** Add disbursement entries
-*** Add isClosed
 ** TODO Add journal.isValid()
 *** currencies all defined
 *** accounts declared

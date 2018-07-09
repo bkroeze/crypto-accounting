@@ -227,7 +227,7 @@ test('Account.getLots with entries', (t) => {
   const coinbase = journal.getAccount('cb');
   const lots = coinbase.getLots(journal.currencies);
   t.is(lots.length, 1);
-  t.is(lots[0].total.toFixed(1), '1.1');
+  t.is(lots[0].getTotal().toFixed(1), '1.1');
 });
 
 test('getLots should not create lots unless it is a transfer in', (t) => {
@@ -235,6 +235,6 @@ test('getLots should not create lots unless it is a transfer in', (t) => {
   const acct = journal.getAccount('binance');
   const lots = acct.getLots(journal.currencies);
   t.is(lots.length, 3);
-  t.deepEqual(lots.map(l => [l.currency, l.total.toFixed(0)]),
+  t.deepEqual(lots.map(l => [l.currency, l.getTotal().toFixed(0)]),
               [['GIN', '40'], ['ETH', '1'], ['ETH', '1']]);
 });

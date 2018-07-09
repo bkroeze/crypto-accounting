@@ -4,6 +4,13 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Find lots
+   CLOSED: [2018-07-08 Sun 18:32]
+   - State "DONE"       from "TODO"       [2018-07-08 Sun 18:32]
+*** Add multiple entries (for bucketing)
+*** Add disbursement entries
+*** Add isClosed
+
 ** DONE Solve "where do assets sold to me by an exchange get credited?"
    CLOSED: [2018-07-04 Wed 12:59]
    - State "DONE"       from              [2018-07-04 Wed 12:59]

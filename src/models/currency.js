@@ -1,5 +1,6 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
 import * as utils from './modelUtils';
 
 const DEFAULT_PROPS = {
@@ -37,6 +38,14 @@ export default class Currency {
     }
   }
 
+  hasTag(tag) {
+    return RA.contained(this.tags, tag);
+  }
+
+  isFiat() {
+    return this.fiatDefault || this.hasTag('fiat');
+  }
+
   toObject() {
     return utils.stripFalsyExcept({
       id: this.id,
@@ -63,3 +72,4 @@ export function makeCurrencies(raw) {
   });
   return currencies;
 }
+

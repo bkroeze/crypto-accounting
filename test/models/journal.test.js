@@ -109,3 +109,15 @@ test('Testing with virtual entries', (t) => {
   t.true(byCurrency.USD.quantity.eq(BIG_0));
   t.true(byCurrency.ETH.quantity.eq(BIG_0));
 });
+
+test('Lots have remaining balances calculated', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const lots = journal.accounts.getLots(journal.currencies)
+  // console.log('lots');
+  // lots.forEach((l) => {
+  //   console.log(l.toObject());
+  // });
+  t.is(lots.length, 4);
+  const remaining = lots[0].getRemaining();
+  t.is(remaining.toFixed(1), '0.0');
+});

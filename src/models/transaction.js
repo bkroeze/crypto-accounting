@@ -5,6 +5,7 @@ import Moment from 'moment';
 
 import { makeEntries } from './entry';
 import { stripFalsyExcept } from './modelUtils';
+import { CREDIT, DEBIT } from './constants';
 
 // stub out fee descriptors
 const makeFees = fees => fees;
@@ -27,8 +28,8 @@ const KEYS = R.keysIn(DEFAULT_PROPS);
 
 const getProps = R.pick(KEYS);
 const allBalanced = R.all(e => e.isBalanced());
-const getDebits = R.filter(R.propEq('type', 'debit'));
-const getCredits = R.filter(R.propEq('type', 'credit'));
+const getDebits = R.filter(R.propEq('type', DEBIT));
+const getCredits = R.filter(R.propEq('type', CREDIT));
 
 export default class Transaction {
   /**
