@@ -102,8 +102,13 @@ export default class Journal {
     return balances;
   }
 
-  getLots(force) {
-    return this.accounts.getLots(this.currencies, force)
+  /**
+   * Get the lots for this journal.
+   * @param {boolean} force - always recalculate if true
+   * @param {boolean} lifo - override default fifo ordering if true
+   */
+  getLots(force, lifo) {
+    return this.accounts.getLots(this.currencies, force, lifo);
   }
 
   getLotsByCurrency(force) {

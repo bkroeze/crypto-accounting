@@ -4,6 +4,14 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Make a wallet-export converter
+   CLOSED: [2018-07-13 Fri 16:17]
+   - State "DONE"       from              [2018-07-13 Fri 16:17]
+
+** DONE Add LIFO
+   CLOSED: [2018-07-12 Thu 18:29]
+   - State "DONE"       from "TODO"       [2018-07-12 Thu 18:29]
+
 ** DONE Find lots
    CLOSED: [2018-07-08 Sun 18:32]
    - State "DONE"       from "TODO"       [2018-07-08 Sun 18:32]

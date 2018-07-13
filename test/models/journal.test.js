@@ -118,7 +118,6 @@ test('Lots have remaining balances calculated', (t) => {
   //   console.log(l.toObject());
   // });
   t.is(lots.length, 4);
-  const remaining = lots[0].getRemaining();
   t.is(lots[0].getRemaining().toFixed(1), '0.0');
   t.is(lots[0].currency, 'ETH');
   t.is(lots[1].getRemaining().toFixed(1), '0.0');
@@ -128,6 +127,25 @@ test('Lots have remaining balances calculated', (t) => {
   t.is(lots[3].getRemaining().toFixed(1), '0.1');
   t.is(lots[3].currency, 'ETH');
 });
+
+test('Lots have remaining balances calculated in lifo ordering too', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const lots = journal.accounts.getLots(journal.currencies, false, true);
+  // console.log('lots');
+  // lots.forEach((l) => {
+  //   console.log(l.toObject());
+  // });
+  t.is(lots.length, 4);
+  t.is(lots[0].getRemaining().toFixed(1), '0.1');
+  t.is(lots[0].currency, 'ETH');
+  t.is(lots[1].getRemaining().toFixed(1), '0.0');
+  t.is(lots[1].currency, 'GIN');
+  t.is(lots[2].getRemaining().toFixed(1), '0.0');
+  t.is(lots[2].currency, 'ETH');
+  t.is(lots[3].getRemaining().toFixed(1), '0.0');
+  t.is(lots[3].currency, 'ETH');
+});
+
 
 test('Can get lots by currency', (t) => {
   const journal = getJournalFromYaml('journal_2.yaml');

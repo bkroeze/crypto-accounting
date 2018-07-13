@@ -14,7 +14,7 @@ export function stripFalsyExcept(toStrip, butNot = []) {
 
   Object.keys(toStrip).forEach((key) => {
     const val = toStrip[key];
-    if (R.indexOf(key, butNot) > -1 || (val && RA.isNotEmpty(val))) {
+    if (R.indexOf(key, butNot) > -1 || (val && RA.isNotEmpty(val) && RA.isNotUndefined(val))) {
       stripped[key] = val;
     }
   });
