@@ -3,7 +3,7 @@ import * as R from 'ramda';
 import Account from './account';
 import Lot from './lot';
 import { CREDIT, DEBIT } from './constants';
-import * as utils from './modelUtils';
+import * as utils from '../utils/models';
 import { BIG_0 } from '../utils/numbers';
 
 const fifoSearch = R.find;

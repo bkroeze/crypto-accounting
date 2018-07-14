@@ -3,7 +3,7 @@ import { contained } from 'ramda-adjunct';
 import path from 'path';
 
 import { getFS } from './common';
-import { splitAndTrim } from '../models/modelUtils';
+import { splitAndTrim } from '../utils/models';
 import Transaction from '../models/transaction';
 import { isRelativePath } from '../utils/files';
 

@@ -1,7 +1,9 @@
+name: Example Journal
 accounts:
   $ref: ./accounts.yaml
 currencies:
   $ref: ./currencies.yaml
 transactions:
   $ref: ./transactions.yaml
-
+prices:
+  $ref: ./prices.yaml

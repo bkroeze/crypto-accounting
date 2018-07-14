@@ -1,6 +1,6 @@
 import Moment from 'moment';
 import * as R from 'ramda';
-import * as utils from './modelUtils';
+import * as utils from '../utils/models';
 import { CREDIT, DEBIT } from './constants';
 import { addBigNumbers, BIG_0 } from '../utils/numbers';
 

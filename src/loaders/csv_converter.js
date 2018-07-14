@@ -4,7 +4,7 @@ import * as R from 'ramda';
 import { safeDump } from 'js-yaml';
 
 import { CLEARED } from '../models/constants'
-import * as utils from '../models/modelUtils';
+import * as utils from '../utils/models';
 import { getFS } from './common';
 
 const onlyConfirmed = R.propEq('Confirmed', 'true');

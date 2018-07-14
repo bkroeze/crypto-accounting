@@ -2,7 +2,7 @@
 import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 import BigNumber from 'bignumber.js';
-import * as utils from './modelUtils';
+import * as utils from '../utils/models';
 import { BIG_0, addBigNumbers, isNegativeString, positiveString } from '../utils/numbers';
 import { CREDIT, DEBIT } from './constants';
 

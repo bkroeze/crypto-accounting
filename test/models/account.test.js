@@ -3,7 +3,6 @@ import Moment from 'moment';
 
 import Account from '../../src/models/account';
 import Transaction from '../../src/models/transaction';
-import { objectValsToObject } from '../../src/models/modelUtils';
 import { journalFinder } from '../utils';
 
 const getJournal = journalFinder(__dirname);

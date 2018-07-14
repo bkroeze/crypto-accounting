@@ -1,5 +1,5 @@
 import test from 'ava';
-import { stripFalsyExcept } from '../../src/models/modelUtils';
+import * as utils from '../../src/utils/models';
 
 test('StripFalsy simple', (t) => {
   const raw = {
@@ -9,7 +9,7 @@ test('StripFalsy simple', (t) => {
     that: 1,
     theother: 'x',
   };
-  const stripped = stripFalsyExcept(raw);
+  const stripped = utils.stripFalsyExcept(raw);
   t.deepEqual(stripped, {
     that: 1,
     theother: 'x',
@@ -24,7 +24,7 @@ test('StripFalsy with exceptions', (t) => {
     that: 1,
     theother: 'x',
   };
-  const stripped = stripFalsyExcept(raw, ['bad', 'empty', 'missing']);
+  const stripped = utils.stripFalsyExcept(raw, ['bad', 'empty', 'missing']);
   t.deepEqual(stripped, {
     bad: 0,
     empty: '',

@@ -1,7 +1,7 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
 import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
-import * as utils from './modelUtils';
+import * as utils from '../utils/models';
 
 const DEFAULT_PROPS = {
   id: '',

@@ -21,6 +21,10 @@ export function stripFalsyExcept(toStrip, butNot = []) {
   return stripped;
 }
 
+export function stripFalsy(toStrip) {
+  return stripFalsyExcept(toStrip, []);
+}
+
 /**
  * Simple helper for classes with "toObject" functions
  * @param {Object} work
@@ -28,6 +32,10 @@ export function stripFalsyExcept(toStrip, butNot = []) {
  */
 export function toObject(work) {
   return (work && R.has(toObject, work)) ? work.toObject() : null;
+}
+
+export function arrayToObjects(work, shallow) {
+  return work.map(x => x.toObject(shallow));
 }
 
 /**

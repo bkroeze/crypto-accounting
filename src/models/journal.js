@@ -5,7 +5,7 @@ import Accounts from './accounts';
 import Account from './account';
 import { makeTransactions } from './transaction';
 import { makeCurrencies } from './currency';
-import * as utils from './modelUtils';
+import * as utils from '../utils/models';
 import { BIG_0 } from '../utils/numbers';
 
 const DEFAULT_PROPS = {

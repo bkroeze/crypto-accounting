@@ -2,7 +2,7 @@
 import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 
-import * as utils from './modelUtils';
+import * as utils from '../utils/models';
 import { CREDIT, DEBIT, INHERIT } from './constants';
 import Lot from './lot';
 

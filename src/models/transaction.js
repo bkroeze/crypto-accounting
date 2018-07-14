@@ -4,7 +4,7 @@ import * as RA from 'ramda-adjunct';
 import Moment from 'moment';
 
 import { makeEntries } from './entry';
-import { stripFalsyExcept } from './modelUtils';
+import * as utils from '../utils/models';
 import { CREDIT, DEBIT } from './constants';
 
 // stub out fee descriptors
@@ -81,7 +81,7 @@ export default class Transaction {
   }
 
   toObject() {
-    return stripFalsyExcept({
+    return utils.stripFalsyExcept({
       id: this.id,
       note: this.note,
       account: this.account,
