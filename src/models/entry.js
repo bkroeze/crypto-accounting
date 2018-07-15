@@ -35,7 +35,8 @@ function getLotCredits(currency, lots) {
 export default class Entry {
   /**
    * Construct using a `props` object that must include the parent transaction
-   * @param {object} props
+   * @param {String|Object} shortcut string, or full object
+   * @throws {TypeError} if props cannot be parsed
    */
   constructor(props = { }) {
     const work = RA.isString(props) ? { shortcut: props } : props;
@@ -43,12 +44,18 @@ export default class Entry {
 
     if (!merged.transaction) {
       console.error(`Invalid Entry, must have a 'transaction', got: ${JSON.stringify(props)}`);
-      throw new Error('Invalid Entry, must have a parent transaction');
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_TERM,
+        'Invalid Entry, must have a parent transaction');
     }
 
     if (merged.shortcut && (merged.currency || merged.amount)) {
       console.error(`Invalid Entry, can't specify a shortcut and currency/amount: ${JSON.stringify(props)}`);
-      throw new Error('Invalid Entry, conflicting shortcut');
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_TERM,
+        'Invalid Entry, conflicting shortcut');
     }
 
     KEYS.forEach((key) => {
@@ -60,18 +67,28 @@ export default class Entry {
     }
 
     if (R.isNil(this.quantity)) {
-      throw new Error('Invalid Entry, no Quantity');
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_TERM,
+        'Invalid Entry, no Quantity');
     }
 
     // doesn't hurt to re-wrap if it isn't already a BigNumber
     this.quantity = new BigNumber(this.quantity);
   }
 
+  /**
+   * Parse and apply the shortcut to this object.
+   * @param {String} shortcut
+   */
   applyShortcut(shortcut) {
     const parts = utils.splitAndTrim(shortcut);
     // minimal shortcut: "10 BTC"
     if (parts.length !== 2 && parts.length !== 3) {
-      throw new Error(`Invalid shortcut: ${shortcut}`);
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        `Invalid shortcut: ${shortcut}`);
     }
     // determine which part is the currency
     let quantity;
@@ -85,11 +102,17 @@ export default class Entry {
     }
 
     if (numeric1 && numeric2) {
-      throw new Error(`Invalid Posting, two numeric in shortcut: ${shortcut}`);
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        `Invalid Posting, two numeric in shortcut: ${shortcut}`);
     }
 
     if (!(numeric1 || numeric2)) {
-      throw new Error(`Invalid Posting, no numeric in shortcut: ${shortcut}`);
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        `Invalid Posting, no numeric in shortcut: ${shortcut}`);
     }
 
     if (numeric1) {
@@ -120,11 +143,18 @@ export default class Entry {
     return this.account || this.transaction.account[this.type];
   }
 
+  /**
+   * Return the account path
+   * @throws {TypeError} if none
+   */
   getAccountPath() {
     const account = this.getAccount();
     if (!account) {
       console.error('no account!', this);
-      throw new Error('invalid account path');
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        'invalid account path');
     }
     if (RA.isString(account)) {
       return account;
@@ -289,13 +319,17 @@ export function objectToEntries(raw, transaction) {
  *
  * @param {String} shortcut
  * @return {Object<string: Array<Posting>>} postings, keyed by "credits" and "debits"
+ * @throws {TypeError} if shortcut cannot be parsed
  * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
  */
 export function shortcutToEntries(rawShortcut, transaction) {
   const parts = utils.splitAndTrim(rawShortcut);
   // minimal shortcut: "10 BTC"
   if (parts.length < 2) {
-    throw new Error(`Invalid shortcut: ${rawShortcut}`);
+    throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        `Invalid shortcut: ${rawShortcut}`);
   }
 
   let accum = [];
@@ -316,7 +350,10 @@ export function shortcutToEntries(rawShortcut, transaction) {
     }
   }
   if (accum.length < 2) {
-    throw new Error(`Invalid shortcut: ${rawShortcut}`);
+    throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        `Invalid shortcut: ${rawShortcut}`);
   }
   shortcuts.push(accum);
 
@@ -392,7 +429,10 @@ export function flexibleToEntries(raw, transaction) {
     return objectToEntries(raw, transaction);
   }
   console.error('Invalid Entry', raw);
-  throw new Error('Invalid Entry: cannot parse');
+  throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        'Invalid Entry: cannot parse');
 }
 
 /**

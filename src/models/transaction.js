@@ -53,7 +53,10 @@ export default class Transaction {
 
     if (!this.utc) {
       console.error(`Invalid Transaction, must have a 'utc', got: ${JSON.stringify(props)}`);
-      throw new Error('Invalid Transaction, must have a utc');
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_TERM,
+        'Invalid Transaction, must have a utc');
     }
     this.utc = Moment(this.utc);
     this.entries = makeEntries(entries, this);

@@ -2,8 +2,9 @@ import * as R from 'ramda';
 
 import Account from './account';
 import Lot from './lot';
-import { CREDIT, DEBIT } from './constants';
+import { CREDIT, DEBIT, ERRORS } from './constants';
 import * as utils from '../utils/models';
+import { makeError } from '../utils/errors';
 import { BIG_0 } from '../utils/numbers';
 
 const fifoSearch = R.find;
@@ -91,6 +92,12 @@ export default class Accounts {
     Object.values(this.accounts).forEach(fn);
   }
 
+  /**
+   * Get an account by alias or key
+   * @param {String} alias or key
+   * @return {Account} account
+   * @throws {ReferenceError} if not found
+   */
   get(key) {
     const path = (R.is(Array, key)) ? key.join(':') : key;
     let val = this.getAlias(path);
@@ -140,7 +147,7 @@ export default class Accounts {
           // console.log('-- qty now', qty.toFixed(2));
           const lot = search(findLot, lots);
           if (!lot) {
-            throw new Error(`Ran out of lots looking for ${c.currency}`);
+            throw makeError(RangeError, ERRORS.EXHAUSTED, `Ran out of lots looking for ${c.currency}`);
           }
           // console.log('going to add to', lot.toObject(true));
           const applied = lot.addCredit(c, qty);

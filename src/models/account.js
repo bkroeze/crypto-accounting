@@ -3,7 +3,8 @@ import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 
 import * as utils from '../utils/models';
-import { CREDIT, DEBIT, INHERIT } from './constants';
+import { CREDIT, DEBIT, INHERIT, ERRORS } from './constants';
+import { makeError } from '../utils/errors';
 import Lot from './lot';
 
 const DEFAULT_PROPS = {
@@ -56,6 +57,7 @@ export default class Account {
    * Construct using a `props` object that must include "path", and may also
    * include "name" and "notes"
    * @param {object} props
+   * @Throws {TypeError} if 'path' param is missing
    */
   constructor(props = {}) {
     this.dirty = {
@@ -80,7 +82,10 @@ export default class Account {
 
     if (!this.path) {
       console.error(`Invalid Account, must have a path, got: ${JSON.stringify(props)}`);
-      throw new Error('Invalid Account, must have a path');
+      throw makeError(
+        TypeError,
+        ERROR.MISSING_PARAMETER,
+        'Invalid Account, must have a path');
     }
     if (this.parent) {
       this.path = `${this.parent.path}:${this.path}`;
@@ -138,14 +143,20 @@ export default class Account {
     } catch (e) {
       if (R.is(ReferenceError, e)) {
         console.log(e);
-        throw new ReferenceError(`Cannot find balancing account ${this.getBalancingAccount()}`);
+        throw makeError(
+          ReferenceError,
+          ERRORS.MISSING_ACCOUNT,
+          `Cannot find balancing account ${balancingAccount}`);
       }
       throw e;
     }
   }
 
   /**
-   * Get a child account
+   * Get a child account.
+   * @param {String} key
+   * @return {Account} account
+   * @throws {ReferenceError} if child not found
    */
   getAccount(key) {
     let path = R.clone(key);
@@ -155,7 +166,10 @@ export default class Account {
     const nextChild = path.shift();
     let child = this.children[nextChild];
     if (!child) {
-      throw new ReferenceError(`Account Not Found: ${this.path}:${nextChild}`);
+      throw makeError(
+        ReferenceError,
+        ERRORS.MISSING_ACCOUNT,
+        `Account Not Found: ${this.path}:${nextChild}`);
     }
     if (path.length > 0) {
       child = child.getAccount(path);

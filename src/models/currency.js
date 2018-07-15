@@ -31,7 +31,10 @@ export default class Currency {
 
     if (!this.id) {
       console.error(`Invalid Currency, must have an id, got: ${JSON.stringify(props)}`);
-      throw new Error('Invalid Currency, must have an id');
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_TERM,
+        'Invalid Currency, must have an id');
     }
     if (!this.name) {
       this.name = this.id;
