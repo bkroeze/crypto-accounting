@@ -1,0 +1,12 @@
+# example price history file using shortcuts and long versions
+# shortcut format is:
+# utc currency base rate
+- 2018-01-01 BTC/USD 10000
+- 2018-01-01 ETH/USD 600
+- utc: 2018-01-02
+  base: BTC
+  quote: USD
+  rate: 10010
+- utc: 2018-06-07
+  key: BTC/USD
+  rate: 6500
