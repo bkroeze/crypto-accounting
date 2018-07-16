@@ -7,7 +7,7 @@ const DEFAULT_PROPS = {
   id: '',
   name: '',
   note: '',
-  base: '',
+  translation: '',
   fiatDefault: false,
   tags: [],
 };
@@ -54,7 +54,7 @@ export default class Currency {
       id: this.id,
       name: this.name,
       note: this.note,
-      base: this.base,
+      translation: this.translation,
       fiatDefault: this.fiatDefault,
       tags: this.tags,
     });

@@ -159,3 +159,15 @@ test('Loads Price History', (t) => {
   const price = journal.pricehistory.findPrice('2018-06-18', 'GIN', 'BTC');
   t.deepEqual(price.rate.toFixed(5), '0.00011');
 });
+
+test('Finds translation currencies', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  t.deepEqual(journal.getTranslationCurrencies(), [journal.currencies.BTC, journal.currencies.ETH]);
+});
+
+test('Finds prices', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const price = journal.findPrice('2018-06-17', 'GIN', 'USD');
+  t.is(price.rate.toFixed(2), '0.70');
+});
+

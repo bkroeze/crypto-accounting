@@ -55,6 +55,25 @@ export default class Journal {
   }
 
   /**
+   * Find the nearest price for the given currency pair
+   * @param {String|Moment|Object} utc
+   * @param {String} base currency
+   * @param {String} quote currency - the rate refers to this many of this currency for 1 base
+   * @param {Array} currencies to use as bases for derivation
+   * @param {Integer} within seconds (no limit if not given or null)
+   * @return {PairPrice}
+   * @throws {RangeError} with code "ERR_DISTANCE" if nearest is out of range
+   * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
+   */
+  findPrice(utc, base, quote, transCurrencies=null, within=null) {
+    const translations = transCurrencies ?
+          transCurrencies
+          :
+          this.getTranslationCurrencies().map(R.prop('id'));
+    return this.pricehistory.findPrice(utc, base, quote, translations, within)
+  }
+
+  /**
    * Get an account from this Journal by following the key path, splitting on
    * colons.
    * @param {String} key such as "assets:banks"
@@ -129,6 +148,10 @@ export default class Journal {
       }
     });
     return lots;
+  }
+
+  getTranslationCurrencies() {
+    return R.valuesIn(this.currencies).filter(c => c.translation);
   }
 
   toObject() {

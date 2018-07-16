@@ -1,7 +1,7 @@
 BTC:
   name: Bitcoin
   tags: ['crypto']
-  base: true
+  translation: true
 CAN:
   name: Canya
   tags: ['crypto', 'erc-20', 'ICO']
@@ -9,7 +9,7 @@ CAN:
 ETH:
   name: Ethereum
   tags: ['crypto']
-  base: true
+  translation: true
 GIN:
   name: GIN
   tags: ['crypto', 'mn']
