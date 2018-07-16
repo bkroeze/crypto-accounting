@@ -153,3 +153,9 @@ test('Can get lots by currency', (t) => {
   t.is(lots.ETH.length, 3);
   t.is(lots.GIN.length, 1);
 });
+
+test('Loads Price History', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const price = journal.pricehistory.findPrice('2018-06-18', 'GIN', 'BTC');
+  t.deepEqual(price.rate.toFixed(5), '0.00011');
+});

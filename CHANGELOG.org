@@ -4,6 +4,11 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Build the price history converter
+   CLOSED: [2018-07-15 Sun 21:41]
+   - State "DONE"       from              [2018-07-15 Sun 21:41]
+*** Possibly use a sorted-array to make for fast date searches
+    https://github.com/javascript/sorted-array
 ** DONE Make a wallet-export converter
    CLOSED: [2018-07-13 Fri 16:17]
    - State "DONE"       from              [2018-07-13 Fri 16:17]

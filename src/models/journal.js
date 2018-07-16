@@ -3,6 +3,7 @@ import * as RA from 'ramda-adjunct';
 
 import Accounts from './accounts';
 import Account from './account';
+import PriceHistory from './pricehistory';
 import { makeTransactions } from './transaction';
 import { makeCurrencies } from './currency';
 import * as utils from '../utils/models';
@@ -10,9 +11,11 @@ import { BIG_0 } from '../utils/numbers';
 
 const DEFAULT_PROPS = {
   id: null,
+  name: null,
   accounts: {},
   currencies: {},
   transactions: [],
+  pricehistory: null,
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -26,9 +29,14 @@ export default class Journal {
   constructor(props) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
     this.id = merged.id;
+    if (!this.id) {
+      this.id === merged.name;
+    }
+    this.name = merged.name;
     this.accounts = new Accounts(merged.accounts);
     this.currencies = makeCurrencies(merged.currencies);
     this.transactions = makeTransactions(merged.transactions);
+    this.pricehistory = new PriceHistory(merged.pricehistory);
     this.checkAndApply();
   }
 
@@ -129,6 +137,7 @@ export default class Journal {
       accounts: utils.objectValsToObject(this.accounts),
       currencies: utils.objectValsToObject(this.currencies),
       transactions: this.transactions.map(utils.toObject),
+      priceHistory: this.priceHistory.toObject(),
     });
   }
 }

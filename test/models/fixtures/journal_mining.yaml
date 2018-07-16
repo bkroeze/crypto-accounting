@@ -6,4 +6,6 @@ currencies:
   $ref: ./currencies.yaml
 transactions:
   $ref: ./transactions_mining.yaml
+pricehistory:
+  $ref: ./pricehistory_mining.yaml
 

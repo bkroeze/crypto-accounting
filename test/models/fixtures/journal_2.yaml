@@ -1,9 +1,9 @@
-meta:
-  note: Test Fixture
+name: Test Fixture 2
 accounts:
   $ref: ./accounts.yaml
 currencies:
   $ref: ./currencies.yaml
 transactions:
   $ref: ./transactions_2.yaml
-
+pricehistory:
+  $ref: ./pricehistory_2.yaml

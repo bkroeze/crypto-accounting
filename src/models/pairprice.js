@@ -5,7 +5,7 @@ import Moment from 'moment';
 import BigNumber from 'bignumber.js';
 
 import * as utils from '../utils/models';
-import { BIG_0 } from '../utils/numbers';
+import { BIG_0, BIG_1 } from '../utils/numbers';
 import { ERRORS } from './constants';
 import { makeError } from '../utils/errors';
 
@@ -65,6 +65,7 @@ export default class PairPrice {
    * @throws {TypeError} if shortcut cannot be parsed
    */
   constructor(props) {
+    this.translationChain = null;
     const converted = parseProps(props);
     const merged = R.merge(DEFAULT_PROPS, getProps(converted));
 
@@ -106,7 +107,24 @@ export default class PairPrice {
     return this.quote < other.quote ? -1 : 1;
   }
 
-  toObject() {
+  /**
+   * Create a reversed version of this price
+   */
+  invert() {
+    return new PairPrice({
+      base: this.quote,
+      quote: this.base,
+      utc: this.utc.toISOString(),
+      rate: BIG_1.div(this.rate),
+      note: this.note,
+    });
+  }
+
+  setTranslationChain(prices) {
+    this.translationChain = prices;
+  }
+
+  toObject(shallow) {
     return utils.stripFalsy({
       pair: this.pair,
       utc: this.utc.toISOString(),
@@ -114,6 +132,8 @@ export default class PairPrice {
       quote: this.quote,
       rate: this.rate.toFixed(8),
       note: this.note,
+      derived: this.derived,
+      translationChain: utils.arrayToObjects(this.translationChain || [], shallow)
     });
   }
 

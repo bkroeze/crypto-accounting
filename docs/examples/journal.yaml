@@ -5,5 +5,5 @@ currencies:
   $ref: ./currencies.yaml
 transactions:
   $ref: ./transactions.yaml
-prices:
+pricehistory:
   $ref: ./prices.yaml
