@@ -1,5 +1,6 @@
 import Moment from 'moment';
 import * as R from 'ramda';
+import Entry from './entry';
 import * as utils from '../utils/models';
 import { CREDIT, DEBIT } from './constants';
 import { addBigNumbers, BIG_0 } from '../utils/numbers';
@@ -75,6 +76,39 @@ export default class Lot {
       this.debits.push({debit, applied});
     }
     return this.getRemaining();
+  }
+
+  /**
+   * Calculate capital gains entries from exercised credits.
+   */
+  getCapitalGains(pricehistory, account, fiat, transCurrencies=['BTC', 'ETH'], within=null) {
+    const purchasePrice = pricehistory.findPrice(this.utc, this.currency, fiat, transCurrencies, within);
+    return this.credits.map(creditWrapper => {
+      const {credit, applied} = creditWrapper;
+      //const salePrice = utcPrice(credit.utc);
+      const ratio = credit.quantity.eq(applied) ? 1 : credit.quantity.div(applied);
+      const salePrice = credit.pair.quantity.times(ratio);
+      // this assumes that the pair currency is fiat
+      // need to correct for that.
+//       console.log('--------------');
+//       console.log(credit.toObject());
+//       console.log(`qty: ${credit.quantity}
+// purchasePrice: ${purchasePrice.rate.toFixed(2)}
+// salePrice: ${salePrice}
+// applied: ${applied}
+// `);
+      return new Entry({
+        transaction: credit.transaction,
+        account,
+        currency: fiat,
+        quantity: salePrice.minus(purchasePrice.rate.times(applied)),
+        type: DEBIT,
+      });
+    });
+  }
+
+  getPurchasePrice(getPrice, account, fiat, transCurrencies=['BTC', 'ETH']) {
+    return getPrice(this.utc, this.currency, fiat, transCurrencies);
   }
 
   getRemaining() {
