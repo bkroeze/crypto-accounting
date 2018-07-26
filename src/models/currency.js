@@ -2,6 +2,8 @@
 import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 import * as utils from '../utils/models';
+import { ERRORS } from './constants';
+import { makeError } from '../utils/errors';
 
 const DEFAULT_PROPS = {
   id: '',
@@ -34,7 +36,8 @@ export default class Currency {
       throw makeError(
         TypeError,
         ERRORS.INVALID_TERM,
-        'Invalid Currency, must have an id');
+        'Invalid Currency, must have an id'
+      );
     }
     if (!this.name) {
       this.name = this.id;
@@ -75,4 +78,3 @@ export function makeCurrencies(raw) {
   });
   return currencies;
 }
-

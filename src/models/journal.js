@@ -1,8 +1,6 @@
 import * as R from 'ramda';
-import * as RA from 'ramda-adjunct';
 
 import Accounts from './accounts';
-import Account from './account';
 import PriceHistory from './pricehistory';
 import { makeTransactions } from './transaction';
 import { makeCurrencies } from './currency';
@@ -30,7 +28,7 @@ export default class Journal {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
     this.id = merged.id;
     if (!this.id) {
-      this.id === merged.name;
+      this.id = merged.name;
     }
     this.name = merged.name;
     this.accounts = new Accounts(merged.accounts);
@@ -65,12 +63,9 @@ export default class Journal {
    * @throws {RangeError} with code "ERR_DISTANCE" if nearest is out of range
    * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
    */
-  findPrice(utc, base, quote, transCurrencies=null, within=null) {
-    const translations = transCurrencies ?
-          transCurrencies
-          :
-          this.getTranslationCurrencies().map(R.prop('id'));
-    return this.pricehistory.findPrice(utc, base, quote, translations, within)
+  findPrice(utc, base, quote, transCurrencies = null, within = null) {
+    const translations = transCurrencies || this.getTranslationCurrencies().map(R.prop('id'));
+    return this.pricehistory.findPrice(utc, base, quote, translations, within);
   }
 
   /**
@@ -100,10 +95,10 @@ export default class Journal {
   /**
    * Get balances of currencies, with account subtotals
    * @param {Function} filter to apply to entries
-   * @param {Boolean} includeVirtual [default false] 
+   * @param {Boolean} includeVirtual [default false]
    * @return {Object} balances keyed by currency
    */
-  getBalancesByCurrency(entryFilter, includeVirtual=false) {
+  getBalancesByCurrency(entryFilter, includeVirtual = false) {
     const { accounts } = this;
     const balances = {};
     const byAccount = this.getBalancesByAccount(entryFilter);
@@ -116,7 +111,7 @@ export default class Journal {
           const quantity = acctBal[curr];
           if (!quantity.eq(BIG_0)) {
             if (!R.has(curr, balances)) {
-              balances[curr] = {quantity, accounts: {[accountPath]: quantity}};
+              balances[curr] = { quantity, accounts: { [accountPath]: quantity } };
             } else {
               balances[curr].quantity = balances[curr].quantity.plus(quantity);
               balances[curr].accounts[accountPath] = quantity;
@@ -140,7 +135,7 @@ export default class Journal {
 
   getLotsByCurrency(force) {
     const lots = {};
-    this.getLots(force).forEach(l => {
+    this.getLots(force).forEach((l) => {
       if (!R.has(l.currency, lots)) {
         lots[l.currency] = [l];
       } else {

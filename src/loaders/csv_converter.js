@@ -1,9 +1,11 @@
+/* eslint no-unused-vars: off */
 import parse from 'csv-parse/lib/sync';
 import Moment from 'moment';
 import * as R from 'ramda';
 import { safeDump } from 'js-yaml';
 
-import { CLEARED } from '../models/constants'
+import { CLEARED } from '../models/constants';
+
 import * as utils from '../utils/models';
 import { getFS } from './common';
 
@@ -11,7 +13,7 @@ const onlyConfirmed = R.propEq('Confirmed', 'true');
 const findAmount = R.find(R.startsWith('Amount'));
 
 export function parseWalletCSV(data, currency, debit, credit) {
-  var parsed = parse(data, {columns: true});
+  const parsed = parse(data, { columns: true });
   let amountField;
   const toObject = (row) => {
     if (!amountField) {
@@ -34,11 +36,11 @@ export function parseWalletCSV(data, currency, debit, credit) {
     .map(toObject);
 }
 
-const keys = ['id', 'account', 'utc', 'status', 'party', 'note', 'address']
+const keys = ['id', 'account', 'utc', 'status', 'party', 'note', 'address'];
 
 function toYaml(data) {
   const work = [];
-  keys.forEach(key => {
+  keys.forEach((key) => {
     if (R.has(key, data)) {
       const prefix = work.length === 0 ? '-' : ' ';
       work.push(`${prefix} ${key}: ${data[key]}`);
@@ -46,7 +48,7 @@ function toYaml(data) {
   });
   if (data.entries && data.entries.length > 0) {
     work.push('  entries:');
-    data.entries.forEach(entry => {
+    data.entries.forEach((entry) => {
       work.push(`    - ${entry}`);
     });
   } else {
@@ -79,15 +81,15 @@ function byDate(a, b) {
 
 export function mergeTransactionLists(a, b) {
   const ids = {};
-  a.forEach(tx => {
+  a.forEach((tx) => {
     if (tx.id) {
       ids[tx.id] = true;
     }
   });
   const work = R.clone(a);
-  b.forEach(tx => {
+  b.forEach((tx) => {
     if (!ids[tx.id]) {
-      work.push(tx);;
+      work.push(tx);
     }
   });
   work.sort(byDate);

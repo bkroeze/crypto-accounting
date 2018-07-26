@@ -12,13 +12,12 @@ import { makeError } from '../utils/errors';
 function ensureMoment(work) {
   if (Moment.isMoment(work)) {
     return work;
-  } else if(RA.isString(work)) {
+  } if (RA.isString(work)) {
     return Moment(work);
-  } else if(RA.isObj(work) && R.has('utc', work)) {
+  } if (RA.isObj(work) && R.has('utc', work)) {
     return ensureMoment(work.utc);
-  } else {
-    throw makeError(TypeError, ERRORS.INVALID_TERM, `Invalid search term: ${work}`);
   }
+  throw makeError(TypeError, ERRORS.INVALID_TERM, `Invalid search term: ${work}`);
 }
 
 export class CurrencyPrices extends SortedArray {
@@ -40,14 +39,14 @@ export class CurrencyPrices extends SortedArray {
    * @param {Integer} within seconds (no limit if not given or null)
    * @return {PairPrice} nearest price
    */
-  findNearest(utc, within=null) {
+  findNearest(utc, within = null) {
     if (this.length === 0) {
       throw makeError(RangeError, ERRORS.EMPTY, 'Price list empty');
     }
     const searchUtc = ensureMoment(utc);
     let diff = Number.MAX_SAFE_INTEGER;
     let lo = 0;
-    let hi = this.length-1;
+    let hi = this.length - 1;
     let mid;
     let currentDiff;
     let currentDate;
@@ -82,8 +81,8 @@ export class CurrencyPrices extends SortedArray {
   }
 
   search(utc) {
-    const searchUtc = ensureUtc(utc);
-    const ix = super.search(work);
+    const searchUtc = Moment(utc);
+    const ix = super.search(searchUtc);
     if (ix === -1) {
       throw new RangeError(ERRORS.NOT_FOUND);
     }
@@ -98,13 +97,15 @@ export class CurrencyPrices extends SortedArray {
 export default class PriceHistory {
   constructor(pricelist) {
     this.pairs = {};
-    pricelist && pricelist.forEach(p => {
-      const price = new PairPrice(p);
-      if (!R.has(price.pair, this.pairs)) {
-        this.pairs[price.pair] = new CurrencyPrices();
-      }
-      this.pairs[price.pair].insert(price)
-    });
+    if (pricelist) {
+      pricelist.forEach((p) => {
+        const price = new PairPrice(p);
+        if (!R.has(price.pair, this.pairs)) {
+          this.pairs[price.pair] = new CurrencyPrices();
+        }
+        this.pairs[price.pair].insert(price);
+      });
+    }
   }
 
   /**
@@ -118,7 +119,7 @@ export default class PriceHistory {
    * @throws {RangeError} with code "ERR_DISTANCE" if nearest is out of range
    * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
    */
-  derivePrice(utc, base, quote, transCurrencies=['BTC', 'ETH'], within=null) {
+  derivePrice(utc, base, quote, transCurrencies = ['BTC', 'ETH'], within = null) {
     if (transCurrencies) {
       const chain = [];
       let quoteStatus;
@@ -146,7 +147,7 @@ export default class PriceHistory {
           utc: dates.averageDates(chain[0].utc, chain[1].utc),
           base,
           quote,
-          rate: chain[0].rate.times(chain[1].rate)
+          rate: chain[0].rate.times(chain[1].rate),
         });
         price.setTranslationChain(chain);
         return price;
@@ -167,7 +168,7 @@ export default class PriceHistory {
    * @throws {RangeError} with code "ERR_DISTANCE" if nearest is out of range
    * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
    */
-  findPrice(utc, base, quote, transCurrencies=['BTC','ETH'], within=null) {
+  findPrice(utc, base, quote, transCurrencies = ['BTC', 'ETH'], within = null) {
     const status = this.hasPair(base, quote);
     if (status === -1) {
       return this.getPair(quote, base).findNearest(utc).invert();
@@ -202,9 +203,9 @@ export default class PriceHistory {
   }
 
   toObject() {
-    rv = {};
-    R.keysIn(this.pairs).forEach(key => {
-      rv[key] = arrayToObjects(utils.this.pairs[key]);
+    const rv = {};
+    R.keysIn(this.pairs).forEach((key) => {
+      rv[key] = arrayToObjects(this.pairs[key]);
     });
     return rv;
   }

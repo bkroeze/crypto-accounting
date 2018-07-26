@@ -105,11 +105,11 @@ test('getSalePrice direct-to-fiat', t => {
   t.is(lots.length, 2);
   let lot = lots[0];
   let {credit} = lot.credits[0];
-  let price = lot.getSalePriceEach(credit, journal.pricehistory, 'USD');
+  let price = Lot.getSalePriceEach(credit, journal.pricehistory, 'USD');
   t.is(price.toFixed(2), '400.00');
 
   credit = lot.credits[1].credit;
-  price = lot.getSalePriceEach(credit, journal.pricehistory, 'USD');
+  price = Lot.getSalePriceEach(credit, journal.pricehistory, 'USD');
   t.is(price.toFixed(2), '600.00');
 });
 
@@ -118,16 +118,16 @@ test('getSalePrice from translation', t => {
   const lots = journal.getLots();
   t.is(lots.length, 5);
   let lot = lots[1];
-  let price = lot.getSalePriceEach(lot.credits[0].credit, journal.pricehistory, 'USD');
+  let price = Lot.getSalePriceEach(lot.credits[0].credit, journal.pricehistory, 'USD');
   t.is(price.toFixed(2), '400.00');
-  price = lot.getSalePriceEach(lot.credits[1].credit, journal.pricehistory, 'USD');
+  price = Lot.getSalePriceEach(lot.credits[1].credit, journal.pricehistory, 'USD');
   t.is(price.toFixed(2), '600.00');
 
   lot = lots[2];
-  price = lot.getSalePriceEach(lot.credits[0].credit, journal.pricehistory, 'USD');
+  price = Lot.getSalePriceEach(lot.credits[0].credit, journal.pricehistory, 'USD');
   t.is(price.toFixed(2), '600.00');
 
-  price = lot.getSalePriceEach(lot.credits[1].credit, journal.pricehistory, 'USD');
+  price = Lot.getSalePriceEach(lot.credits[1].credit, journal.pricehistory, 'USD');
   t.is(price.toFixed(2), '750.00');
 });
 

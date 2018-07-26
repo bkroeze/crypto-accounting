@@ -2,12 +2,26 @@ import Moment from 'moment';
 import * as R from 'ramda';
 import Entry from './entry';
 import * as utils from '../utils/models';
-import { CREDIT, DEBIT } from './constants';
+import { DEBIT } from './constants';
 import { addBigNumbers, BIG_0 } from '../utils/numbers';
+
 const getApplied = R.map(R.prop('applied'));
 
-export default class Lot {
+function makeCreditObjects(wrappers) {
+  return wrappers.map(wrapper => ({
+    ...wrapper.credit.toObject(true),
+    applied: wrapper.applied.toFixed(8),
+  }));
+}
 
+function makeDebitObjects(wrappers) {
+  return wrappers.map(wrapper => ({
+    ...wrapper.debit.toObject(true),
+    applied: wrapper.applied.toFixed(8),
+  }));
+}
+
+export default class Lot {
   constructor(debit) {
     this.account = debit.getAccount();
     this.currency = debit.currency;
@@ -47,7 +61,7 @@ export default class Lot {
       return false;
     }
     if (debit.balancing) {
-      //console.log('debit is lot', debit.toObject(true));
+      // console.log('debit is lot', debit.toObject(true));
       return true;
     }
 
@@ -64,7 +78,7 @@ export default class Lot {
   addCredit(credit, maxQuantity) {
     const applied = credit.setLot(this, maxQuantity);
     if (applied.gt(BIG_0)) {
-      this.credits.push({credit, applied});
+      this.credits.push({ credit, applied });
     }
     return applied;
   }
@@ -72,44 +86,53 @@ export default class Lot {
   addDebit(debit) {
     const applied = debit.setLot(this, debit.quantity);
     if (applied.gt(BIG_0)) {
-      this.debits.push({debit, applied});
+      this.debits.push({ debit, applied });
     }
     return this.getRemaining();
   }
 
-  getPurchasePriceEach(pricehistory, fiat, transCurrencies=['BTC', 'ETH'], within=null) {
-    const {debit} = this.debits[0];
+  getPurchasePriceEach(pricehistory, fiat, transCurrencies = ['BTC', 'ETH'], within = null) {
+    const { debit } = this.debits[0];
     const credit = debit.pair;
     const eachPrice = credit.quantity.div(debit.quantity);
     if (credit.currency === fiat) {
       // easy, purchase price is the "each" price of the credit
       return eachPrice;
     }
-    const translation = pricehistory.findPrice(this.utc, credit.currency, fiat, transCurrencies, within);
-    //console.log('got translation', translation.toObject());
+    const translation = pricehistory.findPrice(
+      this.utc, credit.currency, fiat, transCurrencies, within
+    );
+    // console.log('got translation', translation.toObject());
     return translation.rate.times(eachPrice);
   }
 
-  getSalePriceEach(credit, pricehistory, fiat, transCurrencies=['BTC', 'ETH'], within=null) {
+  static getSalePriceEach(credit, pricehistory, fiat, transCurrencies = ['BTC', 'ETH'], within = null) {
     const debit = credit.pair;
     const eachPrice = debit.quantity.div(credit.quantity);
     if (debit.currency === fiat) {
       return eachPrice;
     }
-    const translation = pricehistory.findPrice(credit.getUtc(), debit.currency, fiat, transCurrencies, within);
+    const translation = pricehistory.findPrice(
+      credit.getUtc(), debit.currency, fiat, transCurrencies, within
+    );
     return translation.rate.times(eachPrice);
   }
 
   /**
    * Calculate capital gains entries from exercised credits.
    */
-  getCapitalGains(pricehistory, account, fiat, transCurrencies=['BTC', 'ETH'], within=null) {
+  getCapitalGains(pricehistory, account, fiat, transCurrencies = ['BTC', 'ETH'], within = null) {
     const purchasePrice = this.getPurchasePriceEach(pricehistory, fiat, transCurrencies, within);
-    return this.credits.map(creditWrapper => {
-      const {credit, applied} = creditWrapper;
-      const salePrice = this.getSalePriceEach(credit, pricehistory, fiat, transCurrencies, within);
+    return this.credits.map((creditWrapper) => {
+      const { credit, applied } = creditWrapper;
+      const salePrice = Lot.getSalePriceEach(
+        credit, pricehistory, fiat, transCurrencies, within
+      );
       const profitEach = salePrice.minus(purchasePrice);
-      //console.log(`profitEach (${salePrice.toFixed(2)}-${purchasePrice.toFixed(2)}) * ${applied.toFixed()} = ${profitEach.toFixed(2)}`);
+      /* console.log(`profitEach (${salePrice.toFixed(2)}
+         -${purchasePrice.toFixed(2)})
+         * ${applied.toFixed()}
+         = ${profitEach.toFixed(2)}`); */
       return new Entry({
         transaction: credit.transaction,
         account,
@@ -120,7 +143,7 @@ export default class Lot {
     });
   }
 
-  getPurchasePrice(getPrice, account, fiat, transCurrencies=['BTC', 'ETH']) {
+  getPurchasePrice(getPrice, account, fiat, transCurrencies = ['BTC', 'ETH']) {
     return getPrice(this.utc, this.currency, fiat, transCurrencies);
   }
 
@@ -156,22 +179,4 @@ export default class Lot {
       remaining: this.getRemaining().toFixed(8),
     }, ['account']);
   }
-}
-
-function makeCreditObjects(wrappers) {
-  return wrappers.map((wrapper) => {
-    return {
-      ...wrapper.credit.toObject(true),
-      applied: wrapper.applied.toFixed(8),
-    }
-  });
-}
-
-function makeDebitObjects(wrappers) {
-  return wrappers.map((wrapper) => {
-    return {
-      ...wrapper.debit.toObject(true),
-      applied: wrapper.applied.toFixed(8),
-    }
-  });
 }

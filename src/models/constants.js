@@ -14,6 +14,6 @@ export const ERRORS = {};
   'MISSING_PARAMETER',
   'NOT_FOUND',
   'OUT_OF_RANGE',
-].forEach(k => {
+].forEach((k) => {
   ERRORS[k] = `ERR_${k}`;
 });

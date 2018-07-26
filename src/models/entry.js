@@ -1,12 +1,22 @@
-/* eslint no-console: ["error", { allow: ["error"] }] */
+/* eslint prefer-destructuring: ["error", { array: false }] */
 import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 import BigNumber from 'bignumber.js';
+import { makeError } from '../utils/errors';
 import * as utils from '../utils/models';
-import { BIG_0, addBigNumbers, isNegativeString, positiveString } from '../utils/numbers';
-import { CREDIT, DEBIT } from './constants';
+import {
+  BIG_0, addBigNumbers, isNegativeString, positiveString,
+} from '../utils/numbers';
+import { CREDIT, DEBIT, ERRORS } from './constants';
 
-const mergeProps = (props) => { return {
+function describeLots(wrappers) {
+  return wrappers.map(wrapper => ({
+    ...wrapper.lot.toObject(),
+    applied: wrapper.applied.toFixed(8),
+  }));
+}
+
+const mergeProps = props => ({
   id: null,
   transaction: null,
   quantity: null,
@@ -17,10 +27,10 @@ const mergeProps = (props) => { return {
   note: '',
   shortcut: '',
   pair: null,
-  balancing: null,    // the other entry in a balancing pair
+  balancing: null, // the other entry in a balancing pair
   virtual: false,
-  ...props
-}};
+  ...props,
+});
 
 const KEYS = R.keysIn(mergeProps({}));
 const getProps = R.pick(KEYS);
@@ -41,13 +51,14 @@ export default class Entry {
    */
   constructor(props = { }) {
     const work = RA.isString(props) ? { shortcut: props } : props;
-    const merged = mergeProps(work);
+    const merged = mergeProps(getProps(work));
     if (!merged.transaction) {
       console.error(`Invalid Entry, must have a 'transaction', got: ${JSON.stringify(props)}`);
       throw makeError(
         TypeError,
         ERRORS.INVALID_TERM,
-        'Invalid Entry, must have a parent transaction');
+        'Invalid Entry, must have a parent transaction'
+      );
     }
 
     if (merged.shortcut && (merged.currency || merged.amount)) {
@@ -55,7 +66,8 @@ export default class Entry {
       throw makeError(
         TypeError,
         ERRORS.INVALID_TERM,
-        'Invalid Entry, conflicting shortcut');
+        'Invalid Entry, conflicting shortcut'
+      );
     }
 
     KEYS.forEach((key) => {
@@ -70,7 +82,8 @@ export default class Entry {
       throw makeError(
         TypeError,
         ERRORS.INVALID_TERM,
-        'Invalid Entry, no Quantity');
+        'Invalid Entry, no Quantity'
+      );
     }
 
     // doesn't hurt to re-wrap if it isn't already a BigNumber
@@ -88,7 +101,8 @@ export default class Entry {
       throw makeError(
         TypeError,
         ERRORS.INVALID_SHORTCUT,
-        `Invalid shortcut: ${shortcut}`);
+        `Invalid shortcut: ${shortcut}`
+      );
     }
     // determine which part is the currency
     let quantity;
@@ -105,14 +119,16 @@ export default class Entry {
       throw makeError(
         TypeError,
         ERRORS.INVALID_SHORTCUT,
-        `Invalid Posting, two numeric in shortcut: ${shortcut}`);
+        `Invalid Posting, two numeric in shortcut: ${shortcut}`
+      );
     }
 
     if (!(numeric1 || numeric2)) {
       throw makeError(
         TypeError,
         ERRORS.INVALID_SHORTCUT,
-        `Invalid Posting, no numeric in shortcut: ${shortcut}`);
+        `Invalid Posting, no numeric in shortcut: ${shortcut}`
+      );
     }
 
     if (numeric1) {
@@ -154,7 +170,8 @@ export default class Entry {
       throw makeError(
         TypeError,
         ERRORS.INVALID_SHORTCUT,
-        'invalid account path');
+        'invalid account path'
+      );
     }
     if (RA.isString(account)) {
       return account;
@@ -181,10 +198,13 @@ export default class Entry {
       const remainingLot = lot.getRemaining();
       const remainingCredit = this.getLotCreditRemaining();
       applied = BigNumber.min(remainingCredit, remainingLot, maxQuantity);
-      //console.log(`rl = ${remainingLot.toFixed(2)} rc = ${remainingCredit.toFixed(2)} max = ${maxQuantity.toFixed(2)} ap = ${applied}`);
+      /* console.log(`rl = ${remainingLot.toFixed(2)}
+         rc = ${remainingCredit.toFixed(2)}
+         max = ${maxQuantity.toFixed(2)}
+         ap = ${applied}`); */
     }
     if (applied.gt(BIG_0)) {
-      this.lots.push({lot, applied});
+      this.lots.push({ lot, applied });
     }
     return applied;
   }
@@ -264,15 +284,6 @@ export default class Entry {
   }
 }
 
-function describeLots(wrappers) {
-  return  wrappers.map((wrapper) => {
-    return {
-      ...wrapper.lot.toObject(),
-      applied: wrapper.applied.toFixed(8),
-    }
-  });
-}
-
 /**
  * parses a list of entries, which may be objects or strings
  * @param {Array<Object|String} rawArray input
@@ -327,9 +338,10 @@ export function shortcutToEntries(rawShortcut, transaction) {
   // minimal shortcut: "10 BTC"
   if (parts.length < 2) {
     throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        `Invalid shortcut: ${rawShortcut}`);
+      TypeError,
+      ERRORS.INVALID_SHORTCUT,
+      `Invalid shortcut: ${rawShortcut}`
+    );
   }
 
   let accum = [];
@@ -351,9 +363,10 @@ export function shortcutToEntries(rawShortcut, transaction) {
   }
   if (accum.length < 2) {
     throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        `Invalid shortcut: ${rawShortcut}`);
+      TypeError,
+      ERRORS.INVALID_SHORTCUT,
+      `Invalid shortcut: ${rawShortcut}`
+    );
   }
   shortcuts.push(accum);
 
@@ -367,9 +380,8 @@ export function shortcutToEntries(rawShortcut, transaction) {
     } else {
       // a leading "=" connector means that this single-entry is a debit
       // so add a matching credit.
-      shortcuts = [shortcuts[0], shortcuts[0].slice(0,2)];
+      shortcuts = [shortcuts[0], shortcuts[0].slice(0, 2)];
     }
-
   }
   let ix = 0;
   let debit;
@@ -430,9 +442,10 @@ export function flexibleToEntries(raw, transaction) {
   }
   console.error('Invalid Entry', raw);
   throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        'Invalid Entry: cannot parse');
+    TypeError,
+    ERRORS.INVALID_SHORTCUT,
+    'Invalid Entry: cannot parse'
+  );
 }
 
 /**

@@ -33,3 +33,13 @@ rules:
   ava/use-t: error
   ava/use-test: error
   ava/use-true-false: error
+  no-plusplus: off
+  no-bitwise: off
+  no-console: off
+  comma-dangle:
+    - error
+    - functions: never
+      arrays: always-multiline
+      objects: always-multiline
+      imports: always-multiline
+      exports: always-multiline

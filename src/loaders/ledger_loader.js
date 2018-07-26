@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: off */
+
 import * as R from 'ramda';
 import { contained } from 'ramda-adjunct';
 import path from 'path';
@@ -8,13 +10,13 @@ import Transaction from '../models/transaction';
 import { isRelativePath } from '../utils/files';
 
 
-const trimRight = (val) => val.trimRight;
+const trimRight = val => val.trimRight;
 const isCommentChar = contained(';#%!*');
-const isLeadingCommentLine = (val) => isCommentChar(val.slice(0,1));
+const isLeadingCommentLine = val => isCommentChar(val.slice(0, 1));
 const stripLeadingCommentLines = R.reject(isLeadingCommentLine);
-const isCommentLine = (val) => isCommentChar(val.trimLeft().slice(0,1));
+const isCommentLine = val => isCommentChar(val.trimLeft().slice(0, 1));
 const isNumeric = contained('0123456789');
-const isNewTransactionLine = (val) => isNumeric(val.slice(0,1));
+const isNewTransactionLine = val => isNumeric(val.slice(0, 1));
 const isAccountKey = contained(['id', 'account', 'note', 'status', 'address', 'party']);
 const addEqualsConnector = R.insert(0, '=');
 
@@ -42,12 +44,12 @@ export function convertLedgerTransaction(lines) {
   const party = header.join(' ');
   const extra = {};
   let account = '';
-  let address = '';
-  let notes = [];
+  const address = '';
+  const notes = [];
   const props = {};
   const entryLines = [];
   // process comment lines first, so that all we will have left are entries
-  lines.forEach(line => {
+  lines.forEach((line) => {
     if (!isLeadingCommentLine(line)) {
       entryLines.push(line);
     } else {
@@ -70,7 +72,7 @@ export function convertLedgerTransaction(lines) {
   });
   // check to see if we have a default account
   if (entryLines.length > 0) {
-    const lastLine = entryLines[entryLines.length-1];
+    const lastLine = entryLines[entryLines.length - 1];
     if (lastLine.indexOf(' ') === -1) {
       // yes, this is an "elided" Ledger entry
       account = entryLines.pop();
@@ -89,11 +91,11 @@ export function convertLedgerTransaction(lines) {
     note: notes.join('\n'),
     extra,
     entries,
-  })
+  });
 }
 
 export function loadLedgerTransactions(raw) {
-  const lines = raw.replace(/\r/g,'').split('\n');
+  const lines = raw.replace(/\r/g, '').split('\n');
   const linesets = [];
   let accum = [];
 

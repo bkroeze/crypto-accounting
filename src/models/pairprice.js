@@ -36,14 +36,16 @@ function parseProps(props) {
       throw makeError(
         TypeError,
         ERRORS.INVALID_TERM,
-        'Invalid price history shortcut: ' + props);
+        `Invalid price history shortcut: ${props}`
+      );
     }
     const keyParts = parts[1].split('/');
     if (keyParts.length < 2) {
       throw makeError(
         TypeError,
         ERRORS.INVALID_TERM,
-        'Invalid price history pair: ' + parts[1]);
+        `Invalid price history pair: ${parts[1]}`
+      );
     }
     const note = (parts.length > 3 && isComment(parts[3])) ? parts[3].slice(1) : '';
     return {
@@ -133,7 +135,7 @@ export default class PairPrice {
       rate: this.rate.toFixed(8),
       note: this.note,
       derived: this.derived,
-      translationChain: utils.arrayToObjects(this.translationChain || [], shallow)
+      translationChain: utils.arrayToObjects(this.translationChain || [], shallow),
     });
   }
 

@@ -1,9 +1,11 @@
-/* eslint no-console: ["error", { allow: ["error"] }] */
+/* eslint no-param-reassign: off */
 import * as R from 'ramda';
 import * as RA from 'ramda-adjunct';
 
 import * as utils from '../utils/models';
-import { CREDIT, DEBIT, INHERIT, ERRORS } from './constants';
+import {
+  CREDIT, DEBIT, INHERIT, ERRORS,
+} from './constants';
 import { makeError } from '../utils/errors';
 import Lot from './lot';
 
@@ -84,8 +86,9 @@ export default class Account {
       console.error(`Invalid Account, must have a path, got: ${JSON.stringify(props)}`);
       throw makeError(
         TypeError,
-        ERROR.MISSING_PARAMETER,
-        'Invalid Account, must have a path');
+        ERRORS.MISSING_PARAMETER,
+        'Invalid Account, must have a path'
+      );
     }
     if (this.parent) {
       this.path = `${this.parent.path}:${this.path}`;
@@ -133,23 +136,25 @@ export default class Account {
         return false;
       }
       const entries = this.getEntries();
-      entries.forEach((entry)=> {
+      entries.forEach((entry) => {
         if (!entry.balancing && (!entry.pair || entry.currency !== entry.pair.currency)) {
-          //console.log(`Adding balancing ${this.path} -> ${balancingAccount.path}`);
-          //console.log(`entry: ${JSON.stringify(entry.toObject(), null, 2)}`);
+          // console.log(`Adding balancing ${this.path} -> ${balancingAccount.path}`);
+          // console.log(`entry: ${JSON.stringify(entry.toObject(), null, 2)}`);
           balancingAccount.addEntry(entry.makeBalancingClone(balancingAccount));
         }
       });
     } catch (e) {
       if (R.is(ReferenceError, e)) {
-        console.log(e);
+        console.error(e);
         throw makeError(
           ReferenceError,
           ERRORS.MISSING_ACCOUNT,
-          `Cannot find balancing account ${balancingAccount}`);
+          `Cannot find balancing account ${balancingAccount}`
+        );
       }
       throw e;
     }
+    return this;
   }
 
   /**
@@ -169,7 +174,8 @@ export default class Account {
       throw makeError(
         ReferenceError,
         ERRORS.MISSING_ACCOUNT,
-        `Account Not Found: ${this.path}:${nextChild}`);
+        `Account Not Found: ${this.path}:${nextChild}`
+      );
     }
     if (path.length > 0) {
       child = child.getAccount(path);
@@ -199,7 +205,7 @@ export default class Account {
       this.dirty.lots = true;
       this.lots = null;
     }
-    const {entries} = this;
+    const { entries } = this;
     if (!entries) {
       return [];
     }

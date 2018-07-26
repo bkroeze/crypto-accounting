@@ -2,7 +2,7 @@ import * as R from 'ramda';
 
 import Account from './account';
 import Lot from './lot';
-import { CREDIT, DEBIT, ERRORS } from './constants';
+import { CREDIT, ERRORS } from './constants';
 import * as utils from '../utils/models';
 import { makeError } from '../utils/errors';
 import { BIG_0 } from '../utils/numbers';
@@ -32,7 +32,7 @@ export default class Accounts {
     this.accounts = accounts;
     this.lots = [];
     R.keysIn(accounts).forEach((path) => {
-      accounts[path] = new Account(R.merge(accounts[path], { path }));
+      this.accounts[path] = new Account(R.merge(accounts[path], { path }));
     });
     this.aliases = {};
     this.paths = {};
@@ -49,11 +49,11 @@ export default class Accounts {
 
   calculatePaths() {
     this.paths = getAccountPathMap(this.accounts);
-    let aliases = {};
+    const aliases = {};
 
     R.valuesIn(this.paths).forEach((account) => {
       if (account.aliases) {
-        account.aliases.forEach(a => {
+        account.aliases.forEach((a) => {
           aliases[a] = account;
         });
       }
@@ -65,7 +65,7 @@ export default class Accounts {
     if (R.isEmpty(this.paths)) {
       this.calculatePaths();
     }
-    this.getBalancing().forEach(account => {
+    this.getBalancing().forEach((account) => {
       try {
         const balancingAccount = this.get(account.getBalancingAccount());
         account.createBalancingEntries(balancingAccount);
@@ -73,7 +73,7 @@ export default class Accounts {
         console.error(`${e.message}\nAccounts: ${Object.keys(this.paths)}`);
         throw e;
       }
-    })
+    });
   }
 
   /**
@@ -118,7 +118,7 @@ export default class Accounts {
   }
 
   getBalancing() {
-    return this.filter(Account.hasBalancingAccount)
+    return this.filter(Account.hasBalancingAccount);
   }
 
   getLots(currencies, force, lifo) {
@@ -133,7 +133,7 @@ export default class Accounts {
           return false;
         }
         const currency = currencies[entry.currency];
-        //console.log(`isNotFiat: ${entry.currency}, ${currency ? 'found' : 'missing'}`);
+        // console.log(`isNotFiat: ${entry.currency}, ${currency ? 'found' : 'missing'}`);
         if (!currency || currency.isFiat()) {
           return false;
         }
