@@ -4,7 +4,6 @@ import Entry from './entry';
 import * as utils from '../utils/models';
 import { CREDIT, DEBIT } from './constants';
 import { addBigNumbers, BIG_0 } from '../utils/numbers';
-
 const getApplied = R.map(R.prop('applied'));
 
 export default class Lot {
@@ -78,30 +77,44 @@ export default class Lot {
     return this.getRemaining();
   }
 
+  getPurchasePriceEach(pricehistory, fiat, transCurrencies=['BTC', 'ETH'], within=null) {
+    const {debit} = this.debits[0];
+    const credit = debit.pair;
+    const eachPrice = credit.quantity.div(debit.quantity);
+    if (credit.currency === fiat) {
+      // easy, purchase price is the "each" price of the credit
+      return eachPrice;
+    }
+    const translation = pricehistory.findPrice(this.utc, credit.currency, fiat, transCurrencies, within);
+    //console.log('got translation', translation.toObject());
+    return translation.rate.times(eachPrice);
+  }
+
+  getSalePriceEach(credit, pricehistory, fiat, transCurrencies=['BTC', 'ETH'], within=null) {
+    const debit = credit.pair;
+    const eachPrice = debit.quantity.div(credit.quantity);
+    if (debit.currency === fiat) {
+      return eachPrice;
+    }
+    const translation = pricehistory.findPrice(credit.getUtc(), debit.currency, fiat, transCurrencies, within);
+    return translation.rate.times(eachPrice);
+  }
+
   /**
    * Calculate capital gains entries from exercised credits.
    */
   getCapitalGains(pricehistory, account, fiat, transCurrencies=['BTC', 'ETH'], within=null) {
-    const purchasePrice = pricehistory.findPrice(this.utc, this.currency, fiat, transCurrencies, within);
+    const purchasePrice = this.getPurchasePriceEach(pricehistory, fiat, transCurrencies, within);
     return this.credits.map(creditWrapper => {
       const {credit, applied} = creditWrapper;
-      //const salePrice = utcPrice(credit.utc);
-      const ratio = credit.quantity.eq(applied) ? 1 : credit.quantity.div(applied);
-      const salePrice = credit.pair.quantity.times(ratio);
-      // this assumes that the pair currency is fiat
-      // need to correct for that.
-//       console.log('--------------');
-//       console.log(credit.toObject());
-//       console.log(`qty: ${credit.quantity}
-// purchasePrice: ${purchasePrice.rate.toFixed(2)}
-// salePrice: ${salePrice}
-// applied: ${applied}
-// `);
+      const salePrice = this.getSalePriceEach(credit, pricehistory, fiat, transCurrencies, within);
+      const profitEach = salePrice.minus(purchasePrice);
+      //console.log(`profitEach (${salePrice.toFixed(2)}-${purchasePrice.toFixed(2)}) * ${applied.toFixed()} = ${profitEach.toFixed(2)}`);
       return new Entry({
         transaction: credit.transaction,
         account,
         currency: fiat,
-        quantity: salePrice.minus(purchasePrice.rate.times(applied)),
+        quantity: profitEach.times(applied),
         type: DEBIT,
       });
     });
@@ -148,7 +161,7 @@ export default class Lot {
 function makeCreditObjects(wrappers) {
   return wrappers.map((wrapper) => {
     return {
-      ...wrapper.credit,
+      ...wrapper.credit.toObject(true),
       applied: wrapper.applied.toFixed(8),
     }
   });
@@ -157,7 +170,7 @@ function makeCreditObjects(wrappers) {
 function makeDebitObjects(wrappers) {
   return wrappers.map((wrapper) => {
     return {
-      ...wrapper.debit,
+      ...wrapper.debit.toObject(true),
       applied: wrapper.applied.toFixed(8),
     }
   });

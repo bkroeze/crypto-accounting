@@ -6,7 +6,7 @@ import * as utils from '../utils/models';
 import { BIG_0, addBigNumbers, isNegativeString, positiveString } from '../utils/numbers';
 import { CREDIT, DEBIT } from './constants';
 
-const DEFAULT_PROPS = {
+const mergeProps = (props) => { return {
   id: null,
   transaction: null,
   quantity: null,
@@ -19,9 +19,10 @@ const DEFAULT_PROPS = {
   pair: null,
   balancing: null,    // the other entry in a balancing pair
   virtual: false,
-};
+  ...props
+}};
 
-const KEYS = R.keysIn(DEFAULT_PROPS);
+const KEYS = R.keysIn(mergeProps({}));
 const getProps = R.pick(KEYS);
 const hasCredits = R.has('credits');
 const hasDebits = R.has('debits');
@@ -40,8 +41,7 @@ export default class Entry {
    */
   constructor(props = { }) {
     const work = RA.isString(props) ? { shortcut: props } : props;
-    const merged = R.merge(DEFAULT_PROPS, getProps(work));
-
+    const merged = mergeProps(work);
     if (!merged.transaction) {
       console.error(`Invalid Entry, must have a 'transaction', got: ${JSON.stringify(props)}`);
       throw makeError(
@@ -267,7 +267,7 @@ export default class Entry {
 function describeLots(wrappers) {
   return  wrappers.map((wrapper) => {
     return {
-      ...wrapper.lot,
+      ...wrapper.lot.toObject(),
       applied: wrapper.applied.toFixed(8),
     }
   });

@@ -1,6 +1,8 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
+** Add unrealized gains method
+** Create sanity/cleanliness report for Journal
 ** Add day-buckets to wallet csv converter
 ** Get transactions from wallets via JSONRPC call?
 *** add dotenv for JSONRPC auth

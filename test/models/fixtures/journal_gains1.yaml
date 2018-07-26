@@ -1,0 +1,31 @@
+name: Test Fixture for testing capital gains calculations
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  - account: assets:exchanges:coinbase
+    utc: 2018-01-01
+    entries:
+      - 2 ETH @ 500 USD assets:banks:checking
+  - account: assets:exchanges:coinbase
+    utc: 2018-01-15
+    entries:
+      - 3 ETH @ 550 USD assets:banks:checking
+  - account: assets:exchanges:coinbase
+    utc: 2018-02-01
+    entries:
+      - -1 ETH @ 400 USD
+  - account: assets:exchanges:coinbase
+    utc: 2018-03-01
+    entries:
+      - -2 ETH @ 600 USD
+  - account: assets:exchanges:coinbase
+    utc: 2018-03-01
+    entries:
+      - -2 ETH @ 1000 USD
+pricehistory: # note that some of these different from the price above - for testing
+  - 2018-01-01 ETH/USD 400 
+  - 2018-01-15 ETH/USD 500
+  - 2018-02-01 ETH/USD 400
+  - 2018-03-01 ETH/USD 750

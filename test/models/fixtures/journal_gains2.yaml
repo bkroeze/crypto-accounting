@@ -1,0 +1,43 @@
+name: Test Fixture for testing capital gains calculations using intermediate pairs for translations
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  - account: assets:exchanges:coinbase
+    note: lot 0
+    utc: 2018-01-01
+    entries:
+      - 1 BTC @ 20000 USD assets:banks:checking # cost $20000, sales 0.093 * $15000 = $1395
+  - account: assets:exchanges:coinbase
+    note: lot 1
+    utc: 2018-01-01
+    entries:
+      - 2 ETH @ 500 USD assets:banks:checking # cost $500, sales 1 @ $400 and 0.12 * $5000 = 1 @ $600
+  - account: assets:exchanges:coinbase
+    utc: 2018-01-15
+    note: lot 2
+    entries:
+      - 3 ETH @ 0.031 BTC assets:banks:checking # cost 0.031 * $20000 = $620 -> lot 0, sales 1 @ $600, 2 @ $750
+  - account: assets:exchanges:coinbase
+    utc: 2018-02-01
+    entries:
+      - -1 ETH @ 400 USD # 1 ETH -> lot 1
+  - account: assets:exchanges:coinbase
+    utc: 2018-03-01
+    entries:
+      - -2 ETH @ .12 BTC # 1 ETH -> lot 1, 1 ETH -> lot 2, 0.24 BTC -> lot 3
+  - account: assets:exchanges:coinbase
+    utc: 2018-03-01
+    entries:
+      - -2 ETH @ .15 BTC # 2 ETH -> lot 2, 0.30 BTC -> lot 4
+pricehistory:
+  - 2018-01-01 ETH/BTC 0.025
+  - 2018-01-01 BTC/USD 20000 # ETH/USD = 0.025 * 20000 = 500
+  - 2018-01-15 ETH/BTC 0.03
+  - 2018-01-15 BTC/USD 15000 # ETH/USD = 0.03 * 15000 = 450
+  - 2018-02-01 ETH/BTC 0.04 
+  - 2018-02-01 BTC/USD 10000 # ETH/USD = 0.04 * 10000 = 400
+  - 2018-03-01 ETH/BTC 0.12
+  - 2018-03-01 BTC/USD 5000 # ETH/USD = 0.12 * 5000 = 600
+
