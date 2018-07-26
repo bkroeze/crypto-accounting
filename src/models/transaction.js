@@ -5,7 +5,8 @@ import Moment from 'moment';
 
 import { makeEntries } from './entry';
 import * as utils from '../utils/models';
-import { CREDIT, DEBIT } from './constants';
+import { makeError } from '../utils/errors';
+import { CREDIT, DEBIT, ERRORS } from './constants';
 
 // stub out fee descriptors
 const makeFees = fees => fees;
@@ -56,7 +57,8 @@ export default class Transaction {
       throw makeError(
         TypeError,
         ERRORS.INVALID_TERM,
-        'Invalid Transaction, must have a utc');
+        'Invalid Transaction, must have a utc'
+      );
     }
     this.utc = Moment(this.utc);
     this.entries = makeEntries(entries, this);

@@ -1,11 +1,15 @@
 /**
  * Make an enhanced error.
- * @param {Class} errClass
+ * @param {Class} ErrClass
  * @param {String} code
  * @param {Any} detail
  */
-export function makeError(errClass, code, detail) {
-  const err = new errClass(code);
+export function makeError(ErrClass, code, detail) {
+  const err = new ErrClass(code);
   err.detail = detail;
   return err;
 }
+
+export default {
+  makeError,
+};
