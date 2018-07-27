@@ -20,6 +20,9 @@ function ensureMoment(work) {
   throw makeError(TypeError, ERRORS.INVALID_TERM, `Invalid search term: ${work}`);
 }
 
+/**
+ * A price history for a specific currency.
+ */
 export class CurrencyPrices extends SortedArray {
   constructor(prices) {
     super(prices || [], dates.compareByDate);
@@ -80,6 +83,11 @@ export class CurrencyPrices extends SortedArray {
     return this.array.map(fn);
   }
 
+  /**
+   * Get the price nearest the date.
+   * @param {String|Moment} utc
+   * @return {PairPrice} price
+   */
   search(utc) {
     const searchUtc = Moment(utc);
     const ix = super.search(searchUtc);
@@ -89,12 +97,23 @@ export class CurrencyPrices extends SortedArray {
     return this.get(ix);
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @return {Array<Object>}
+   */
   toObject() {
     return arrayToObjects(this);
   }
 }
 
+/**
+ * A collection of prices for multiple currencies.
+ */
 export default class PriceHistory {
+  /**
+   * Instantiate via a raw list of prices
+   * @param {Array<String|Object>} raw prices
+   */
   constructor(pricelist) {
     this.pairs = {};
     if (pricelist) {
@@ -179,6 +198,12 @@ export default class PriceHistory {
     return this.derivePrice(utc, base, quote, transCurrencies, within);
   }
 
+  /**
+   * Get the prices for a pair
+   * @param {String} base
+   * @param {String} quote
+   * @return {CurrencyPrices} prices
+   */
   getPair(base, quote) {
     return this.pairs[`${base}/${quote}`];
   }
@@ -202,6 +227,10 @@ export default class PriceHistory {
     return 0;
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @return {Object<String, *>}
+   */
   toObject() {
     const rv = {};
     R.keysIn(this.pairs).forEach((key) => {

@@ -140,9 +140,15 @@ export default class Entry {
     this.currency = currency;
   }
 
+  /**
+   * Add this entry to the correct account.
+   * @param {Accounts} Accounts
+   * @return {Account} account for this entry
+   */
   applyToAccount(accounts) {
     const acct = accounts.get(this.getAccountPath());
     acct.addEntry(this);
+    return acct;
   }
 
   equals(entry) {
@@ -155,6 +161,11 @@ export default class Entry {
     );
   }
 
+  /**
+   * Get the account for this entry, defaulting to the transaction account for this
+   * type if not directly set.
+   * @return {Account} Account
+   */
   getAccount() {
     return this.account || this.transaction.account[this.type];
   }
@@ -179,6 +190,10 @@ export default class Entry {
     return account.path;
   }
 
+  /**
+   * Get the amount remaining of this credit, not yet applied to lots.
+   * @return {BigNumber} amount remaining
+   */
   getLotCreditRemaining() {
     if (this.TYPE === DEBIT) {
       return BIG_0;
@@ -188,10 +203,20 @@ export default class Entry {
     return this.quantity.minus(credits);
   }
 
+  /**
+   * Get the date for this entry, defaulting to the transaction date if not directly set.
+   * @return {Moment} date
+   */
   getUtc() {
     return this.transaction.utc;
   }
 
+  /**
+   * Apply as much as possible of our remaining credit amount to the specified lot.
+   * @param {Lot} lot
+   * @param {BigNumber} maximum to apply
+   * @return {BigNumber} how much was applied to the lot
+   */
   setLot(lot, maxQuantity) {
     let applied = this.quantity;
     if (this.type === CREDIT) {
@@ -209,6 +234,11 @@ export default class Entry {
     return applied;
   }
 
+  /**
+   * Test whether this entry is in the specified account or one of its parents.
+   * @param {String} path
+   * @return {Boolean} true if found
+   */
   inAccount(path) {
     const acct = this.getAccount();
     if (RA.isString(acct)) {
@@ -217,6 +247,10 @@ export default class Entry {
     return acct.inPath(path);
   }
 
+  /**
+   * Test whether this entry has a proper balancing entry.
+   * @return {Boolean} true if balanced
+   */
   isBalanced() {
     return !!(this.pair && (
       this.pair.currency !== this.currency
@@ -224,10 +258,19 @@ export default class Entry {
     ));
   }
 
+  /**
+   * Test whether this is a balancing entry.
+   * @return {Boolean} true if balancing
+   */
   isBalancingEntry() {
     return this.balancing && this.virtual;
   }
 
+  /**
+   * Make a balancing pair entry.
+   * @param {Account} account
+   * @return {Entry} new pair entry
+   */
   makeBalancingClone(account) {
     this.balancing = new Entry({
       transaction: this.transaction,
@@ -251,6 +294,11 @@ export default class Entry {
     return this;
   }
 
+  /**
+   * Set the "other side" of the entry on this and its partner.
+   * @param {Entry} other side (credit if this is debit, debit if this is credit)
+   * @param {Boolean} true if the price is specified as "per each"
+   */
   setPair(partner, priceEach) {
     this.pair = partner;
     if (priceEach) {
@@ -259,11 +307,16 @@ export default class Entry {
       partner.multiplyBy(this);
     }
     if (partner.pair !== this) {
-      // set the partnet, but don't multiply
+      // set the partner, but don't multiply
       partner.setPair(this, false);
     }
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @param {Boolean} shallow - reduce output of child objects if true
+   * @return {Object<String, *>}
+   */
   toObject(shallow) {
     return utils.stripFalsyExcept({
       id: this.id,
@@ -301,14 +354,14 @@ export function arrayToEntries(rawArray, entryType, transaction) {
   });
 }
 
+/**
+ * Parses a raw object with credits and/or debits array members
+ * Pair posting: debit [@|=] credit
+ * @param {String} shortcut
+ * @return {Array<Entry>} list of entries
+ * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
+ */
 export function objectToEntries(raw, transaction) {
-  /**
-   * Parses a raw object with credits and/or debits array members
-   * Pair posting: debit [@|=] credit
-   * @param {String} shortcut
-   * @return {Array<Entry>} list of entries
-   * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
-   */
   let entries = [];
   if (hasDebits(raw)) {
     entries = arrayToEntries(raw.debits, DEBIT, transaction);

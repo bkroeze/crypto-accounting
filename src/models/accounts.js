@@ -27,7 +27,15 @@ function getAccountPathMap(accounts) {
   return pathMap;
 }
 
+/**
+ * A container class for a group of accounts.
+ */
 export default class Accounts {
+
+  /**
+   * Constructor
+   * @param {Array<Object>} accounts in raw 'props' format
+   */
   constructor(accounts) {
     this.accounts = accounts;
     this.lots = [];
@@ -38,6 +46,10 @@ export default class Accounts {
     this.paths = {};
   }
 
+  /**
+   * Lazily get all accounts as an array, sorted by path.
+   * @return {Array<Account>} accounts
+   */
   asList() {
     if (R.isEmpty(this.paths)) {
       this.calculatePaths();
@@ -47,6 +59,9 @@ export default class Accounts {
     return keys.map(k => this.paths[k]);
   }
 
+  /**
+   * Build the path account map, for faster lookup later.
+   */
   calculatePaths() {
     this.paths = getAccountPathMap(this.accounts);
     const aliases = {};
@@ -59,8 +74,12 @@ export default class Accounts {
       }
     });
     this.aliases = aliases;
+    return this;
   }
 
+  /**
+   * Go through all balancing accounts, and create balancing (virtual) entries for them.
+   */
   createBalancingEntries() {
     if (R.isEmpty(this.paths)) {
       this.calculatePaths();
@@ -74,6 +93,7 @@ export default class Accounts {
         throw e;
       }
     });
+    return this;
   }
 
   /**
@@ -88,6 +108,10 @@ export default class Accounts {
     return accounts.filter(accountFilter);
   }
 
+  /**
+   * Apply a function to each account.
+   * @param {Function } fn
+   */
   forEach(fn) {
     Object.values(this.accounts).forEach(fn);
   }
@@ -110,6 +134,11 @@ export default class Accounts {
     return val;
   }
 
+  /**
+   * Get an account by alias.
+   * @param {String} alias
+   * @return {Account} account
+   */
   getAlias(alias) {
     if (R.isEmpty(this.aliases)) {
       this.calculatePaths();
@@ -117,10 +146,21 @@ export default class Accounts {
     return this.aliases[alias];
   }
 
+  /**
+   * Get all balancing accounts.
+   * @return {Array<Account>} accounts
+   */
   getBalancing() {
     return this.filter(Account.hasBalancingAccount);
   }
 
+  /**
+   * Lazily calculate all lots for all transactions in all accounts.
+   * @param {Object<String,Currency>} currencies
+   * @param {Boolean} force recalculation if true
+   * @param {Boolean} lifo use lifo instead of the default fifo strategy if true
+   * @return {Array<Lot>} lots
+   */
   getLots(currencies, force, lifo) {
     const search = lifo ? lifoSearch : fifoSearch;
     if (force || this.lots.length === 0) {
@@ -168,6 +208,11 @@ export default class Accounts {
     return this.lots;
   }
 
+  /**
+   * Get an account by path.
+   * @param {String} path
+   * @return {Account} account
+   */
   getPath(path) {
     if (R.isEmpty(this.paths)) {
       this.calculatePaths();
@@ -175,6 +220,10 @@ export default class Accounts {
     return this.paths[path];
   }
 
+  /**
+   * Check to see if it is populated.
+   * return {Boolean} true if no accounts
+   */
   isEmpty() {
     return R.isEmpty(this.accounts);
   }
@@ -191,6 +240,10 @@ export default class Accounts {
     return accounts.map(fn);
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @return {Object<String, Object>}
+   */
   toObject() {
     return utils.objectValsToObject(this.accounts);
   }

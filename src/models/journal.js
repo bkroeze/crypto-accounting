@@ -7,6 +7,9 @@ import { makeCurrencies } from './currency';
 import * as utils from '../utils/models';
 import { BIG_0 } from '../utils/numbers';
 
+/**
+ * Default properties for new Journal instances
+ */
 const DEFAULT_PROPS = {
   id: null,
   name: null,
@@ -21,15 +24,12 @@ const getProps = R.pick(KEYS);
 
 export default class Journal {
   /**
-   * Construct using a `props` object from YAML
+   * Construct using a `props` object.
    * @param {object} props
    */
   constructor(props) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
-    this.id = merged.id;
-    if (!this.id) {
-      this.id = merged.name;
-    }
+    this.id = R.propOr(merged.name, 'id', merged);
     this.name = merged.name;
     this.accounts = new Accounts(merged.accounts);
     this.currencies = makeCurrencies(merged.currencies);
@@ -128,14 +128,21 @@ export default class Journal {
    * Get the lots for this journal.
    * @param {boolean} force - always recalculate if true
    * @param {boolean} lifo - override default fifo ordering if true
+   * @return {Array<Lot>} lots
    */
   getLots(force, lifo) {
     return this.accounts.getLots(this.currencies, force, lifo);
   }
 
-  getLotsByCurrency(force) {
+  /**
+   * Get lots for this journal as an object keyed by currency.
+   * @param {boolean} force - always recalculate if true
+   * @param {boolean} lifo - override default fifo ordering if true
+   * @param {Object<String, Lot>} lots
+   */
+  getLotsByCurrency(force, lifo) {
     const lots = {};
-    this.getLots(force).forEach((l) => {
+    this.getLots(force, lifo).forEach((l) => {
       if (!R.has(l.currency, lots)) {
         lots[l.currency] = [l];
       } else {
@@ -145,13 +152,22 @@ export default class Journal {
     return lots;
   }
 
+  /**
+   * Get currencies noted as translation currencies in the Journal.
+   * @return {Array<Currency>} translation currencies
+   */
   getTranslationCurrencies() {
     return R.valuesIn(this.currencies).filter(c => c.translation);
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @return {Object<String, *>}
+   */
   toObject() {
     return utils.stripFalsyExcept({
       id: this.id,
+      name: this.name,
       accounts: utils.objectValsToObject(this.accounts),
       currencies: utils.objectValsToObject(this.currencies),
       transactions: this.transactions.map(utils.toObject),

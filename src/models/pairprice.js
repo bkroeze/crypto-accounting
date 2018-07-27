@@ -60,6 +60,9 @@ function parseProps(props) {
   return props;
 }
 
+/**
+ * Represents a price for a pair at a specific date
+ */
 export default class PairPrice {
   /**
    * Flexibly create using either a shortcut or an object.
@@ -122,10 +125,19 @@ export default class PairPrice {
     });
   }
 
+  /**
+   * Set the chain used to translate between pairs where no direct price is available.
+   * @param {Array<PairPrice>} prices
+   */
   setTranslationChain(prices) {
     this.translationChain = prices;
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @param {Boolean} shallow - reduce output of child objects if true
+   * @return {Object<String, *>}
+   */
   toObject(shallow) {
     return utils.stripFalsy({
       pair: this.pair,

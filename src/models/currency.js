@@ -18,6 +18,9 @@ const KEYS = R.keysIn(DEFAULT_PROPS);
 
 const getProps = R.pick(KEYS);
 
+/**
+ * Represents any currency or non-stock tradeable commodity.
+ */
 export default class Currency {
   /**
    * Construct using a `props` object that must include "id", and may also
@@ -44,14 +47,27 @@ export default class Currency {
     }
   }
 
+  /**
+   * Test whether this currency has a specific flag.
+   * @param {String} tag to search for
+   * @return {Boolean} true if found
+   */
   hasTag(tag) {
     return RA.contained(this.tags, tag);
   }
 
+  /**
+   * Check to see if this currency is to be treated as a fiat currency.
+   * @return {Boolean} true if fiat
+   */
   isFiat() {
     return this.fiatDefault || this.hasTag('fiat');
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @return {Object<String, *>}
+   */
   toObject() {
     return utils.stripFalsyExcept({
       id: this.id,
@@ -70,6 +86,8 @@ export default class Currency {
 
 /**
  * Make a currencies object from a yaml description
+ * @param {Object<String, Object} raw object representation, typically from YAML load
+ * @return {Object<String, Currency} currencies keyed by id
  */
 export function makeCurrencies(raw) {
   const currencies = {};

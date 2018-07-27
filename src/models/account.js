@@ -30,6 +30,9 @@ function getBalanceQty(e) {
   return e.type === DEBIT ? e.quantity : e.quantity.times(-1);
 }
 
+/**
+ * Extends the sort for entry to include its insertion order, for more stable sorts.
+ */
 function entrySorter(a, b) {
   const utcA = a.getUtc();
   const utcB = b.getUtc();
@@ -97,18 +100,39 @@ export default class Account {
     this.children = Account.makeChildAccounts(this, children);
   }
 
+  /**
+   * Test if an account is a balancing account.
+   * @param {Account} account
+   * @return {Boolean} true if balancing
+   */
   static hasBalancingAccount(account) {
     return !!account.getBalancingAccount();
   }
 
+  /**
+   * Test if an account is a virtual account.
+   * @param {Account} account
+   * @return {Boolean} true if virtual
+   */
   static isVirtualAccount(account) {
     return account.isVirtual();
   }
 
+  /**
+   * Test if an account is not a virtual account.
+   * @param {Account} account
+   * @return {Boolean} true if not a virtual account
+   */
   static isNotVirtualAccount(account) {
     return !account.isVirtual();
   }
 
+  /**
+   * Create a set of child accounts for a parent.
+   * @param {Account} parent
+   * @param {Array<Account>} children
+   * @return {Object<String, Account>} accounts keyed by path
+   */
   static makeChildAccounts(parent, children) {
     const accounts = {};
     R.keysIn(children).forEach((path) => {
@@ -118,10 +142,16 @@ export default class Account {
     return accounts;
   }
 
+  /**
+   * Add an entry to the account entries.
+   * @param {Entry} entry
+   * @return {Accounts} this object
+   */
   addEntry(entry) {
     entry.addIndex = this.entries.length;
     this.entries.push(entry);
     this.dirty.entries = true;
+    return this;
   }
 
   /**
@@ -129,6 +159,7 @@ export default class Account {
    * the total books to 0
    * @param {Account} account which will get the balancing entries
    * @throws {ReferenceError} if balancing account is not found
+   * @return {Accounts} this object
    */
   createBalancingEntries(balancingAccount) {
     try {
@@ -183,6 +214,10 @@ export default class Account {
     return child;
   }
 
+  /**
+   * Gets the balancing account path if directly or indirectly set via parent.
+   * @return {String} path, empty if not found
+   */
   getBalancingAccount() {
     if (this.balancingAccount) {
       return this.balancingAccount;
@@ -218,6 +253,12 @@ export default class Account {
     return entries.filter(e => e.type === ofType);
   }
 
+  /**
+   * Lazily get all lots from all accounts
+   * @param {Object<String,Currency>} currencies
+   * @param {Boolean} force recalculation if true
+   * @return {Array<Lot>} lots
+   */
   getLots(currencies, force) {
     if (this.isVirtual()) {
       return [];
@@ -232,7 +273,8 @@ export default class Account {
 
   /**
    * Get current balance of each currency.
-   * @param {function) filter to apply to the entries
+   * @param {function} filter to apply to the entries
+   * @return {Object<String, BigNumber>} balances keyed by currency
    */
   getBalances(entryFilter) {
     const balances = {};
@@ -251,6 +293,11 @@ export default class Account {
     return balances;
   }
 
+  /**
+   * Get current balance for each account
+   * @param {function} filter to apply to the entries
+   * @return {Object<String, BigNumber>} balances keyed by account path
+   */
   getBalancesByAccount(entryFilter) {
     let balances = {};
     balances[this.path] = this.getBalances(entryFilter);
@@ -260,6 +307,11 @@ export default class Account {
     return balances;
   }
 
+  /**
+   * Get Total balances, keyed by currency
+   * @param {function} filter to apply to the entries
+   * @return {Object<String, BigNumber>} balances keyed by currency
+   */
   getTotalBalances(entryFilter) {
     const balances = this.getBalances(entryFilter);
     Object.values(this.children).forEach((child) => {
@@ -290,6 +342,10 @@ export default class Account {
     return false;
   }
 
+  /**
+   * Test if this account is virtual or descended from a virtual parent
+   * @return {Boolean} true if virtual
+   */
   isVirtual() {
     if (this.virtual === INHERIT) {
       if (this.parent) {
@@ -300,6 +356,10 @@ export default class Account {
     return this.virtual;
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @return {Object<String, *>}
+   */
   toObject() {
     return utils.stripFalsyExcept({
       path: this.path,

@@ -65,18 +65,35 @@ export default class Transaction {
     this.fees = makeFees(fees);
   }
 
+  /**
+   * Applies all entries to their correct accounts.
+   * @param {Accounts} accounts
+   * @return {Transaction} this transaction
+   */
   applyToAccounts(accounts) {
     this.entries.forEach(e => e.applyToAccount(accounts));
+    return this;
   }
 
+  /**
+   * Get all credits from this transaction entries
+   * @return {Array<Entry} Credits
+   */
   getCredits() {
     return getCredits(this.entries);
   }
 
+  /**
+   * Get all debits from this transaction entries
+   * @return {Array<Entry} Debits
+   */
   getDebits() {
     return getDebits(this.entries);
   }
 
+  /**
+   * Test whether all debits in this transaction are balanced.
+   */
   isBalanced() {
     return allBalanced(this.getDebits());
   }
@@ -85,6 +102,10 @@ export default class Transaction {
     return this.entries.length;
   }
 
+  /**
+   * Get a representation of this object useful for logging or converting to yaml
+   * @return {Object<String, *>}
+   */
   toObject() {
     return utils.stripFalsyExcept({
       id: this.id,
@@ -106,4 +127,9 @@ export default class Transaction {
   }
 }
 
+/**
+ * Create transactions from a raw list
+ * @param {Array<Object>} raw transaction objections
+ * @return {Array<Transaction>} transactions
+ */
 export const makeTransactions = raw => raw.map(tx => new Transaction(tx));
