@@ -15,12 +15,17 @@ transactions:
       #   0.093 BTC @ $15000
       # Capital gains:
       #   -510 USD
+      # Unrealized gains (2018-03-01):
+      #   -13605 USD
       #
       # Calculations:
       #   sale price: 0.093 BTC @ $15000 = $1395
       #   purchase price: 0.093 BTC @ $20000 = $1860
       #   sale price - purchase price = $1395 - $1860 = -$510
-      
+      #   unrealized value: (1 - 0.093) remaining BTC * $5000 current price = $4535
+      #   unrealized purchase price: (1 - 0.093) * $20000 = $18140
+      #   value - purchase = $4535 - $18140 = -$13605
+
   - account: assets:exchanges:coinbase
     id: Txn 2
     note: lot 1

@@ -4,6 +4,9 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Add unrealized gains method
+   CLOSED: [2018-07-26 Thu 18:35]
+   - State "DONE"       from              [2018-07-26 Thu 18:35]
 ** DONE Add lot cap-gains
    CLOSED: [2018-07-25 Wed 19:03]
    - State "DONE"       from              [2018-07-25 Wed 19:03]

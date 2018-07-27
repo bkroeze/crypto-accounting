@@ -155,6 +155,32 @@ export default class Lot {
     return addBigNumbers(getApplied(this.debits));
   }
 
+  getUnrealizedGains(utc, pricehistory, account, currency, transCurrencies = ['BTC', 'ETH'], within = null) {
+    let quantity = BIG_0;
+    const remaining = this.getRemaining();
+    if (remaining.gt(BIG_0)) {
+      const purchasePrice = this.getPurchasePriceEach(
+        pricehistory, currency, transCurrencies, within
+      );
+      const translation = pricehistory.findPrice(
+        utc, this.currency, currency, transCurrencies, within
+      );
+      const currentPrice = translation.rate;
+
+      const profitEach = currentPrice.minus(purchasePrice);
+      quantity = profitEach.times(remaining);
+    }
+
+    const { debit } = this.debits[0];
+    return new Entry({
+      transaction: debit.transaction,
+      account,
+      quantity,
+      currency,
+      type: DEBIT,
+    });
+  }
+
   getUsed() {
     return addBigNumbers(getApplied(this.credits));
   }

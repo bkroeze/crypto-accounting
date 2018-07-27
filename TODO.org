@@ -1,7 +1,7 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** Add unrealized gains method
+** Add docstrings
 ** Create sanity/cleanliness report for Journal
 ** Add day-buckets to wallet csv converter
 ** Get transactions from wallets via JSONRPC call?
@@ -15,8 +15,6 @@
 ** Figure out a way to specify commissions in a transaction
 ** Add fees to tests
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object
-** Settle lots
-*** Capital gains from sales should be entered as Entries against capital gains & revenue
 ** Update version to 1.0.0 for release
 
 * Someday / Maybe

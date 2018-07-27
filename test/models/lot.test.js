@@ -153,7 +153,7 @@ test('calculate gains with historical prices different than realized', t => {
   t.is(gains2[1].quantity.toFixed(2), '900.00');
 });
 
-test('Test gains with non-fiat pair', t => {
+test('calculates gains with non-fiat pair', t => {
   const journal = getJournal('journal_gains2.yaml');
   const lots = journal.getLots();
   t.is(lots.length, 5);
@@ -171,7 +171,14 @@ test('Test gains with non-fiat pair', t => {
   //console.log(`totals: ${totals.map(t => t.toFixed(2))}`);
   const total = addBigNumbers(totals);
   t.is(total.toFixed(0), '195');
+});
 
+test('Calculates unrealized gains', t => {
+  const journal = getJournal('journal_gains2.yaml');
+  const lots = journal.getLots();
+  const lot = lots[0];
+  const unrealized = lot.getUnrealizedGains('2018-03-01', journal.pricehistory, 'income:unrealized', 'USD');
+  t.is(unrealized.quantity.toFixed(2), '-13605.00');
 });
 
 
