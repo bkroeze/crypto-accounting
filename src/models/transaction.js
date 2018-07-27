@@ -76,11 +76,32 @@ export default class Transaction {
   }
 
   /**
+   * Apply a function to all entries.
+   * @param {Function} function to apply
+   */
+  forEach(fn) {
+    if (fn) {
+      this.entries.forEach(fn);
+    }
+  }
+
+  getAccounts() {
+    return new Set(this.map(e => e.getAccountPath()));
+  }
+
+  /**
    * Get all credits from this transaction entries
    * @return {Array<Entry} Credits
    */
   getCredits() {
     return getCredits(this.entries);
+  }
+
+  /**
+   * Get the set of all currencies used in this transaction
+   */
+  getCurrencies() {
+    return new Set(this.map(R.prop('currency')));
   }
 
   /**
@@ -96,6 +117,18 @@ export default class Transaction {
    */
   isBalanced() {
     return allBalanced(this.getDebits());
+  }
+
+  /**
+   * Apply a function to all entries.
+   * @param {Function} function to apply
+   * @return {Array} result of function application
+   */
+  map(fn) {
+    if (!fn) {
+      return this.entries;
+    }
+    return this.entries.map(fn);
   }
 
   size() {

@@ -1,6 +1,6 @@
 import test from 'ava';
 import Moment from 'moment';
-
+import * as R from 'ramda';
 import Journal from '../../src/models/journal';
 import { BIG_0 } from '../../src/utils/numbers';
 import { journalFinder } from '../utils';
@@ -171,3 +171,42 @@ test('Finds prices', (t) => {
   t.is(price.rate.toFixed(2), '0.70');
 });
 
+test('Finds no currency problems on a clean journal', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const probs = journal.getCleanlinessOfCurrencies();
+  t.is(probs.length, 0);
+});
+
+test('Finds missing currencies', (t) => {
+  const journal = getJournalFromYaml('journal_currency_errors.yaml');
+  const probs = journal.getCleanlinessOfCurrencies();
+  t.is(probs.length, 3);
+  t.deepEqual(probs, [ 'USD currency not defined in currencies list',
+                       'ETH currency not defined in currencies list',
+                       'GIN currency not defined in currencies list' ]);
+});
+
+test('Finds no account problems on a clean journal', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const probs = journal.getCleanlinessOfAccounts();
+  t.is(probs.length, 0);
+});
+
+test('Finds missing accounts problems', (t) => {
+  const journal = getJournalFromYaml('journal_missing_accounts.yaml');
+  const probs = journal.getCleanlinessOfAccounts();
+  t.is(probs.length, 1);
+  t.deepEqual(probs, [ 'assets:exchanges:binance not defined in accounts list' ]);
+});
+
+test('Finds no unbalanced transactions on a clean journal', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const probs = journal.getCleanlinessOfTransactions();
+  t.is(probs.length, 0);
+});
+
+test('Finds no problems on a clean journal', (t) => {
+  const journal = getJournalFromYaml('journal_2.yaml');
+  const probs = journal.getCleanliness();
+  t.true(R.isEmpty(probs));
+});

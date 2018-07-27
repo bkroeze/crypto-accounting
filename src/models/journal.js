@@ -6,6 +6,7 @@ import { makeTransactions } from './transaction';
 import { makeCurrencies } from './currency';
 import * as utils from '../utils/models';
 import { BIG_0 } from '../utils/numbers';
+import * as sets from '../utils/sets';
 
 /**
  * Default properties for new Journal instances
@@ -50,6 +51,52 @@ export default class Journal {
       });
       accounts.createBalancingEntries();
     }
+  }
+
+  /**
+   * Generate a report showing helpful messages about aspects of the journal that may need fixing
+   * for integrity and accuracy.
+   * @return {Object<String, Array>} A report keyed by area.
+   */
+  getCleanliness() {
+    return utils.stripFalsy({
+      accounts: this.getCleanlinessOfAccounts(),
+      currencies: this.getCleanlinessOfCurrencies(),
+      transactions: this.getCleanlinessOfTransactions(),
+    });
+  }
+
+  getCleanlinessOfAccounts() {
+    const problems = [];
+    const accountsUsed = sets.mergeSets(this.transactions.map(tx => tx.getAccounts()));
+    accountsUsed.forEach(account => {
+      if (!this.accounts.has(account)) {
+        problems.push(`${account} not defined in accounts list`);
+      }
+    });
+    return problems;
+  }
+
+
+  getCleanlinessOfCurrencies() {
+    const problems = [];
+    const currenciesUsed = sets.mergeSets(this.transactions.map(tx => tx.getCurrencies()));
+    const currenciesAvailable = new Set(Object.keys(this.currencies));
+    const currenciesMissing = sets.setDifference(currenciesUsed, currenciesAvailable);
+    currenciesMissing.forEach(missing => {
+      problems.push(`${missing} currency not defined in currencies list`);
+    });
+    return problems;
+  }
+
+  getCleanlinessOfTransactions() {
+    const problems = [];
+    this.transactions.forEach(tx => {
+      if (!tx.isBalanced()) {
+        problems.push(`Transaction ${tx.id} on ${tx.utc.toISODate()} is not balanced.`);
+      }
+    });
+    return problems;
   }
 
   /**

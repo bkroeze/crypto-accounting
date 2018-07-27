@@ -1,0 +1,55 @@
+name: Test Fixture with deliberately missing accounts
+accounts:
+  assets:
+    children:
+      banks:
+        children:
+          checking:
+            tags: ['fiat']
+      exchanges:
+        balancing_account: equity:internet
+        children:
+          coinbase:
+            balancing_account: equity:test
+            aliases: ['cb']
+            tags: ['crypto']
+  expenses:
+    children:
+      exchange:
+        note: Exchange fees
+        tags:
+          - exchange
+          - fee
+      txfee:
+        note: Crypto transaction fees
+        tags:
+          - crypto
+          - fee
+  revenue:
+    note: Revenue accounts
+    children:
+      mining:
+        note: Income from mining activities
+        portfolio: passive
+        tags:
+          - mining
+          - crypto
+          - dividend
+          - regular-income
+  equity:
+    note: This is a virtual account, and will not show up on reports unless explicitly requested.
+    virtual: true
+    children:
+      internet:
+        note: Where crypto lives
+      test:
+        note: for tests
+      testNotVirtual:
+        virtual: false
+
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  $ref: ./transactions_2.yaml
+pricehistory:
+  $ref: ./pricehistory_2.yaml

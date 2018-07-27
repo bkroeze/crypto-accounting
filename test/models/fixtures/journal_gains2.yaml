@@ -53,7 +53,7 @@ transactions:
     entries:
       - 3 ETH @ 0.031 BTC
       # cost basis
-      #   3 ETH @ 0.31 BTC = 0.31 * $15000 = $465 each, 3 * $465 = $1395 total
+      #   3 ETH @ 0.31 BTC = 0.031 * $15000 = $465 each, 3 * $465 = $1395 total
       # Credits:
       #   1 ETH @ 0.12 BTC
       #   2 ETH @ 0.15 BTC
@@ -79,7 +79,7 @@ transactions:
     entries:
       - -2 ETH @ .12 BTC # 1 ETH -> lot 1, 1 ETH -> lot 2, 0.24 BTC -> lot 3
   - account: assets:exchanges:coinbase
-    id: Txn5
+    id: Txn6
     utc: 2018-03-01
     entries:
       - -2 ETH @ .15 BTC # 2 ETH -> lot 2, 0.30 BTC -> lot 4

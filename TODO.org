@@ -1,17 +1,10 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** Add docstrings
-** Create sanity/cleanliness report for Journal
 ** Add day-buckets to wallet csv converter
 ** Get transactions from wallets via JSONRPC call?
 *** add dotenv for JSONRPC auth
 ** Add basic CLI framework
-** Add journal.isValid()
-*** currencies all defined
-*** accounts declared
-*** all transactions balanced
-*** Should return an object helping to find problems
 ** Figure out a way to specify commissions in a transaction
 ** Add fees to tests
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object

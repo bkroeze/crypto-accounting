@@ -146,8 +146,15 @@ export default class Entry {
    * @return {Account} account for this entry
    */
   applyToAccount(accounts) {
-    const acct = accounts.get(this.getAccountPath());
-    acct.addEntry(this);
+    let acct;
+    try {
+      acct = accounts.get(this.getAccountPath());
+      acct.addEntry(this);
+    } catch (e) {
+      if (e.message === ERRORS.NOT_FOUND) {
+        console.error(`Warning, invalid journal, missing account ${this.getAccountPath()}`);
+      }
+    }
     return acct;
   }
 

@@ -1,0 +1,10 @@
+name: Test Fixture with deliberately missing currencies
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  FOO:
+    name: FooCoin
+transactions:
+  $ref: ./transactions_2.yaml
+pricehistory:
+  $ref: ./pricehistory_2.yaml

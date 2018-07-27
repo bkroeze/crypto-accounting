@@ -4,6 +4,17 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Create sanity/cleanliness report for Journal [4/4]
+   CLOSED: [2018-07-27 Fri 14:49]
+   - State "DONE"       from              [2018-07-27 Fri 14:49]
+   - [X] currencies all defined
+   - [X] accounts declared
+   - [X] all transactions balanced
+   - [X] Should return an object helping to find problems
+
+** DONE Add docstrings
+   CLOSED: [2018-07-27 Fri 12:55]
+   - State "DONE"       from              [2018-07-27 Fri 12:55]
 ** DONE Add unrealized gains method
    CLOSED: [2018-07-26 Thu 18:35]
    - State "DONE"       from              [2018-07-26 Thu 18:35]

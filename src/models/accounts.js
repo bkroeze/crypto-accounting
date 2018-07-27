@@ -129,7 +129,10 @@ export default class Accounts {
       val = this.getPath(path);
     }
     if (!val) {
-      throw new ReferenceError(path);
+      throw makeError(
+        ReferenceError,
+        ERRORS.NOT_FOUND,
+        path);
     }
     return val;
   }
@@ -220,6 +223,17 @@ export default class Accounts {
     return this.paths[path];
   }
 
+  has(path) {
+    try {
+      if (this.get(path)) {
+        return true;
+      }
+    } catch (e) {
+      //pass
+    }
+    return false;
+  }
+
   /**
    * Check to see if it is populated.
    * return {Boolean} true if no accounts
@@ -230,7 +244,7 @@ export default class Accounts {
 
   /**
    * Apply a function to all accounts.
-   * @param {Function} filter
+   * @param {Function} function to apply
    */
   map(fn) {
     const accounts = this.asList();
