@@ -1,7 +1,9 @@
 import test from 'ava';
+import * as R from 'ramda';
 import Transaction from '../../src/models/transaction';
 import Lot from '../../src/models/lot';
 import PriceHistory from '../../src/models/pricehistory';
+import { addBigNumbers } from '../../src/utils/numbers';
 import { journalFinder } from '../utils';
 
 const getJournal = journalFinder(__dirname);
@@ -113,6 +115,7 @@ test('getSalePrice direct-to-fiat', t => {
   t.is(price.toFixed(2), '600.00');
 });
 
+
 test('getSalePrice from translation', t => {
   const journal = getJournal('journal_gains2.yaml');
   const lots = journal.getLots();
@@ -137,7 +140,7 @@ test('calculate gains with historical prices different than realized', t => {
   const lots = journal.getLots();
   t.is(lots.length, 2);
   //console.log(lots[0].toObject());
-  t.is(lots[0].credits.length, 2)
+  t.is(lots[0].credits.length, 2);
   const gains1 = lots[0].getCapitalGains(journal.pricehistory, 'income:capitalgains', 'USD');
   //gains1.forEach(g => { console.log(g.toObject())});
   t.is(gains1.length, 2);
@@ -160,4 +163,15 @@ test('Test gains with non-fiat pair', t => {
   gains = lots[2].getCapitalGains(journal.pricehistory, 'income:capitalgains', 'USD');
   //gains.forEach(g => console.log(g.toObject()));
   t.deepEqual(gains.map(g => g.quantity.toFixed(0)), ['135', '570']);
+
+  const allGains = R.flatten(lots.map(l => l.getCapitalGains(journal.pricehistory, 'income:capitalgains', 'USD')));
+  //console.log(JSON.stringify(lots[0].toObject(), null, 2));
+  //allGains.forEach(g => console.log(g.toObject()));
+  const totals = R.map(R.prop('quantity'), allGains);
+  //console.log(`totals: ${totals.map(t => t.toFixed(2))}`);
+  const total = addBigNumbers(totals);
+  t.is(total.toFixed(0), '195');
+
 });
+
+

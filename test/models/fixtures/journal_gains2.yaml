@@ -5,29 +5,76 @@ currencies:
   $ref: ./currencies.yaml
 transactions:
   - account: assets:exchanges:coinbase
+    id: Txn 1
     note: lot 0
     utc: 2018-01-01
     entries:
-      - 1 BTC @ 20000 USD assets:banks:checking # cost $20000, sales 0.093 * $15000 = $1395
+      - 1 BTC @ 20000 USD assets:banks:checking
+      # cost basis $20000 each, total $20000
+      # Credits:
+      #   0.093 BTC @ $15000
+      # Capital gains:
+      #   -510 USD
+      #
+      # Calculations:
+      #   sale price: 0.093 BTC @ $15000 = $1395
+      #   purchase price: 0.093 BTC @ $20000 = $1860
+      #   sale price - purchase price = $1395 - $1860 = -$510
+      
   - account: assets:exchanges:coinbase
+    id: Txn 2
     note: lot 1
     utc: 2018-01-01
     entries:
-      - 2 ETH @ 500 USD assets:banks:checking # cost $500, sales 1 @ $400 and 0.12 * $5000 = 1 @ $600
+      - 2 ETH @ 500 USD assets:banks:checking
+      # cost basis $500 each, total $1000
+      # Credits:
+      #   1 ETH @ $400
+      #   1 ETH @ 0.12 BTC
+      # Capital Gains:
+      #   -100 USD
+      #   100 USD
+      #
+      # Calculations:
+      #   credit 1 sale price: 1 ETH @ $400 = $400
+      #   credit 2 sale price: 1 ETH @ 0.12 BTC = 1 * 0.12 * $5000 = $600
+      #   purchase price: 1 ETH @ $500 = $500
+      #   cap gain 1: credit 1 sale - purchase price = $400 - $500 = -$100
+      #   cap gain 2: credit 2 sale - purchase price = $600 - $500 = $100
   - account: assets:exchanges:coinbase
+    id: Txn 3
     utc: 2018-01-15
     note: lot 2
     entries:
-      - 3 ETH @ 0.031 BTC assets:banks:checking # cost 0.031 * $20000 = $620 -> lot 0, sales 1 @ $600, 2 @ $750
+      - 3 ETH @ 0.031 BTC
+      # cost basis
+      #   3 ETH @ 0.31 BTC = 0.31 * $15000 = $465 each, 3 * $465 = $1395 total
+      # Credits:
+      #   1 ETH @ 0.12 BTC
+      #   2 ETH @ 0.15 BTC
+      # Capital Gains
+      #   135 USD
+      #   570 USD
+      #
+      # Calculations:
+      #   credit 1 sale price: 1 ETH @ 0.12 BTC = 1 * 0.12 BTC * $5000 = $600
+      #   credit 2 sale price: 2 ETH @ 0.15 BTC = 2 * 0.15 BTC * $5000 = $1500
+      #   purchase price 1: 1 ETH @ $465
+      #   purchase price 2: 2 ETH @ $465 = $930
+      #   cap gain 1: credit 1 sale - purchase price 1 = $600 - $465 = $135
+      #   cap gain 2: credit 2 sale - purchase price 3 = $1500 - $930 = $570
   - account: assets:exchanges:coinbase
+    id: Txn 4
     utc: 2018-02-01
     entries:
       - -1 ETH @ 400 USD # 1 ETH -> lot 1
   - account: assets:exchanges:coinbase
+    id: Txn5
     utc: 2018-03-01
     entries:
       - -2 ETH @ .12 BTC # 1 ETH -> lot 1, 1 ETH -> lot 2, 0.24 BTC -> lot 3
   - account: assets:exchanges:coinbase
+    id: Txn5
     utc: 2018-03-01
     entries:
       - -2 ETH @ .15 BTC # 2 ETH -> lot 2, 0.30 BTC -> lot 4
