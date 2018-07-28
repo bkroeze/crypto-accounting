@@ -1,14 +1,13 @@
 /* eslint no-unused-vars: off */
 
-import * as R from 'ramda';
-import { contained } from 'ramda-adjunct';
-import path from 'path';
+const R = require('ramda');
+const { contained } = require('ramda-adjunct');
+const path = require('path');
 
-import { getFS } from './common';
-import { splitAndTrim } from '../utils/models';
-import Transaction from '../models/transaction';
-import { isRelativePath } from '../utils/files';
-
+const { getFS } = require('./common');
+const { splitAndTrim } = require('../utils/models');
+const Transaction = require('../models/transaction');
+const { isRelativePath } = require('../utils/files');
 
 const trimRight = val => val.trimRight;
 const isCommentChar = contained(';#%!*');
@@ -20,8 +19,7 @@ const isNewTransactionLine = val => isNumeric(val.slice(0, 1));
 const isAccountKey = contained(['id', 'account', 'note', 'status', 'address', 'party']);
 const addEqualsConnector = R.insert(0, '=');
 
-
-export function shortcutFromLedgerLine(line) {
+function shortcutFromLedgerLine(line) {
   let parts = splitAndTrim(line);
   const account = parts.shift();
   parts = R.reject(isLeadingCommentLine, parts);
@@ -34,7 +32,7 @@ export function shortcutFromLedgerLine(line) {
   return parts.join(' ').replace(/@@/g, '=');
 }
 
-export function convertLedgerTransaction(lines) {
+function convertLedgerTransaction(lines) {
   const header = splitAndTrim(lines.shift());
   const utc = header.shift().split('/').join('-');
   let status = '';
@@ -94,7 +92,7 @@ export function convertLedgerTransaction(lines) {
   });
 }
 
-export function loadLedgerTransactions(raw) {
+function loadLedgerTransactions(raw) {
   const lines = raw.replace(/\r/g, '').split('\n');
   const linesets = [];
   let accum = [];
@@ -118,11 +116,17 @@ export function loadLedgerTransactions(raw) {
   return linesets.map(convertLedgerTransaction);
 }
 
-
-export function loadTransactionsFromFilenameSync(fname, directory) {
+function loadTransactionsFromFilenameSync(fname, directory) {
   let link = fname;
   if (directory && isRelativePath(fname)) {
     link = path.normalize(`${directory}/${fname}`);
   }
   return loadLedgerTransactions(getFS().readFileSync(link, 'utf-8'));
 }
+
+module.exports = {
+  shortcutFromLedgerLine,
+  loadTransactionsFromFilenameSync,
+  loadLedgerTransactions,
+  convertLedgerTransaction,
+};

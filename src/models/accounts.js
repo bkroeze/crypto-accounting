@@ -1,11 +1,11 @@
-import * as R from 'ramda';
+const R = require('ramda');
 
-import Account from './account';
-import Lot from './lot';
-import { CREDIT, ERRORS } from './constants';
-import * as utils from '../utils/models';
-import { makeError } from '../utils/errors';
-import { BIG_0 } from '../utils/numbers';
+const Account = require('./account');
+const Lot = require('./lot');
+const { CREDIT, ERRORS } = require('./constants');
+const utils = require('../utils/models');
+const { makeError } = require('../utils/errors');
+const { BIG_0 } = require('../utils/numbers');
 
 const fifoSearch = R.find;
 const lifoSearch = R.findLast;
@@ -30,8 +30,7 @@ function getAccountPathMap(accounts) {
 /**
  * A container class for a group of accounts.
  */
-export default class Accounts {
-
+class Accounts {
   /**
    * Constructor
    * @param {Array<Object>} accounts in raw 'props' format
@@ -262,3 +261,5 @@ export default class Accounts {
     return utils.objectValsToObject(this.accounts);
   }
 }
+
+module.exports = Accounts;

@@ -1,9 +1,10 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
-import * as R from 'ramda';
-import * as RA from 'ramda-adjunct';
-import * as utils from '../utils/models';
-import { ERRORS } from './constants';
-import { makeError } from '../utils/errors';
+const R = require('ramda');
+const RA = require('ramda-adjunct');
+const utils = require('../utils/models');
+
+const { ERRORS } = require('./constants');
+const { makeError } = require('../utils/errors');
 
 const DEFAULT_PROPS = {
   id: '',
@@ -21,7 +22,7 @@ const getProps = R.pick(KEYS);
 /**
  * Represents any currency or non-stock tradeable commodity.
  */
-export default class Currency {
+class Currency {
   /**
    * Construct using a `props` object that must include "id", and may also
    * include "name" and "note"
@@ -45,6 +46,19 @@ export default class Currency {
     if (!this.name) {
       this.name = this.id;
     }
+  }
+
+  /**
+   * Make a currencies object from a yaml description
+   * @param {Object<String, Object} raw object representation, typically from YAML load
+   * @return {Object<String, Currency} currencies keyed by id
+   */
+  static makeCurrencies(raw) {
+    const currencies = {};
+    R.keysIn(raw).forEach((id) => {
+      currencies[id] = new Currency(R.merge(raw[id], { id }));
+    });
+    return currencies;
   }
 
   /**
@@ -84,15 +98,4 @@ export default class Currency {
   }
 }
 
-/**
- * Make a currencies object from a yaml description
- * @param {Object<String, Object} raw object representation, typically from YAML load
- * @return {Object<String, Currency} currencies keyed by id
- */
-export function makeCurrencies(raw) {
-  const currencies = {};
-  R.keysIn(raw).forEach((id) => {
-    currencies[id] = new Currency(R.merge(raw[id], { id }));
-  });
-  return currencies;
-}
+module.exports = Currency;

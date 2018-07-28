@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "sources": [
+    "errors.js"
+  ],
+  "names": [
+    "makeError",
+    "ErrClass",
+    "code",
+    "detail",
+    "err",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA;;;;;;AAMA,SAASA,SAAT,CAAmBC,QAAnB,EAA6BC,IAA7B,EAAmCC,MAAnC,EAA2C;AACzC,QAAMC,MAAM,IAAIH,QAAJ,CAAaC,IAAb,CAAZ;AACAE,MAAID,MAAJ,GAAaA,MAAb;AACA,SAAOC,GAAP;AACD;;AAEDC,OAAOC,OAAP,GAAiB;AACfN;AADe,CAAjB",
+  "file": "errors.js",
+  "sourceRoot": "../../src/utils",
+  "sourcesContent": [
+    "/**\n * Make an enhanced error.\n * @param {Class} ErrClass\n * @param {String} code\n * @param {Any} detail\n */\nfunction makeError(ErrClass, code, detail) {\n  const err = new ErrClass(code);\n  err.detail = detail;\n  return err;\n}\n\nmodule.exports = {\n  makeError,\n};\n"
+  ]
+}

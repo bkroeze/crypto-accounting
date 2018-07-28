@@ -1,0 +1,28 @@
+{
+  "version": 3,
+  "sources": [
+    "sets.js"
+  ],
+  "names": [
+    "R",
+    "require",
+    "setUnion",
+    "a",
+    "b",
+    "Set",
+    "mergeSets",
+    "reduce",
+    "setDifference",
+    "filter",
+    "x",
+    "has",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA,MAAMA,IAAIC,QAAQ,OAAR,CAAV;;AAEA,MAAMC,WAAW,CAACC,CAAD,EAAIC,CAAJ,KAAU,IAAIC,GAAJ,CAAQ,CAAC,GAAGF,CAAJ,EAAO,GAAGC,CAAV,CAAR,CAA3B;;AAEA,MAAME,YAAYN,EAAEO,MAAF,CAASL,QAAT,EAAmB,IAAIG,GAAJ,EAAnB,CAAlB;;AAEA,MAAMG,gBAAgB,CAACL,CAAD,EAAIC,CAAJ,KAAU,IAAIC,GAAJ,CAAQ,CAAC,GAAGF,CAAJ,EAAOM,MAAP,CAAcC,KAAK,CAACN,EAAEO,GAAF,CAAMD,CAAN,CAApB,CAAR,CAAhC;;AAEAE,OAAOC,OAAP,GAAiB;AACfP,WADe;AAEfE,eAFe;AAGfN;AAHe,CAAjB",
+  "file": "sets.js",
+  "sourceRoot": "../../src/utils",
+  "sourcesContent": [
+    "const R = require('ramda');\n\nconst setUnion = (a, b) => new Set([...a, ...b]);\n\nconst mergeSets = R.reduce(setUnion, new Set());\n\nconst setDifference = (a, b) => new Set([...a].filter(x => !b.has(x)));\n\nmodule.exports = {\n  mergeSets,\n  setDifference,\n  setUnion,\n};\n\n"
+  ]
+}

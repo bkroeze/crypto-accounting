@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "sources": [
+    "files.js"
+  ],
+  "names": [
+    "R",
+    "require",
+    "isRelativePath",
+    "fname",
+    "startsWith",
+    "slice",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA,MAAMA,IAAIC,QAAQ,OAAR,CAAV;;AAEA,SAASC,cAAT,CAAwBC,KAAxB,EAA+B;AAC7B,SAAO,CAACH,EAAEI,UAAF,CAAa,GAAb,EAAkBD,KAAlB,CAAD,IAA6BA,MAAME,KAAN,CAAY,CAAZ,EAAe,CAAf,MAAsB,GAA1D;AACD;;AAEDC,OAAOC,OAAP,GAAiB;AACfL;AADe,CAAjB",
+  "file": "files.js",
+  "sourceRoot": "../../src/utils",
+  "sourcesContent": [
+    "const R = require('ramda');\n\nfunction isRelativePath(fname) {\n  return !R.startsWith('/', fname) && fname.slice(1, 2) !== ':';\n}\n\nmodule.exports = {\n  isRelativePath,\n};\n"
+  ]
+}

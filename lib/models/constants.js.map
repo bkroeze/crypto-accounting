@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "sources": [
+    "constants.js"
+  ],
+  "names": [
+    "constants",
+    "CREDIT",
+    "DEBIT",
+    "INHERIT",
+    "CLEARED",
+    "ERRORS",
+    "forEach",
+    "k",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA,MAAMA,YAAY;AAChBC,UAAQ,QADQ;AAEhBC,SAAO,OAFS;AAGhBC,WAAS,WAHO;AAIhBC,WAAS,SAJO;AAKhBC,UAAQ;AALQ,CAAlB;;AAQA,CACE,OADF,EAEE,WAFF,EAGE,iBAHF,EAIE,kBAJF,EAKE,cALF,EAME,iBANF,EAOE,mBAPF,EAQE,WARF,EASE,cATF,EAUEC,OAVF,CAUWC,CAAD,IAAO;AACfP,YAAUK,MAAV,CAAiBE,CAAjB,IAAuB,OAAMA,CAAE,EAA/B;AACD,CAZD;;AAcAC,OAAOC,OAAP,GAAiBT,SAAjB",
+  "file": "constants.js",
+  "sourceRoot": "../../src/models",
+  "sourcesContent": [
+    "const constants = {\n  CREDIT: 'credit',\n  DEBIT: 'debit',\n  INHERIT: '%INHERIT%',\n  CLEARED: 'cleared',\n  ERRORS: {},\n};\n\n[\n  'EMPTY',\n  'EXHAUSTED',\n  'INVALID_ACCOUNT',\n  'INVALID_SHORTCUT',\n  'INVALID_TERM',\n  'MISSING_ACCOUNT',\n  'MISSING_PARAMETER',\n  'NOT_FOUND',\n  'OUT_OF_RANGE',\n].forEach((k) => {\n  constants.ERRORS[k] = `ERR_${k}`;\n});\n\nmodule.exports = constants;\n"
+  ]
+}

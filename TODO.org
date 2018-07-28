@@ -1,6 +1,7 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
+** Add build step
 ** Add day-buckets to wallet csv converter
 ** Get transactions from wallets via JSONRPC call?
 *** add dotenv for JSONRPC auth

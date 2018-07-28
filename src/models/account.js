@@ -1,13 +1,11 @@
 /* eslint no-param-reassign: off */
-import * as R from 'ramda';
-import * as RA from 'ramda-adjunct';
+const R = require('ramda');
+const RA = require('ramda-adjunct');
 
-import * as utils from '../utils/models';
-import {
-  CREDIT, DEBIT, INHERIT, ERRORS,
-} from './constants';
-import { makeError } from '../utils/errors';
-import Lot from './lot';
+const utils = require('../utils/models');
+const { CREDIT, DEBIT, INHERIT, ERRORS } = require('./constants');
+const { makeError } = require('../utils/errors');
+const Lot = require('./lot');
 
 const DEFAULT_PROPS = {
   path: '',
@@ -57,7 +55,7 @@ function entrySorter(a, b) {
   return 0;
 }
 
-export default class Account {
+class Account {
   /**
    * Construct using a `props` object that must include "path", and may also
    * include "name" and "notes"
@@ -379,3 +377,5 @@ export default class Account {
     return `Currency: ${this.id}`;
   }
 }
+
+module.exports = Account;

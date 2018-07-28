@@ -1,8 +1,10 @@
-export const CREDIT = 'credit';
-export const DEBIT = 'debit';
-export const INHERIT = '%INHERIT%';
-export const CLEARED = 'cleared';
-export const ERRORS = {};
+const constants = {
+  CREDIT: 'credit',
+  DEBIT: 'debit',
+  INHERIT: '%INHERIT%',
+  CLEARED: 'cleared',
+  ERRORS: {},
+};
 
 [
   'EMPTY',
@@ -15,5 +17,7 @@ export const ERRORS = {};
   'NOT_FOUND',
   'OUT_OF_RANGE',
 ].forEach((k) => {
-  ERRORS[k] = `ERR_${k}`;
+  constants.ERRORS[k] = `ERR_${k}`;
 });
+
+module.exports = constants;

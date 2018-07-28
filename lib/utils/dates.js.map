@@ -1,0 +1,31 @@
+{
+  "version": 3,
+  "sources": [
+    "dates.js"
+  ],
+  "names": [
+    "Moment",
+    "require",
+    "averageDates",
+    "date1",
+    "date2",
+    "d1",
+    "d2",
+    "isBefore",
+    "add",
+    "diff",
+    "compareByDate",
+    "a",
+    "b",
+    "utc",
+    "isAfter",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA,MAAMA,SAASC,QAAQ,QAAR,CAAf;;AAEA,SAASC,YAAT,CAAsBC,KAAtB,EAA6BC,KAA7B,EAAoC;AAClC,MAAIC,EAAJ;AACA,MAAIC,EAAJ;AACA,MAAIH,MAAMI,QAAN,CAAeH,KAAf,CAAJ,EAA2B;AACzBC,SAAKF,KAAL;AACAG,SAAKF,KAAL;AACD,GAHD,MAGO;AACLC,SAAKD,KAAL;AACAE,SAAKH,KAAL;AACD;AACD,SAAOH,OAAOK,GAAGG,GAAH,CAAOF,GAAGG,IAAH,CAAQJ,EAAR,IAAc,CAArB,CAAP,EAAgC,IAAhC,CAAP;AACD;;AAED,SAASK,aAAT,CAAuBC,CAAvB,EAA0BC,CAA1B,EAA6B;AAC3B,MAAID,EAAEE,GAAF,CAAMN,QAAN,CAAeK,EAAEC,GAAjB,CAAJ,EAA2B;AACzB,WAAO,CAAC,CAAR;AACD;AACD,MAAIF,EAAEE,GAAF,CAAMC,OAAN,CAAcF,EAAEC,GAAhB,CAAJ,EAA0B;AACxB,WAAO,CAAP;AACD;AACD,SAAO,CAAP;AACD;;AAEDE,OAAOC,OAAP,GAAiB;AACfd,cADe;AAEfQ;AAFe,CAAjB",
+  "file": "dates.js",
+  "sourceRoot": "../../src/utils",
+  "sourcesContent": [
+    "const Moment = require('moment');\n\nfunction averageDates(date1, date2) {\n  let d1;\n  let d2;\n  if (date1.isBefore(date2)) {\n    d1 = date1;\n    d2 = date2;\n  } else {\n    d1 = date2;\n    d2 = date1;\n  }\n  return Moment(d1.add(d2.diff(d1) / 2), 'ms');\n}\n\nfunction compareByDate(a, b) {\n  if (a.utc.isBefore(b.utc)) {\n    return -1;\n  }\n  if (a.utc.isAfter(b.utc)) {\n    return 1;\n  }\n  return 0;\n}\n\nmodule.exports = {\n  averageDates,\n  compareByDate,\n};\n"
+  ]
+}

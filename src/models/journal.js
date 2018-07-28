@@ -1,12 +1,12 @@
-import * as R from 'ramda';
+const R = require('ramda');
 
-import Accounts from './accounts';
-import PriceHistory from './pricehistory';
-import { makeTransactions } from './transaction';
-import { makeCurrencies } from './currency';
-import * as utils from '../utils/models';
-import { BIG_0 } from '../utils/numbers';
-import * as sets from '../utils/sets';
+const Accounts = require('./accounts');
+const PriceHistory = require('./pricehistory');
+const Transaction = require('./transaction');
+const { makeCurrencies } = require('./currency');
+const utils = require('../utils/models');
+const { BIG_0 } = require('../utils/numbers');
+const sets = require('../utils/sets');
 
 /**
  * Default properties for new Journal instances
@@ -23,7 +23,7 @@ const DEFAULT_PROPS = {
 const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
 
-export default class Journal {
+class Journal {
   /**
    * Construct using a `props` object.
    * @param {object} props
@@ -34,7 +34,7 @@ export default class Journal {
     this.name = merged.name;
     this.accounts = new Accounts(merged.accounts);
     this.currencies = makeCurrencies(merged.currencies);
-    this.transactions = makeTransactions(merged.transactions);
+    this.transactions = Transaction.makeTransactions(merged.transactions);
     this.pricehistory = new PriceHistory(merged.pricehistory);
     this.checkAndApply();
   }
@@ -222,3 +222,5 @@ export default class Journal {
     });
   }
 }
+
+module.exports = Journal;

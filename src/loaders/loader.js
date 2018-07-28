@@ -1,7 +1,11 @@
 /* eslint import/prefer-default-export: off */
-import { loadYamlFromFilenameSync } from './yaml_loader';
-import Journal from '../models/journal';
+const { loadYamlFromFilenameSync } = require('./yaml_loader');
+const Journal = require('../models/journal');
 
-export function loadJournalFromFilenameSync(fname, directory) {
+function loadJournalFromFilenameSync(fname, directory) {
   return new Journal(loadYamlFromFilenameSync(fname, directory));
 }
+
+module.exports = {
+  loadJournalFromFilenameSync,
+};

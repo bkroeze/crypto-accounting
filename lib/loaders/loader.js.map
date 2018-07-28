@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "sources": [
+    "loader.js"
+  ],
+  "names": [
+    "loadYamlFromFilenameSync",
+    "require",
+    "Journal",
+    "loadJournalFromFilenameSync",
+    "fname",
+    "directory",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA;AACA,MAAM,EAAEA,wBAAF,KAA+BC,QAAQ,eAAR,CAArC;AACA,MAAMC,UAAUD,QAAQ,mBAAR,CAAhB;;AAEA,SAASE,2BAAT,CAAqCC,KAArC,EAA4CC,SAA5C,EAAuD;AACrD,SAAO,IAAIH,OAAJ,CAAYF,yBAAyBI,KAAzB,EAAgCC,SAAhC,CAAZ,CAAP;AACD;;AAEDC,OAAOC,OAAP,GAAiB;AACfJ;AADe,CAAjB",
+  "file": "loader.js",
+  "sourceRoot": "../../src/loaders",
+  "sourcesContent": [
+    "/* eslint import/prefer-default-export: off */\nconst { loadYamlFromFilenameSync } = require('./yaml_loader');\nconst Journal = require('../models/journal');\n\nfunction loadJournalFromFilenameSync(fname, directory) {\n  return new Journal(loadYamlFromFilenameSync(fname, directory));\n}\n\nmodule.exports = {\n  loadJournalFromFilenameSync,\n};\n"
+  ]
+}

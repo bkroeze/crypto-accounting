@@ -4,6 +4,10 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Change to require from import, for compatibility.
+   CLOSED: [2018-07-28 Sat 07:47]
+   - State "DONE"       from              [2018-07-28 Sat 07:47]
+
 ** DONE Create sanity/cleanliness report for Journal [4/4]
    CLOSED: [2018-07-27 Fri 14:49]
    - State "DONE"       from              [2018-07-27 Fri 14:49]

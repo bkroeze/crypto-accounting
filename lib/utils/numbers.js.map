@@ -1,0 +1,30 @@
+{
+  "version": 3,
+  "sources": [
+    "numbers.js"
+  ],
+  "names": [
+    "BigNumber",
+    "require",
+    "R",
+    "BIG_0",
+    "BIG_1",
+    "addBigNumbers",
+    "reduce",
+    "acc",
+    "val",
+    "plus",
+    "isNegativeString",
+    "lt",
+    "positiveString",
+    "slice",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA,MAAMA,YAAYC,QAAS,cAAT,CAAlB;AACA,MAAMC,IAAID,QAAQ,OAAR,CAAV;;AAEA,MAAME,QAAQH,UAAU,CAAV,CAAd;AACA,MAAMI,QAAQJ,UAAU,CAAV,CAAd;;AAEA,MAAMK,gBAAgBH,EAAEI,MAAF,CAAS,CAACC,GAAD,EAAMC,GAAN,KAAcD,IAAIE,IAAJ,CAASD,GAAT,CAAvB,EAAsCL,KAAtC,CAAtB;;AAEA,MAAMO,mBAAmBF,OAAOR,UAAUQ,GAAV,EAAeG,EAAf,CAAkBR,KAAlB,CAAhC;;AAEA,SAASS,cAAT,CAAwBJ,GAAxB,EAA6B;AAC3B,SAAOE,iBAAiBF,GAAjB,IAAwBA,IAAIK,KAAJ,CAAU,CAAV,CAAxB,GAAuCL,GAA9C;AACD;;AAEDM,OAAOC,OAAP,GAAiB;AACfZ,OADe;AAEfC,OAFe;AAGfC,eAHe;AAIfK,kBAJe;AAKfE;AALe,CAAjB",
+  "file": "numbers.js",
+  "sourceRoot": "../../src/utils",
+  "sourcesContent": [
+    "const BigNumber = require ('bignumber.js');\nconst R = require('ramda');\n\nconst BIG_0 = BigNumber(0);\nconst BIG_1 = BigNumber(1);\n\nconst addBigNumbers = R.reduce((acc, val) => acc.plus(val), BIG_0);\n\nconst isNegativeString = val => BigNumber(val).lt(BIG_0);\n\nfunction positiveString(val) {\n  return isNegativeString(val) ? val.slice(1) : val;\n}\n\nmodule.exports = {\n  BIG_0,\n  BIG_1,\n  addBigNumbers,\n  isNegativeString,\n  positiveString,\n};\n"
+  ]
+}

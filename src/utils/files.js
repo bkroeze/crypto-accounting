@@ -1,7 +1,9 @@
-import * as R from 'ramda';
+const R = require('ramda');
 
-export function isRelativePath(fname) {
+function isRelativePath(fname) {
   return !R.startsWith('/', fname) && fname.slice(1, 2) !== ':';
 }
 
-export default { isRelativePath };
+module.exports = {
+  isRelativePath,
+};

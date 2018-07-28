@@ -1,12 +1,12 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
-import * as R from 'ramda';
-import * as RA from 'ramda-adjunct';
-import Moment from 'moment';
+const R = require('ramda');
+const RA = require('ramda-adjunct');
+const Moment = require('moment');
 
-import { makeEntries } from './entry';
-import * as utils from '../utils/models';
-import { makeError } from '../utils/errors';
-import { CREDIT, DEBIT, ERRORS } from './constants';
+const { makeEntries } = require('./entry');
+const utils = require('../utils/models');
+const { makeError } = require('../utils/errors');
+const { CREDIT, DEBIT, ERRORS } = require('./constants');
 
 // stub out fee descriptors
 const makeFees = fees => fees;
@@ -32,7 +32,7 @@ const allBalanced = R.all(e => e.isBalanced());
 const getDebits = R.filter(R.propEq('type', DEBIT));
 const getCredits = R.filter(R.propEq('type', CREDIT));
 
-export default class Transaction {
+class Transaction {
   /**
    * Construct using a `props` object that must include "utc", and may also
    * include "notes", "tags", and a list of transactions
@@ -63,6 +63,15 @@ export default class Transaction {
     this.utc = Moment(this.utc);
     this.entries = makeEntries(entries, this);
     this.fees = makeFees(fees);
+  }
+
+  /**
+   * Create transactions from a raw list
+   * @param {Array<Object>} raw transaction objections
+   * @return {Array<Transaction>} transactions
+   */
+  static makeTransactions(raw) {
+    return raw.map(tx => new Transaction(tx));
   }
 
   /**
@@ -160,9 +169,4 @@ export default class Transaction {
   }
 }
 
-/**
- * Create transactions from a raw list
- * @param {Array<Object>} raw transaction objections
- * @return {Array<Transaction>} transactions
- */
-export const makeTransactions = raw => raw.map(tx => new Transaction(tx));
+module.exports = Transaction;

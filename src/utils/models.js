@@ -1,6 +1,6 @@
 /* eslint no-underscore-dangle: off */
-import * as R from 'ramda';
-import * as RA from 'ramda-adjunct';
+const R = require('ramda');
+const RA = require('ramda-adjunct');
 
 /**
  * Returns a copy of an object, with all members having falsy values removed,
@@ -9,7 +9,7 @@ import * as RA from 'ramda-adjunct';
  * @param {array} (optional) list of keys to retain even if falsy
  * @return {object} stripped copy
  */
-export function stripFalsyExcept(toStrip, butNot = []) {
+function stripFalsyExcept(toStrip, butNot = []) {
   const stripped = {};
 
   Object.keys(toStrip).forEach((key) => {
@@ -21,7 +21,7 @@ export function stripFalsyExcept(toStrip, butNot = []) {
   return stripped;
 }
 
-export function stripFalsy(toStrip) {
+function stripFalsy(toStrip) {
   return stripFalsyExcept(toStrip, []);
 }
 
@@ -30,11 +30,11 @@ export function stripFalsy(toStrip) {
  * @param {Object} work
  * @return {Object} work.toObject() results;
  */
-export function toObject(work) {
+function toObject(work) {
   return (work && R.has(toObject, work)) ? work.toObject() : null;
 }
 
-export function arrayToObjects(work, shallow) {
+function arrayToObjects(work, shallow) {
   return work.map(x => x.toObject(shallow));
 }
 
@@ -43,11 +43,11 @@ export function arrayToObjects(work, shallow) {
  * @param {Object} work
  * @return {Object} work.toObject() results;
  */
-export function toShallowObject(work) {
+function toShallowObject(work) {
   return (work && R.has(toObject, work)) ? work.toObject(true) : null;
 }
 
-export function objectValsToObject(obj) {
+function objectValsToObject(obj) {
   const work = {};
   R.keysIn(obj).forEach((key) => {
     work[key] = obj[key].toObject();
@@ -55,14 +55,31 @@ export function objectValsToObject(obj) {
   return work;
 }
 
-export const filterEmpty = R.filter(R.complement(R.isEmpty));
-export const mapTrim = R.map(R.trim);
-export const splitSpace = R.split(' ');
-export const numberRe = new RegExp(/^-?[0-9.]+$/);
-export const looksNumeric = val => val.search(numberRe) > -1;
-export const startsWithCarat = R.startsWith('^');
-export const isConnector = R.contains(R.__, ['@', '=']);
+const filterEmpty = R.filter(R.complement(R.isEmpty));
+const mapTrim = R.map(R.trim);
+const splitSpace = R.split(' ');
+const numberRe = new RegExp(/^-?[0-9.]+$/);
+const looksNumeric = val => val.search(numberRe) > -1;
+const startsWithCarat = R.startsWith('^');
+const isConnector = R.contains(R.__, ['@', '=']);
 
-export function splitAndTrim(work) {
+function splitAndTrim(work) {
   return filterEmpty(mapTrim(splitSpace(work)));
 }
+
+module.exports = {
+  arrayToObjects,
+  filterEmpty,
+  isConnector,
+  looksNumeric,
+  mapTrim,
+  numberRe,
+  objectValsToObject,
+  splitAndTrim,
+  splitSpace,
+  startsWithCarat,
+  stripFalsy,
+  toObject,
+  toShallowObject,
+  stripFalsyExcept,
+};

@@ -1,11 +1,16 @@
-import fs from 'graceful-fs';
+const fs = require('graceful-fs');
 
 let activeFS = fs;
 
-export function setMockFS(mock) {
+function setMockFS(mock) {
   activeFS = mock || fs;
 }
 
-export function getFS() {
+function getFS() {
   return activeFS;
 }
+
+module.exports = {
+  getFS,
+  setMockFS,
+};

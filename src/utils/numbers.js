@@ -1,13 +1,21 @@
-import BigNumber from 'bignumber.js';
-import * as R from 'ramda';
+const BigNumber = require ('bignumber.js');
+const R = require('ramda');
 
-export const BIG_0 = BigNumber(0);
-export const BIG_1 = BigNumber(1);
+const BIG_0 = BigNumber(0);
+const BIG_1 = BigNumber(1);
 
-export const addBigNumbers = R.reduce((acc, val) => acc.plus(val), BIG_0);
+const addBigNumbers = R.reduce((acc, val) => acc.plus(val), BIG_0);
 
-export const isNegativeString = val => BigNumber(val).lt(BIG_0);
+const isNegativeString = val => BigNumber(val).lt(BIG_0);
 
-export function positiveString(val) {
+function positiveString(val) {
   return isNegativeString(val) ? val.slice(1) : val;
 }
+
+module.exports = {
+  BIG_0,
+  BIG_1,
+  addBigNumbers,
+  isNegativeString,
+  positiveString,
+};

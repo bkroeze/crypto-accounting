@@ -1,10 +1,10 @@
 /* eslint no-use-before-define: off */
-import * as R from 'ramda';
-import path from 'path';
-import { safeLoad } from 'js-yaml';
-import { isRelativePath } from '../utils/files';
-import { loadTransactionsFromFilenameSync as loadLedgerTransactions } from './ledger_loader';
-import { getFS } from './common';
+const R = require('ramda');
+const path = require('path');
+const { safeLoad } = require('js-yaml');
+const { isRelativePath } = require('../utils/files');
+const loadLedgerTransactions = require('./ledger_loader').loadTransactionsFromFilenameSync;
+const { getFS } = require('./common');
 
 const hasRef = R.has('$ref');
 const isObjectByKey = (obj, key) => R.is(Object, R.prop(key, obj));
@@ -17,7 +17,7 @@ const objectTester = R.curry(isObjectByKey);
  * @return {Array<Object<Array<String>, String>>} An array of paths, given as
  *   {path: array, link: string}
  */
-export function findRefs(work, refPath = []) {
+function findRefs(work, refPath = []) {
   let refs = [];
 
   if (hasRef(work)) {
@@ -33,7 +33,7 @@ export function findRefs(work, refPath = []) {
   return refs;
 }
 
-export function loadYamlFromFilenameSync(fname, directory) {
+function loadYamlFromFilenameSync(fname, directory) {
   let link = fname;
   if (directory && isRelativePath(fname)) {
     link = path.normalize(`${directory}/${fname}`);
@@ -41,7 +41,7 @@ export function loadYamlFromFilenameSync(fname, directory) {
   return loadRefs(safeLoad(getFS().readFileSync(link, 'utf-8')), directory);
 }
 
-export function flexibleLoadByExtSync(fname, directory) {
+function flexibleLoadByExtSync(fname, directory) {
   const ext = path.extname(fname).toLowerCase();
   if (ext === '.dat' || ext === '.ledger' || ext === '.ldr') {
     return loadLedgerTransactions(fname, directory);
@@ -49,7 +49,7 @@ export function flexibleLoadByExtSync(fname, directory) {
   return loadYamlFromFilenameSync(fname, directory);
 }
 
-export function loadRef(work, reference, directory) {
+function loadRef(work, reference, directory) {
   const { link } = reference;
   let child;
   if (R.is(String, link)) {
@@ -68,7 +68,7 @@ export function loadRef(work, reference, directory) {
   return R.assocPath(reference.path, child, merged);
 }
 
-export function loadRefs(work, directory) {
+function loadRefs(work, directory) {
   let merged = work;
   findRefs(work).forEach((ref) => {
     // and merge in the result of loading the link
@@ -76,3 +76,11 @@ export function loadRefs(work, directory) {
   });
   return merged;
 }
+
+module.exports = {
+  findRefs,
+  flexibleLoadByExtSync,
+  loadRef,
+  loadRefs,
+  loadYamlFromFilenameSync,
+};

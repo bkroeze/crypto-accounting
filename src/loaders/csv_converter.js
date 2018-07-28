@@ -1,18 +1,18 @@
 /* eslint no-unused-vars: off */
-import parse from 'csv-parse/lib/sync';
-import Moment from 'moment';
-import * as R from 'ramda';
-import { safeDump } from 'js-yaml';
+const R = require('ramda');
+const parse = require('csv-parse/lib/sync');
+const Moment = require('moment');
+const { safeDump } = require('js-yaml');
 
-import { CLEARED } from '../models/constants';
+const { CLEARED } = require('../models/constants');
 
-import * as utils from '../utils/models';
-import { getFS } from './common';
+const utils = require('../utils/models');
+const { getFS } = require('./common');
 
 const onlyConfirmed = R.propEq('Confirmed', 'true');
 const findAmount = R.find(R.startsWith('Amount'));
 
-export function parseWalletCSV(data, currency, debit, credit) {
+function parseWalletCSV(data, currency, debit, credit) {
   const parsed = parse(data, { columns: true });
   let amountField;
   const toObject = (row) => {
@@ -58,11 +58,11 @@ function toYaml(data) {
   return work.join('\n');
 }
 
-export function transactionsToYaml(data) {
+function transactionsToYaml(data) {
   return data.map(toYaml).join('\n');
 }
 
-export function walletCsvToYamlSync(filename, currency, debit, credit) {
+function walletCsvToYamlSync(filename, currency, debit, credit) {
   const data = parseWalletCSV(getFS().readFileSync(filename), currency, debit, credit);
   return transactionsToYaml(data);
 }
@@ -79,7 +79,7 @@ function byDate(a, b) {
   return 0;
 }
 
-export function mergeTransactionLists(a, b) {
+function mergeTransactionLists(a, b) {
   const ids = {};
   a.forEach((tx) => {
     if (tx.id) {
@@ -95,3 +95,12 @@ export function mergeTransactionLists(a, b) {
   work.sort(byDate);
   return work;
 }
+
+module.exports = {
+  parseWalletCSV,
+  transactionsToYaml,
+  walletCsvToYamlSync,
+  byDate,
+  mergeTransactionLists,
+};
+

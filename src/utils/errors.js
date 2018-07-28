@@ -4,12 +4,12 @@
  * @param {String} code
  * @param {Any} detail
  */
-export function makeError(ErrClass, code, detail) {
+function makeError(ErrClass, code, detail) {
   const err = new ErrClass(code);
   err.detail = detail;
   return err;
 }
 
-export default {
+module.exports = {
   makeError,
 };

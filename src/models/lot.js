@@ -1,9 +1,10 @@
-import Moment from 'moment';
-import * as R from 'ramda';
-import Entry from './entry';
-import * as utils from '../utils/models';
-import { DEBIT } from './constants';
-import { addBigNumbers, BIG_0 } from '../utils/numbers';
+const Moment = require('moment');
+const R = require('ramda');
+
+const Entry = require('./entry');
+const utils = require('../utils/models');
+const { DEBIT } = require('./constants');
+const { addBigNumbers, BIG_0 } = require('../utils/numbers');
 
 const getApplied = R.map(R.prop('applied'));
 
@@ -21,7 +22,7 @@ function makeDebitObjects(wrappers) {
   }));
 }
 
-export default class Lot {
+class Lot {
   /**
    * Instantiate the lot with its first debit.
    * @param {Entry} debit
@@ -292,3 +293,5 @@ export default class Lot {
     }, ['account']);
   }
 }
+
+module.exports = Lot;

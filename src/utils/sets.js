@@ -1,13 +1,14 @@
-import * as R from 'ramda'
+const R = require('ramda');
 
-export const setUnion = (a, b) => new Set([...a, ...b]);
+const setUnion = (a, b) => new Set([...a, ...b]);
 
-export const mergeSets = R.reduce(setUnion, new Set());
+const mergeSets = R.reduce(setUnion, new Set());
 
-export const setDifference = (a, b) => new Set([...a].filter(x => !b.has(x)));
+const setDifference = (a, b) => new Set([...a].filter(x => !b.has(x)));
 
-export default {
+module.exports = {
   mergeSets,
+  setDifference,
   setUnion,
 };
 

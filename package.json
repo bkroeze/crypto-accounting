@@ -1,6 +1,6 @@
 {
   "name": "crypto-accounting",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Multi-currency/commodity accounting using human-readable text files",
   "main": "src/cli.js",
   "repository": "https://github.com/bkroeze/crypto-accounting.git",
@@ -20,11 +20,15 @@
   "devDependencies": {
     "ava": "^0.25.0",
     "babel-cli": "^6.26.0",
+    "babel-compile": "^2.0.0",
     "babel-core": "^6.26.3",
     "babel-plugin-source-map-support": "^2.0.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.5",
+    "babel-plugin-transform-es2015-destructuring": "^6.23.0",
     "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
     "babel-register": "^6.26.0",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^13.0.0",
@@ -33,6 +37,8 @@
     "source-map-support": "^0.5.6"
   },
   "scripts": {
+    "compile": "babel-compile -p stage-3 src:lib",
+    "prepublish": "yarn compile",
     "test": "ava",
     "watch": "ava -v --watch",
     "eslint": "eslint"

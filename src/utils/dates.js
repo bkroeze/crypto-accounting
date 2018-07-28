@@ -1,6 +1,6 @@
-import Moment from 'moment';
+const Moment = require('moment');
 
-export function averageDates(date1, date2) {
+function averageDates(date1, date2) {
   let d1;
   let d2;
   if (date1.isBefore(date2)) {
@@ -13,7 +13,7 @@ export function averageDates(date1, date2) {
   return Moment(d1.add(d2.diff(d1) / 2), 'ms');
 }
 
-export function compareByDate(a, b) {
+function compareByDate(a, b) {
   if (a.utc.isBefore(b.utc)) {
     return -1;
   }
@@ -22,3 +22,8 @@ export function compareByDate(a, b) {
   }
   return 0;
 }
+
+module.exports = {
+  averageDates,
+  compareByDate,
+};

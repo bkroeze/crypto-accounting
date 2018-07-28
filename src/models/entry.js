@@ -1,13 +1,14 @@
 /* eslint prefer-destructuring: ["error", { array: false }] */
-import * as R from 'ramda';
-import * as RA from 'ramda-adjunct';
-import BigNumber from 'bignumber.js';
-import { makeError } from '../utils/errors';
-import * as utils from '../utils/models';
-import {
+const R = require('ramda');
+const RA = require('ramda-adjunct');
+
+const utils = require('../utils/models');
+const BigNumber = require('bignumber.js');
+const { makeError } = require('../utils/errors');
+const {
   BIG_0, addBigNumbers, isNegativeString, positiveString,
-} from '../utils/numbers';
-import { CREDIT, DEBIT, ERRORS } from './constants';
+} = require('../utils/numbers');
+const { CREDIT, DEBIT, ERRORS } = require('./constants');
 
 function describeLots(wrappers) {
   return wrappers.map(wrapper => ({
@@ -43,7 +44,7 @@ function getLotCredits(currency, lots) {
     .map(R.prop('applied'));
 }
 
-export default class Entry {
+class Entry {
   /**
    * Construct using a `props` object that must include the parent transaction
    * @param {String|Object} shortcut string, or full object
@@ -88,6 +89,179 @@ export default class Entry {
 
     // doesn't hurt to re-wrap if it isn't already a BigNumber
     this.quantity = new BigNumber(this.quantity);
+  }
+
+  /**
+   * parses a list of entries, which may be objects or strings
+   * @param {Array<Object|String} rawArray input
+   * @param {String} entryType credit or debit
+   */
+  static arrayToEntries(rawArray, entryType, transaction) {
+    return rawArray.map((entry) => {
+      let props;
+      if (RA.isString(entry)) {
+        props = { shortcut: entry, transaction, type: entryType };
+      } else {
+        props = { ...entry, transaction, type: entryType };
+      }
+      return new Entry(props);
+    });
+  }
+
+  /**
+   * Parses a raw object with credits and/or debits array members
+   * Pair posting: debit [@|=] credit
+   * @param {String} shortcut
+   * @return {Array<Entry>} list of entries
+   * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
+   */
+  static objectToEntries(raw, transaction) {
+    let entries = [];
+    if (hasDebits(raw)) {
+      entries = Entry.arrayToEntries(raw.debits, DEBIT, transaction);
+    }
+    if (hasCredits(raw)) {
+      entries = R.concat(entries, Entry.arrayToEntries(raw.credits, CREDIT, transaction));
+    }
+
+    return entries;
+  }
+
+  /**
+   * Parses an entry "shortcut" into balanced Entries.
+   * Shortcut can be in three forms:
+   * - Single posting (credit): "quantity currency [account]"
+   *   which will have a balancing debit created for it using the transaction debit account.
+   * - Single posting (debit): "= quantity currency [account]"
+   * - Pair posting: debit [@|=] credit
+   *
+   * @param {String} shortcut
+   * @return {Object<string: Array<Posting>>} postings, keyed by "credits" and "debits"
+   * @throws {TypeError} if shortcut cannot be parsed
+   * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
+   */
+  static shortcutToEntries(rawShortcut, transaction) {
+    const parts = utils.splitAndTrim(rawShortcut);
+    // minimal shortcut: "10 BTC"
+    if (parts.length < 2) {
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        `Invalid shortcut: ${rawShortcut}`
+      );
+    }
+
+    let accum = [];
+    let connector = '';
+    let current;
+    let shortcuts = [];
+
+    while (parts.length > 0) {
+      current = parts.shift();
+      if (!utils.isConnector(current)) {
+        accum.push(current);
+      } else {
+        if (accum.length > 0) {
+          shortcuts.push(accum);
+        }
+        connector = current;
+        accum = [];
+      }
+    }
+    if (accum.length < 2) {
+      throw makeError(
+        TypeError,
+        ERRORS.INVALID_SHORTCUT,
+        `Invalid shortcut: ${rawShortcut}`
+      );
+    }
+    shortcuts.push(accum);
+
+    if (shortcuts.length === 1) {
+      if (connector !== '=') {
+        // insert a debit at the front, without a specified account
+        // this allows the default action to be from and to the same account
+        // but if one is specified, then that is the credit account.
+        shortcuts = [shortcuts[0].slice(0, 2), shortcuts[0]];
+        connector = '=';
+      } else {
+        // a leading "=" connector means that this single-entry is a debit
+        // so add a matching credit.
+        shortcuts = [shortcuts[0], shortcuts[0].slice(0, 2)];
+      }
+    }
+    let ix = 0;
+    let debit;
+    let credit;
+    const entries = [];
+    while (ix < shortcuts.length) {
+      let debitIx = ix;
+      let creditIx = ix + 1;
+
+      const firstAmount = shortcuts[debitIx][0];
+      const negativeFirst = isNegativeString(firstAmount);
+      if (negativeFirst) {
+        // this is a credit, not a debit
+        // take the positive value
+        shortcuts[debitIx][0] = positiveString(firstAmount);
+        // and swap the shortcuts
+        debitIx = ix + 1;
+        creditIx = ix;
+      }
+
+      debit = new Entry({
+        shortcut: shortcuts[debitIx].join(' '),
+        transaction,
+        type: DEBIT,
+      });
+      credit = new Entry({
+        shortcut: shortcuts[creditIx].join(' '),
+        transaction,
+        type: CREDIT,
+      });
+
+      if (negativeFirst) {
+        credit.setPair(debit, connector === '@');
+      } else {
+        debit.setPair(credit, connector === '@');
+      }
+      entries.push(debit);
+      entries.push(credit);
+      ix += 2;
+    }
+    return entries;
+  }
+
+  /**
+   * Parses an one or more entries from a yaml-style "entry".
+   * This means it may be:
+   * - A string: shortcut
+   * - An object: with one or both of "credits" or "debits" fields
+   * @param {Object|String} raw object to parse
+   * @return {Array<Entry>} List of entries parsed
+   */
+  static flexibleToEntries(raw, transaction) {
+    if (RA.isString(raw)) {
+      return Entry.shortcutToEntries(raw, transaction);
+    }
+    if (RA.isObj(raw)) {
+      return Entry.objectToEntries(raw, transaction);
+    }
+    console.error('Invalid Entry', raw);
+    throw makeError(
+      TypeError,
+      ERRORS.INVALID_SHORTCUT,
+      'Invalid Entry: cannot parse'
+    );
+  }
+
+  /**
+   * Parse an entire list of shortcut or object entries and return a list of Entries
+   * @param {Array<Object|String}} entries
+   * @param {Transaction} transaction parent
+   */
+  static makeEntries(entries, transaction) {
+    return R.flatten(entries.map(entry => Entry.flexibleToEntries(entry, transaction)));
   }
 
   /**
@@ -344,175 +518,4 @@ export default class Entry {
   }
 }
 
-/**
- * parses a list of entries, which may be objects or strings
- * @param {Array<Object|String} rawArray input
- * @param {String} entryType credit or debit
- */
-export function arrayToEntries(rawArray, entryType, transaction) {
-  return rawArray.map((entry) => {
-    let props;
-    if (RA.isString(entry)) {
-      props = { shortcut: entry, transaction, type: entryType };
-    } else {
-      props = { ...entry, transaction, type: entryType };
-    }
-    return new Entry(props);
-  });
-}
-
-/**
- * Parses a raw object with credits and/or debits array members
- * Pair posting: debit [@|=] credit
- * @param {String} shortcut
- * @return {Array<Entry>} list of entries
- * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
- */
-export function objectToEntries(raw, transaction) {
-  let entries = [];
-  if (hasDebits(raw)) {
-    entries = arrayToEntries(raw.debits, DEBIT, transaction);
-  }
-  if (hasCredits(raw)) {
-    entries = R.concat(entries, arrayToEntries(raw.credits, CREDIT, transaction));
-  }
-
-  return entries;
-}
-
-/**
- * Parses an entry "shortcut" into balanced Entries.
- * Shortcut can be in three forms:
- * - Single posting (credit): "quantity currency [account]"
- *   which will have a balancing debit created for it using the transaction debit account.
- * - Single posting (debit): "= quantity currency [account]"
- * - Pair posting: debit [@|=] credit
- *
- * @param {String} shortcut
- * @return {Object<string: Array<Posting>>} postings, keyed by "credits" and "debits"
- * @throws {TypeError} if shortcut cannot be parsed
- * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
- */
-export function shortcutToEntries(rawShortcut, transaction) {
-  const parts = utils.splitAndTrim(rawShortcut);
-  // minimal shortcut: "10 BTC"
-  if (parts.length < 2) {
-    throw makeError(
-      TypeError,
-      ERRORS.INVALID_SHORTCUT,
-      `Invalid shortcut: ${rawShortcut}`
-    );
-  }
-
-  let accum = [];
-  let connector = '';
-  let current;
-  let shortcuts = [];
-
-  while (parts.length > 0) {
-    current = parts.shift();
-    if (!utils.isConnector(current)) {
-      accum.push(current);
-    } else {
-      if (accum.length > 0) {
-        shortcuts.push(accum);
-      }
-      connector = current;
-      accum = [];
-    }
-  }
-  if (accum.length < 2) {
-    throw makeError(
-      TypeError,
-      ERRORS.INVALID_SHORTCUT,
-      `Invalid shortcut: ${rawShortcut}`
-    );
-  }
-  shortcuts.push(accum);
-
-  if (shortcuts.length === 1) {
-    if (connector !== '=') {
-      // insert a debit at the front, without a specified account
-      // this allows the default action to be from and to the same account
-      // but if one is specified, then that is the credit account.
-      shortcuts = [shortcuts[0].slice(0, 2), shortcuts[0]];
-      connector = '=';
-    } else {
-      // a leading "=" connector means that this single-entry is a debit
-      // so add a matching credit.
-      shortcuts = [shortcuts[0], shortcuts[0].slice(0, 2)];
-    }
-  }
-  let ix = 0;
-  let debit;
-  let credit;
-  const entries = [];
-  while (ix < shortcuts.length) {
-    let debitIx = ix;
-    let creditIx = ix + 1;
-
-    const firstAmount = shortcuts[debitIx][0];
-    const negativeFirst = isNegativeString(firstAmount);
-    if (negativeFirst) {
-      // this is a credit, not a debit
-      // take the positive value
-      shortcuts[debitIx][0] = positiveString(firstAmount);
-      // and swap the shortcuts
-      debitIx = ix + 1;
-      creditIx = ix;
-    }
-
-    debit = new Entry({
-      shortcut: shortcuts[debitIx].join(' '),
-      transaction,
-      type: DEBIT,
-    });
-    credit = new Entry({
-      shortcut: shortcuts[creditIx].join(' '),
-      transaction,
-      type: CREDIT,
-    });
-
-    if (negativeFirst) {
-      credit.setPair(debit, connector === '@');
-    } else {
-      debit.setPair(credit, connector === '@');
-    }
-    entries.push(debit);
-    entries.push(credit);
-    ix += 2;
-  }
-  return entries;
-}
-
-/**
- * Parses an one or more entries from a yaml-style "entry".
- * This means it may be:
- * - A string: shortcut
- * - An object: with one or both of "credits" or "debits" fields
- * @param {Object|String} raw object to parse
- * @return {Array<Entry>} List of entries parsed
- */
-export function flexibleToEntries(raw, transaction) {
-  if (RA.isString(raw)) {
-    return shortcutToEntries(raw, transaction);
-  }
-  if (RA.isObj(raw)) {
-    return objectToEntries(raw, transaction);
-  }
-  console.error('Invalid Entry', raw);
-  throw makeError(
-    TypeError,
-    ERRORS.INVALID_SHORTCUT,
-    'Invalid Entry: cannot parse'
-  );
-}
-
-/**
- * Parse an entire list of shortcut or object entries and return a list of Entries
- * @param {Array<Object|String}} entries
- * @param {Transaction} transaction parent
- */
-export function makeEntries(entries, transaction) {
-  return R.flatten(entries.map(entry => flexibleToEntries(entry, transaction)));
-}
+module.exports = Entry;

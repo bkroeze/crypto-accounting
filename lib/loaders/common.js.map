@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "sources": [
+    "common.js"
+  ],
+  "names": [
+    "fs",
+    "require",
+    "activeFS",
+    "setMockFS",
+    "mock",
+    "getFS",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA,MAAMA,KAAKC,QAAQ,aAAR,CAAX;;AAEA,IAAIC,WAAWF,EAAf;;AAEA,SAASG,SAAT,CAAmBC,IAAnB,EAAyB;AACvBF,aAAWE,QAAQJ,EAAnB;AACD;;AAED,SAASK,KAAT,GAAiB;AACf,SAAOH,QAAP;AACD;;AAEDI,OAAOC,OAAP,GAAiB;AACfF,OADe;AAEfF;AAFe,CAAjB",
+  "file": "common.js",
+  "sourceRoot": "../../src/loaders",
+  "sourcesContent": [
+    "const fs = require('graceful-fs');\n\nlet activeFS = fs;\n\nfunction setMockFS(mock) {\n  activeFS = mock || fs;\n}\n\nfunction getFS() {\n  return activeFS;\n}\n\nmodule.exports = {\n  getFS,\n  setMockFS,\n};\n"
+  ]
+}
