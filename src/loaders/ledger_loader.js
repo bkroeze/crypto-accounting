@@ -5,12 +5,13 @@ const { contained } = require('ramda-adjunct');
 const path = require('path');
 
 const { getFS } = require('./common');
-const { splitAndTrim } = require('../utils/models');
+const { splitAndTrim, isTime } = require('../utils/models');
 const Transaction = require('../models/transaction');
 const { isRelativePath } = require('../utils/files');
+const { LEDGER_COMMENTS } = require('../models/constants')
 
 const trimRight = val => val.trimRight;
-const isCommentChar = contained(';#%!*');
+const isCommentChar = contained(LEDGER_COMMENTS);
 const isLeadingCommentLine = val => isCommentChar(val.slice(0, 1));
 const stripLeadingCommentLines = R.reject(isLeadingCommentLine);
 const isCommentLine = val => isCommentChar(val.trimLeft().slice(0, 1));
@@ -18,26 +19,47 @@ const isNumeric = contained('0123456789');
 const isNewTransactionLine = val => isNumeric(val.slice(0, 1));
 const isAccountKey = contained(['id', 'account', 'note', 'status', 'address', 'party']);
 const addEqualsConnector = R.insert(0, '=');
+const lineCommentSpaces = /\; */;
+const groupByPartType = R.groupBy((part) => {
+  return isLeadingCommentLine(part) ? 'comments' : 'parts';
+});
 
 function shortcutFromLedgerLine(line) {
-  let parts = splitAndTrim(line);
+  const clean = line
+        .replace(lineCommentSpaces, ';')
+        .replace(/@@/g, '=');
+  let parts = splitAndTrim(clean);
   const account = parts.shift();
-  parts = R.reject(isLeadingCommentLine, parts);
+  const parsed = groupByPartType(parts);
+  parts = parsed.parts;
   parts.push(account);
   if (parts.length <= 3) {
     // in Ledger format, if it is a single-posting, then it is a debit
     // so use the leading-equals shortcut for that.
     parts = addEqualsConnector(parts);
   }
-  return parts.join(' ').replace(/@@/g, '=');
+  // add comments to end;
+  while (parsed.comments && parsed.comments.length > 0) {
+    parts.push(parsed.comments.shift());
+  }
+  return parts.join(' ');
 }
 
 function convertLedgerTransaction(lines) {
   const header = splitAndTrim(lines.shift());
-  const utc = header.shift().split('/').join('-');
+  // get the utc, replacing / with -.
+  let utc = header.shift().split('/').join('-');
   let status = '';
+
+  // has time?
+  if (header[0].length > 1 && isTime(header[0])) {
+    utc = `${utc} ${header.shift()}`;
+  }
   if (header[0].length === 1 && header.length > 1) {
     status = header.shift();
+    if (status === '*') {
+      status = 'cleared';
+    }
   }
   const party = header.join(' ');
   const extra = {};

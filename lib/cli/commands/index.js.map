@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "sources": [
+    "index.js"
+  ],
+  "names": [
+    "R",
+    "require",
+    "requireCommands",
+    "map",
+    "cmd",
+    "command",
+    "e",
+    "console",
+    "log",
+    "commands",
+    "module",
+    "exports"
+  ],
+  "mappings": "AAAA,MAAMA,IAAIC,QAAQ,OAAR,CAAV;;AAEA,MAAMC,kBAAkBF,EAAEG,GAAF,CAAOC,GAAD,IAAS;AACrC,MAAI;AACF,WAAOH,QAAS,KAAIG,GAAI,EAAjB,EAAoBC,OAA3B;AACD,GAFD,CAEE,OAAOC,CAAP,EAAU;AACVC,YAAQC,GAAR,CAAa,wBAAuBJ,GAAI,EAAxC;AACA,UAAME,CAAN;AACD;AACF,CAPuB,CAAxB;;AASA,MAAMG,WAAWP,gBAAgB,CAC/B,SAD+B,CAAhB,CAAjB;;AAIAQ,OAAOC,OAAP,GAAiBF,QAAjB",
+  "file": "index.js",
+  "sourceRoot": "../../../src/cli/commands",
+  "sourcesContent": [
+    "const R = require('ramda');\n\nconst requireCommands = R.map((cmd) => {\n  try {\n    return require(`./${cmd}`).command;\n  } catch (e) {\n    console.log(`Error while loading: ${cmd}`);\n    throw e;\n  }\n});\n\nconst commands = requireCommands([\n  'convert',\n]);\n\nmodule.exports = commands;\n"
+  ]
+}

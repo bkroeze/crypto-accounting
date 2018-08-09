@@ -38,17 +38,19 @@
 // const price = history.findPrice('2018-06-17', 'GIN', 'USD', ['BTC']);
 // console.log(price.toObject());
 
-import Transaction from './src/models/transaction';
+// import Transaction from './src/models/transaction';
 
-const transaction = new Transaction({
-  account: 'test',
-  utc: '2018-07-04',
-  entries: [
-    '-10 ETH @ 400 USD exchange',
-  ]
-});
+// const transaction = new Transaction({
+//   account: 'test',
+//   utc: '2018-07-04',
+//   entries: [
+//     '-10 ETH @ 400 USD exchange',
+//   ]
+// });
 
-console.log(transaction.toObject());
-console.log('credits\n',transaction.getCredits().map(x => x.toObject()));
-console.log('debuts\n',transaction.getDebits().map(x => x.toObject()));
+// console.log(transaction.toObject());
+// console.log('credits\n',transaction.getCredits().map(x => x.toObject()));
+// console.log('debuts\n',transaction.getDebits().map(x => x.toObject()));
 
+const {b: a} = {b: 'test'};
+console.log(`a is ${a}`);

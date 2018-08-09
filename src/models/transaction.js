@@ -6,6 +6,7 @@ const Moment = require('moment');
 const { makeEntries } = require('./entry');
 const utils = require('../utils/models');
 const { makeError } = require('../utils/errors');
+const { calcHashId } = require('../utils/numbers');
 const { CREDIT, DEBIT, ERRORS } = require('./constants');
 
 // stub out fee descriptors
@@ -63,6 +64,9 @@ class Transaction {
     this.utc = Moment(this.utc);
     this.entries = makeEntries(entries, this);
     this.fees = makeFees(fees);
+    if (!this.id) {
+      this.id = calcHashId(this.toObject());
+    }
   }
 
   /**
@@ -148,13 +152,13 @@ class Transaction {
    * Get a representation of this object useful for logging or converting to yaml
    * @return {Object<String, *>}
    */
-  toObject() {
+  toObject(shortDate) {
     return utils.stripFalsyExcept({
       id: this.id,
       note: this.note,
       account: this.account,
       status: this.status,
-      utc: this.utc.toISOString(),
+      utc: shortDate ? this.utc.format('YYYY-MM-DD') : this.utc.toISOString(),
       address: this.address,
       party: this.party,
       tags: this.tags,
@@ -166,6 +170,43 @@ class Transaction {
 
   toString() {
     return `Transaction: ${this.account} ${this.utc.toISOString} [${this.entries.length} entries]`;
+  }
+
+  /**
+   * Convert a transaction object to its yaml representation
+   * @param {Boolean} byDay if bucketed
+   * @return {String} YAML representation
+   */
+  toYaml(byDay) {
+    const data = this.toObject(byDay);
+    const work = [];
+    KEYS.forEach((key) => {
+      if (R.has(key, data)) {
+        const prefix = work.length === 0 ? '-' : ' ';
+        let val = data[key];
+        if (key === 'entries') {
+          if (val && val.length > 0) {
+            work.push(`${prefix} entries:`);
+            this.getDebits().forEach((entry) => {
+              work.push(`    - ${entry.shortcut}`);
+            });
+          }
+        } else if (key === 'tags') {
+          if (val && val.length > 0) {
+            work.push(`${prefix} tags:`)
+            val.forEach((tag) => {
+              work.push(`    - ${tag}`);
+            });
+          }
+        } else if (key === 'account') {
+          work.push(`${prefix} account: ${val.credit}`)
+        } else {
+          work.push(`${prefix} ${key}: ${val}`);
+        }
+      }
+    });
+    work.push('');
+    return work.join('\n');
   }
 }
 

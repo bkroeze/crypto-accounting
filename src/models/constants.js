@@ -4,6 +4,9 @@ const constants = {
   INHERIT: '%INHERIT%',
   CLEARED: 'cleared',
   ERRORS: {},
+  LEDGER_LINE_COMMENT: ';',
+  LEDGER_COMMENTS: [';', '#', '|', '*'],
+  SYMBOL_MAP: new Map([['$', 'USD'], ['£', 'GBP'], ['€', 'EUR']]),
 };
 
 [

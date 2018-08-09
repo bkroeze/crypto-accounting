@@ -7,10 +7,10 @@ import MockFS from '../mockfs';
 const header = (currency) => `"Confirmed","Date","Type","Label","Address","Amount (${currency})","ID"`;
 
 const simpleData = [
-  '"true","2018-07-11T23:15:57","Masternode Reward","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","320.00000000","70971385e41478352e0040e95cc50bb6c347a0385b3618cc05b7452544a7bc07"',
-  '"true","2018-07-11T01:30:53","Masternode Reward","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","320.00000000","122f23e635e8fc7d085e4120fc6bd720970c10130a9e73c48e565a896b6f15cb"',
-  '"true","2018-07-10T11:08:22","Minted","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","79.99998520","e90724b3e70852b25824957bf34e80b0b52f1911bf34b1c0564c1fe0266a2f7f"',
-  '"true","2018-07-10T09:54:03","Minted","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","79.99998520","1efd6e15588931ba5f14d1416839d70cc0278214c00c9264961ee3bc5b79f63a"',
+  '"true","2018-07-11T23:15:57Z","Masternode Reward","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","320.00000000","70971385e41478352e0040e95cc50bb6c347a0385b3618cc05b7452544a7bc07"',
+  '"true","2018-07-11T01:30:53Z","Masternode Reward","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","320.00000000","122f23e635e8fc7d085e4120fc6bd720970c10130a9e73c48e565a896b6f15cb"',
+  '"true","2018-07-10T11:08:22Z","Minted","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","79.99998520","e90724b3e70852b25824957bf34e80b0b52f1911bf34b1c0564c1fe0266a2f7f"',
+  '"true","2018-07-10T09:54:03Z","Minted","MN1","CLbJSt79vKz7JRQASCeE5jZzkeNo68dMWR","79.99998520","1efd6e15588931ba5f14d1416839d70cc0278214c00c9264961ee3bc5b79f63a"',
 ];
 
 test('Can parse objects from csv', (t) => {
@@ -28,7 +28,7 @@ test('Can parse a sample csv export from file', (t) => {
   const result = csv.walletCsvToYamlSync('test.csv', 'TEST', 'assets:test', 'income:crypto');
   const expected = `- id: 70971385e41478352e0040e95cc50bb6c347a0385b3618cc05b7452544a7bc07
   account: assets:test
-  utc: 2018-07-11T23:15:57
+  utc: 2018-07-11T23:15:57.000Z
   status: cleared
   party: MN1
   note: Masternode Reward
@@ -38,7 +38,7 @@ test('Can parse a sample csv export from file', (t) => {
 
 - id: 122f23e635e8fc7d085e4120fc6bd720970c10130a9e73c48e565a896b6f15cb
   account: assets:test
-  utc: 2018-07-11T01:30:53
+  utc: 2018-07-11T01:30:53.000Z
   status: cleared
   party: MN1
   note: Masternode Reward

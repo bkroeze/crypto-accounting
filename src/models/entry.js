@@ -8,7 +8,8 @@ const { makeError } = require('../utils/errors');
 const {
   BIG_0, addBigNumbers, isNegativeString, positiveString,
 } = require('../utils/numbers');
-const { CREDIT, DEBIT, ERRORS } = require('./constants');
+const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP, LEDGER_COMMENTS } = require('./constants');
+const log = require('js-logger').get('c.a.models.entry');
 
 function describeLots(wrappers) {
   return wrappers.map(wrapper => ({
@@ -37,11 +38,65 @@ const KEYS = R.keysIn(mergeProps({}));
 const getProps = R.pick(KEYS);
 const hasCredits = R.has('credits');
 const hasDebits = R.has('debits');
+const hasLeadingSymbol = (symbol, val) => {
+  return val.slice(0,1) === symbol && utils.looksNumeric(val.slice(1));
+}
 
 function getLotCredits(currency, lots) {
   return lots
     .filter(R.propEq('currency', currency))
     .map(R.prop('applied'));
+}
+
+// TODO: Fix me, not all comments, just the semicolon
+function splitComment(val) {
+  let ix;
+  for (let i=0; i < LEDGER_COMMENTS.length; i++) {
+      ix = val.indexOf(LEDGER_COMMENTS[i]);
+    if (ix > -1) {
+      return [val.slice(0,ix), val.slice(ix)];
+    }
+  }
+  return [val, null];
+}
+
+function tokenizeShortcut(shortcut, leadingSymbolMap) {
+  const fixLeadingSymbol = (token) => {
+    let work = token;
+    leadingSymbolMap.forEach((currency, symbol) => {
+      if (hasLeadingSymbol(symbol, token)) {
+        work = `${token.slice(1)} ${currency}`;
+      }
+    });
+    return work;
+  };
+
+  // check for comment
+  const [trimmed, comment] = splitComment(shortcut);
+
+  // have to pass over string twice, first time to clean up any
+  // $100 style entries, converting to 100 USD
+  const cleaned = utils.splitAndTrim(trimmed)
+        .map(fixLeadingSymbol)
+        .join(' ');
+
+  // The second time, we want to tokenize the string
+  const tokens = utils.splitAndTrim(cleaned);
+
+  // minimal shortcut: "10 BTC"
+  if (tokens.length < 2) {
+    console.error(`Invalid shortcut (need 2 parts): ${shortcut}`);
+    throw makeError(
+      TypeError,
+      ERRORS.INVALID_SHORTCUT,
+      `Invalid shortcut (need 2 parts): ${shortcut}`
+    );
+  }
+
+  if (comment) {
+    tokens.push(comment);
+  }
+  return tokens;
 }
 
 class Entry {
@@ -140,24 +195,16 @@ class Entry {
    * @throws {TypeError} if shortcut cannot be parsed
    * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
    */
-  static shortcutToEntries(rawShortcut, transaction) {
-    const parts = utils.splitAndTrim(rawShortcut);
-    // minimal shortcut: "10 BTC"
-    if (parts.length < 2) {
-      throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        `Invalid shortcut: ${rawShortcut}`
-      );
-    }
+  static shortcutToEntries(rawShortcut, transaction, leadingSymbolMap = SYMBOL_MAP) {
+    const tokens = tokenizeShortcut(rawShortcut, leadingSymbolMap);
 
     let accum = [];
     let connector = '';
     let current;
     let shortcuts = [];
 
-    while (parts.length > 0) {
-      current = parts.shift();
+    while (tokens.length > 0) {
+      current = tokens.shift();
       if (!utils.isConnector(current)) {
         accum.push(current);
       } else {
@@ -209,24 +256,39 @@ class Entry {
         creditIx = ix;
       }
 
-      debit = new Entry({
+      const catcher = (err) => {
+        console.error(err.message, err.detail);
+        return null;
+      }
+
+      const maker = (props) => new Entry(props);
+
+      const makeEntry = R.tryCatch(maker, catcher);
+
+      debit = makeEntry({
         shortcut: shortcuts[debitIx].join(' '),
         transaction,
         type: DEBIT,
       });
-      credit = new Entry({
+      credit = makeEntry({
         shortcut: shortcuts[creditIx].join(' '),
         transaction,
         type: CREDIT,
       });
 
-      if (negativeFirst) {
-        credit.setPair(debit, connector === '@');
-      } else {
-        debit.setPair(credit, connector === '@');
+      if (credit && debit) {
+        if (negativeFirst) {
+          credit.setPair(debit, connector === '@');
+        } else {
+          debit.setPair(credit, connector === '@');
+        }
       }
-      entries.push(debit);
-      entries.push(credit);
+      if (debit) {
+        entries.push(debit)
+      };
+      if (credit) {
+        entries.push(credit)
+      };
       ix += 2;
     }
     return entries;
@@ -267,26 +329,27 @@ class Entry {
   /**
    * Parse and apply the shortcut to this object.
    * @param {String} shortcut
+   * @param {Map} leadingSymbols to use, defaulting to {'$': 'USD', '£': 'GBP', '€': EUR'}
    */
-  applyShortcut(shortcut) {
-    const parts = utils.splitAndTrim(shortcut);
-    // minimal shortcut: "10 BTC"
-    if (parts.length !== 2 && parts.length !== 3) {
+  applyShortcut(shortcut, leadingSymbolMap = SYMBOL_MAP) {
+    const tokens = tokenizeShortcut(shortcut, leadingSymbolMap);
+
+    if (tokens.length > 3) {
       throw makeError(
         TypeError,
         ERRORS.INVALID_SHORTCUT,
-        `Invalid shortcut: ${shortcut}`
+        `Invalid shortcut (unknown extra fields): ${shortcut}`
       );
     }
-    // determine which part is the currency
+    // determine which token is the currency
     let quantity;
     let currency;
 
-    const numeric1 = utils.looksNumeric(parts[0]);
-    const numeric2 = utils.looksNumeric(parts[1]);
+    const numeric1 = utils.looksNumeric(tokens[0]);
+    const numeric2 = utils.looksNumeric(tokens[1]);
 
-    if (parts.length === 3) {
-      this.account = parts[2];
+    if (tokens.length === 3) {
+      this.account = tokens[2];
     }
 
     if (numeric1 && numeric2) {
@@ -306,9 +369,9 @@ class Entry {
     }
 
     if (numeric1) {
-      [quantity, currency] = parts;
+      [quantity, currency] = tokens;
     } else {
-      [currency, quantity] = parts;
+      [currency, quantity] = tokens;
     }
     this.quantity = BigNumber(quantity);
     this.currency = currency;

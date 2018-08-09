@@ -62,6 +62,8 @@ const numberRe = new RegExp(/^-?[0-9.]+$/);
 const looksNumeric = val => val.search(numberRe) > -1;
 const startsWithCarat = R.startsWith('^');
 const isConnector = R.contains(R.__, ['@', '=']);
+const timeRE = new RegExp('^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]?$');
+const isTime = (val) => timeRE.test(val);
 
 function splitAndTrim(work) {
   return filterEmpty(mapTrim(splitSpace(work)));
@@ -71,6 +73,7 @@ module.exports = {
   arrayToObjects,
   filterEmpty,
   isConnector,
+  isTime,
   looksNumeric,
   mapTrim,
   numberRe,

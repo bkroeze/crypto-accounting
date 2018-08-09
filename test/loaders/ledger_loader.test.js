@@ -20,11 +20,12 @@ test('Can load a simple set of ledger formatted entries', t => {
   // });
   t.is(result.length, 2);
   t.deepEqual(result[0].toObject(), {
+    id: '17e6cd23672d9a0d308037f72552c72bc8e7f0e225f3ac0b881efd68c0a0ff03',
     account: {
       debit: 'income',
       credit: 'income'
     },
-    status: '*',
+    status: 'cleared',
     utc: '2018-01-01T08:00:00.000Z',
     party: 'Test',
     entries: [
@@ -56,11 +57,12 @@ test('Can load a simple set of ledger formatted entries', t => {
   });
 
   t.deepEqual(result[1].toObject(), {
+    id: 'c3dd87efa8e5ec12865a238466f0641941b75f71dca86c0c187f2be76715a81f',
     account: {
       debit: 'income',
       credit: 'income'
     },
-    status: '*',
+    status: 'cleared',
     utc: '2018-01-02T08:00:00.000Z',
     party: 'Test2',
     entries: [

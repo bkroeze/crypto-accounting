@@ -1,3 +1,4 @@
+id: TestGains2
 name: Test Fixture for testing capital gains calculations using intermediate pairs for translations
 accounts:
   $ref: ./accounts.yaml

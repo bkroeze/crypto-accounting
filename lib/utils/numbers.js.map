@@ -7,6 +7,7 @@
     "BigNumber",
     "require",
     "R",
+    "sha",
     "BIG_0",
     "BIG_1",
     "addBigNumbers",
@@ -18,13 +19,21 @@
     "lt",
     "positiveString",
     "slice",
+    "calcHashId",
+    "data",
+    "hasher",
+    "sha256",
+    "update",
+    "JSON",
+    "stringify",
+    "digest",
     "module",
     "exports"
   ],
-  "mappings": "AAAA,MAAMA,YAAYC,QAAS,cAAT,CAAlB;AACA,MAAMC,IAAID,QAAQ,OAAR,CAAV;;AAEA,MAAME,QAAQH,UAAU,CAAV,CAAd;AACA,MAAMI,QAAQJ,UAAU,CAAV,CAAd;;AAEA,MAAMK,gBAAgBH,EAAEI,MAAF,CAAS,CAACC,GAAD,EAAMC,GAAN,KAAcD,IAAIE,IAAJ,CAASD,GAAT,CAAvB,EAAsCL,KAAtC,CAAtB;;AAEA,MAAMO,mBAAmBF,OAAOR,UAAUQ,GAAV,EAAeG,EAAf,CAAkBR,KAAlB,CAAhC;;AAEA,SAASS,cAAT,CAAwBJ,GAAxB,EAA6B;AAC3B,SAAOE,iBAAiBF,GAAjB,IAAwBA,IAAIK,KAAJ,CAAU,CAAV,CAAxB,GAAuCL,GAA9C;AACD;;AAEDM,OAAOC,OAAP,GAAiB;AACfZ,OADe;AAEfC,OAFe;AAGfC,eAHe;AAIfK,kBAJe;AAKfE;AALe,CAAjB",
+  "mappings": "AAAA,MAAMA,YAAYC,QAAS,cAAT,CAAlB;AACA,MAAMC,IAAID,QAAQ,OAAR,CAAV;AACA,MAAME,MAAMF,QAAQ,QAAR,CAAZ;;AAEA,MAAMG,QAAQJ,UAAU,CAAV,CAAd;AACA,MAAMK,QAAQL,UAAU,CAAV,CAAd;;AAEA,MAAMM,gBAAgBJ,EAAEK,MAAF,CAAS,CAACC,GAAD,EAAMC,GAAN,KAAcD,IAAIE,IAAJ,CAASD,GAAT,CAAvB,EAAsCL,KAAtC,CAAtB;;AAEA,MAAMO,mBAAmBF,OAAOT,UAAUS,GAAV,EAAeG,EAAf,CAAkBR,KAAlB,CAAhC;;AAEA,SAASS,cAAT,CAAwBJ,GAAxB,EAA6B;AAC3B,SAAOE,iBAAiBF,GAAjB,IAAwBA,IAAIK,KAAJ,CAAU,CAAV,CAAxB,GAAuCL,GAA9C;AACD;;AAED,SAASM,UAAT,CAAoBC,IAApB,EAA0B;AACxB,QAAMC,SAAS,IAAId,IAAIe,MAAR,EAAf;AACAD,SAAOE,MAAP,CAAcC,KAAKC,SAAL,CAAeL,IAAf,CAAd;AACA,SAAOC,OAAOK,MAAP,CAAc,KAAd,CAAP;AACD;;AAEDC,OAAOC,OAAP,GAAiB;AACfpB,OADe;AAEfC,OAFe;AAGfC,eAHe;AAIfS,YAJe;AAKfJ,kBALe;AAMfE;AANe,CAAjB",
   "file": "numbers.js",
   "sourceRoot": "../../src/utils",
   "sourcesContent": [
-    "const BigNumber = require ('bignumber.js');\nconst R = require('ramda');\n\nconst BIG_0 = BigNumber(0);\nconst BIG_1 = BigNumber(1);\n\nconst addBigNumbers = R.reduce((acc, val) => acc.plus(val), BIG_0);\n\nconst isNegativeString = val => BigNumber(val).lt(BIG_0);\n\nfunction positiveString(val) {\n  return isNegativeString(val) ? val.slice(1) : val;\n}\n\nmodule.exports = {\n  BIG_0,\n  BIG_1,\n  addBigNumbers,\n  isNegativeString,\n  positiveString,\n};\n"
+    "const BigNumber = require ('bignumber.js');\nconst R = require('ramda');\nconst sha = require('sha.js');\n\nconst BIG_0 = BigNumber(0);\nconst BIG_1 = BigNumber(1);\n\nconst addBigNumbers = R.reduce((acc, val) => acc.plus(val), BIG_0);\n\nconst isNegativeString = val => BigNumber(val).lt(BIG_0);\n\nfunction positiveString(val) {\n  return isNegativeString(val) ? val.slice(1) : val;\n}\n\nfunction calcHashId(data) {\n  const hasher = new sha.sha256();\n  hasher.update(JSON.stringify(data));\n  return hasher.digest('hex');\n}\n\nmodule.exports = {\n  BIG_0,\n  BIG_1,\n  addBigNumbers,\n  calcHashId,\n  isNegativeString,\n  positiveString,\n};\n"
   ]
 }

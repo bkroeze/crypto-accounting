@@ -4,6 +4,17 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Unreleased version 1.0.0
+** DONE Add day-buckets to wallet csv converter
+   CLOSED: [2018-08-05 Sun 18:38]
+   - State "DONE"       from              [2018-08-05 Sun 18:38]
+** DONE Add basic CLI framework
+   CLOSED: [2018-08-05 Sun 18:38]
+   - State "DONE"       from              [2018-08-05 Sun 18:38]
+
+** DONE Add build step
+   CLOSED: [2018-07-29 Sun 16:46]
+   - State "DONE"       from              [2018-07-29 Sun 16:46]
+
 ** DONE Change to require from import, for compatibility.
    CLOSED: [2018-07-28 Sat 07:47]
    - State "DONE"       from              [2018-07-28 Sat 07:47]
