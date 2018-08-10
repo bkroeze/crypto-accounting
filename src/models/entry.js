@@ -465,7 +465,7 @@ class Entry {
    * Get a shortcut for this entry.  If it is a debit and has a credit, then add that to the shortcut.
    */
   getFullShortcut() {
-    if (this.type === DEBIT && this.pair) {
+    if (this.type === DEBIT && this.pair && !(this.pair.quantity.eq(this.quantity) && this.pair.currency === this.currency)) {
       return `${this.shortcut} @ ${this.pair.shortcut}`;
     }
     return this.shortcut;
