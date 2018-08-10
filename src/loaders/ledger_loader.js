@@ -5,10 +5,11 @@ const { contained } = require('ramda-adjunct');
 const path = require('path');
 
 const { getFS } = require('./common');
-const { splitAndTrim, isTime } = require('../utils/models');
+const { splitAndTrim, isTime, isConnector } = require('../utils/models');
 const Transaction = require('../models/transaction');
 const { isRelativePath } = require('../utils/files');
-const { LEDGER_COMMENTS } = require('../models/constants')
+const { LEDGER_COMMENTS, LEDGER_LINE_COMMENT } = require('../models/constants')
+const Entry = require('../models/entry');
 
 const trimRight = val => val.trimRight;
 const isCommentChar = contained(LEDGER_COMMENTS);
@@ -20,27 +21,32 @@ const isNewTransactionLine = val => isNumeric(val.slice(0, 1));
 const isAccountKey = contained(['id', 'account', 'note', 'status', 'address', 'party']);
 const addEqualsConnector = R.insert(0, '=');
 const lineCommentSpaces = /\; */;
-const groupByPartType = R.groupBy((part) => {
-  return isLeadingCommentLine(part) ? 'comments' : 'parts';
-});
+const isCommentToken = R.startsWith(LEDGER_LINE_COMMENT);
+const lastTokenIsComment = (val) => isCommentToken(R.last(val));
+const findConnector = R.findIndex(isConnector);
 
 function shortcutFromLedgerLine(line) {
   const clean = line
         .replace(lineCommentSpaces, ';')
         .replace(/@@/g, '=');
-  let parts = splitAndTrim(clean);
+  let parts = Entry.tokenizeShortcut(clean);
+  const comment = lastTokenIsComment(parts) ? parts.pop() : null;
   const account = parts.shift();
-  const parsed = groupByPartType(parts);
-  parts = parsed.parts;
-  parts.push(account);
   if (parts.length <= 3) {
     // in Ledger format, if it is a single-posting, then it is a debit
     // so use the leading-equals shortcut for that.
     parts = addEqualsConnector(parts);
   }
-  // add comments to end;
-  while (parsed.comments && parsed.comments.length > 0) {
-    parts.push(parsed.comments.shift());
+
+  const connectorIx = findConnector(parts);
+  if (connectorIx) {
+    parts = R.insert(connectorIx, account, parts);
+  } else {
+    parts.push(account);
+  }
+
+  if (comment) {
+    parts.push(comment);
   }
   return parts.join(' ');
 }
@@ -101,7 +107,7 @@ function convertLedgerTransaction(lines) {
 
   const entries = entryLines.map(shortcutFromLedgerLine);
 
-  return new Transaction({
+  const tx = {
     ...props,
     utc,
     status,
@@ -111,7 +117,9 @@ function convertLedgerTransaction(lines) {
     note: notes.join('\n'),
     extra,
     entries,
-  });
+  };
+  //console.log('new TX:', JSON.stringify(tx, null, 2));
+  return new Transaction(tx);
 }
 
 function loadLedgerTransactions(raw) {

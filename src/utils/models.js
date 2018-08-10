@@ -58,7 +58,7 @@ function objectValsToObject(obj) {
 const filterEmpty = R.filter(R.complement(R.isEmpty));
 const mapTrim = R.map(R.trim);
 const splitSpace = R.split(' ');
-const numberRe = new RegExp(/^-?[0-9.]+$/);
+const numberRe = new RegExp(/^-?[0-9.\,]+$/);
 const looksNumeric = val => val.search(numberRe) > -1;
 const startsWithCarat = R.startsWith('^');
 const isConnector = R.contains(R.__, ['@', '=']);

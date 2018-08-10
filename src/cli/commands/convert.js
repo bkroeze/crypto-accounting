@@ -80,7 +80,7 @@ function printResults(results, base, credit, debit, descending, byDay, startDate
       line = row.toYaml(byDay);
     } catch (e) {
       if (e.name === 'TypeError') {
-        line = rowToYaml(row, byDay);
+        line = row.toYaml(byDay);
       } else {
         throw e;
       }

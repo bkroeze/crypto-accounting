@@ -137,3 +137,28 @@ test('Handles negative shortcuts', (t) => {
   t.is(entries[0].quantity.toFixed(0), '100');
   t.is(entries[0].currency, 'USD');
 });
+
+test('shortcut with tabs', (t) => {
+  const tab = '	';
+  const e = new Entry({transaction: TX, shortcut: `0.00000370${tab}BTC${tab}Assets:Exchanges:CryptoBridge`});
+});
+
+test('Entry.tokenizeShortcut simple', (t) => {
+  t.deepEqual(Entry.tokenizeShortcut('10 ETH'), ['10', 'ETH']);
+});
+
+test('Entry.tokenizeShortcut $', (t) => {
+  t.deepEqual(Entry.tokenizeShortcut('$100'), ['100', 'USD']);
+});
+
+test('Entry.tokenizeShortcut comment', (t) => {
+  t.deepEqual(Entry.tokenizeShortcut('$100 ; testing'), ['100', 'USD', ';testing']);
+  t.deepEqual(Entry.tokenizeShortcut('$100 ; testing one two'), ['100', 'USD', ';testing one two']);
+});
+
+test('Entry.tokenizeShortcut account', (t) => {
+  t.deepEqual(Entry.tokenizeShortcut('100 BTC Income:Gift'), ['100', 'BTC', 'Income:Gift']);
+  t.deepEqual(Entry.tokenizeShortcut('100 BTC Income:Gift ;  test'), ['100', 'BTC', 'Income:Gift', ';test']);
+});
+
+

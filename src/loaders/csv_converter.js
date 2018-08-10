@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: off */
 const R = require('ramda');
+const RA = require('ramda-adjunct');
 const parse = require('csv-parse/lib/sync');
 const Moment = require('moment');
 const { safeDump } = require('js-yaml');
@@ -56,13 +57,26 @@ const keys = ['id', 'account', 'utc', 'status', 'party', 'note', 'address'];
 function toYaml(data, byDay) {
   const work = [];
   keys.forEach((key) => {
-    if (R.has(key, data)) {
+    if (R.has(key, data) && data[key]) {
       const prefix = work.length === 0 ? '-' : ' ';
+      let pushed = false;
       let val = data[key];
-      if (key === 'utc') {
+      if (key === 'account' && RA.isObj(val)) {
+        if (val.credit === val.debit) {
+          val = val.credit;
+        } else {
+          work.push(`${prefix} account:`)
+          Object.keys(val).forEach((acctKey) => {
+            work.push(`    ${acctKey}: ${val[acctKey]}`);
+          });
+          pushed = true;
+        }
+      } else if (key === 'utc') {
         val = byDay ? val.format('YYYY-MM-DD') : val.toISOString();
       }
-      work.push(`${prefix} ${key}: ${val}`);
+      if (!pushed) {
+        work.push(`${prefix} ${key}: ${val}`);
+      }
     }
   });
   if (data.entries && data.entries.length > 0) {

@@ -8,8 +8,15 @@ const { makeError } = require('../utils/errors');
 const {
   BIG_0, addBigNumbers, isNegativeString, positiveString,
 } = require('../utils/numbers');
-const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP, LEDGER_COMMENTS } = require('./constants');
+const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP, LEDGER_COMMENTS, LEDGER_LINE_COMMENT } = require('./constants');
 const log = require('js-logger').get('c.a.models.entry');
+const lineSpaces = new RegExp(/  /, 'g');
+const lineCommentSpaces = /\; */;
+const tabRe = new RegExp(/\t/, 'g');
+const commaRe = new RegExp(/,/, 'g');
+
+const isCommentToken = R.startsWith(LEDGER_LINE_COMMENT);
+const lastTokenIsComment = (val) => isCommentToken(R.last(val));
 
 function describeLots(wrappers) {
   return wrappers.map(wrapper => ({
@@ -48,19 +55,17 @@ function getLotCredits(currency, lots) {
     .map(R.prop('applied'));
 }
 
-// TODO: Fix me, not all comments, just the semicolon
 function splitComment(val) {
-  let ix;
-  for (let i=0; i < LEDGER_COMMENTS.length; i++) {
-      ix = val.indexOf(LEDGER_COMMENTS[i]);
-    if (ix > -1) {
-      return [val.slice(0,ix), val.slice(ix)];
-    }
+  const cleaned = val.replace(lineSpaces, ' ').replace(tabRe, ' ');
+
+  let ix = cleaned.indexOf(LEDGER_LINE_COMMENT);
+  if (ix > -1) {
+    return [cleaned.slice(0, ix), cleaned.slice(ix).replace(lineCommentSpaces, ';')];
   }
-  return [val, null];
+  return [cleaned, null];
 }
 
-function tokenizeShortcut(shortcut, leadingSymbolMap) {
+function tokenizeShortcut(shortcut, leadingSymbolMap = SYMBOL_MAP) {
   const fixLeadingSymbol = (token) => {
     let work = token;
     leadingSymbolMap.forEach((currency, symbol) => {
@@ -72,11 +77,11 @@ function tokenizeShortcut(shortcut, leadingSymbolMap) {
   };
 
   // check for comment
-  const [trimmed, comment] = splitComment(shortcut);
+  let [cleaned, comment] = splitComment(shortcut);
 
   // have to pass over string twice, first time to clean up any
   // $100 style entries, converting to 100 USD
-  const cleaned = utils.splitAndTrim(trimmed)
+  cleaned = utils.splitAndTrim(cleaned)
         .map(fixLeadingSymbol)
         .join(' ');
 
@@ -197,7 +202,6 @@ class Entry {
    */
   static shortcutToEntries(rawShortcut, transaction, leadingSymbolMap = SYMBOL_MAP) {
     const tokens = tokenizeShortcut(rawShortcut, leadingSymbolMap);
-
     let accum = [];
     let connector = '';
     let current;
@@ -326,13 +330,21 @@ class Entry {
     return R.flatten(entries.map(entry => Entry.flexibleToEntries(entry, transaction)));
   }
 
+  static tokenizeShortcut (shortcut, leadingSymbolMap) {
+    return tokenizeShortcut(shortcut, leadingSymbolMap);
+  }
+
   /**
    * Parse and apply the shortcut to this object.
    * @param {String} shortcut
    * @param {Map} leadingSymbols to use, defaulting to {'$': 'USD', '£': 'GBP', '€': EUR'}
    */
   applyShortcut(shortcut, leadingSymbolMap = SYMBOL_MAP) {
-    const tokens = tokenizeShortcut(shortcut, leadingSymbolMap);
+    const tokens = Entry.tokenizeShortcut(shortcut, leadingSymbolMap);
+
+    if (lastTokenIsComment(tokens)) {
+      this.note = tokens.pop().slice(1).trim(); // strip leading comment char
+    }
 
     if (tokens.length > 3) {
       throw makeError(
@@ -373,6 +385,8 @@ class Entry {
     } else {
       [currency, quantity] = tokens;
     }
+
+    quantity = quantity.replace(commaRe, '');
     this.quantity = BigNumber(quantity);
     this.currency = currency;
   }
@@ -445,6 +459,16 @@ class Entry {
 
     const credits = addBigNumbers(getLotCredits(this.currency, this.lots));
     return this.quantity.minus(credits);
+  }
+
+  /**
+   * Get a shortcut for this entry.  If it is a debit and has a credit, then add that to the shortcut.
+   */
+  getFullShortcut() {
+    if (this.type === DEBIT && this.pair) {
+      return `${this.shortcut} @ ${this.pair.shortcut}`;
+    }
+    return this.shortcut;
   }
 
   /**

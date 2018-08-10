@@ -188,7 +188,7 @@ class Transaction {
           if (val && val.length > 0) {
             work.push(`${prefix} entries:`);
             this.getDebits().forEach((entry) => {
-              work.push(`    - ${entry.shortcut}`);
+              work.push(`    - ${entry.getFullShortcut()}`);
             });
           }
         } else if (key === 'tags') {

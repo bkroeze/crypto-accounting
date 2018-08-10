@@ -1,5 +1,6 @@
 import test from 'ava';
 import * as utils from '../../src/utils/models';
+const { looksNumeric } = utils;
 
 test('StripFalsy simple', (t) => {
   const raw = {
@@ -31,4 +32,12 @@ test('StripFalsy with exceptions', (t) => {
     that: 1,
     theother: 'x',
   });
+});
+
+test('looksNumeric', (t) => {
+  t.true(looksNumeric('1'));
+  t.true(looksNumeric('1.0'));
+  t.true(looksNumeric('100.00000'));
+  t.true(looksNumeric('1,000.00000'));
+  t.true(looksNumeric('2,123,456,789.100'));
 });
