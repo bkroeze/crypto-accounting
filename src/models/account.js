@@ -1,7 +1,6 @@
 /* eslint no-param-reassign: off */
 const R = require('ramda');
 const RA = require('ramda-adjunct');
-
 const utils = require('../utils/models');
 const { CREDIT, DEBIT, INHERIT, ERRORS } = require('./constants');
 const { makeError } = require('../utils/errors');
@@ -264,7 +263,7 @@ class Account {
     if (this.dirty.lots || force) {
       const debits = this.getEntries(DEBIT);
       this.lots = Lot.makeLots(currencies, debits);
-      // console.log('made lots:', this.lots.map(l => l.toObject(true)));
+      // console.log('made lots:', this.lots.map(l => l.toObject({shallow: true})));
     }
     return this.lots;
   }
@@ -358,19 +357,24 @@ class Account {
    * Get a representation of this object useful for logging or converting to yaml
    * @return {Object<String, *>}
    */
-  toObject() {
-    return utils.stripFalsyExcept({
+  toObject(options = {}) {
+    const props = {
       path: this.path,
       aliases: this.aliases,
       balancing_account: this.balancingAccount,
       note: this.note,
       tags: this.tags,
       portfolio: this.portfolio,
-      children: utils.objectValsToObject(this.children),
-      entries: this.entries.map(utils.toObject),
+      children: utils.objectValsToObject(this.children, options),
       virtual: this.virtual === INHERIT ? null : this.virtual,
       details: this.details,
-    });
+    };
+
+    if (!options.yaml) {
+      props.entries = utils.arrayToObjects(this.entries, options);
+    }
+
+    return utils.stripFalsyExcept(props);
   }
 
   toString() {

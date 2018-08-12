@@ -31,11 +31,15 @@ function stripFalsy(toStrip) {
  * @return {Object} work.toObject() results;
  */
 function toObject(work) {
-  return (work && R.has(toObject, work)) ? work.toObject() : null;
+  try {
+    return work.toObject()
+  } catch (e) {
+    return work;
+  }
 }
 
-function arrayToObjects(work, shallow) {
-  return work.map(x => x.toObject(shallow));
+function arrayToObjects(work, options) {
+  return work.map(x => x.toObject(options));
 }
 
 /**
@@ -44,13 +48,13 @@ function arrayToObjects(work, shallow) {
  * @return {Object} work.toObject() results;
  */
 function toShallowObject(work) {
-  return (work && R.has(toObject, work)) ? work.toObject(true) : null;
+  return (work && R.has(toObject, work)) ? work.toObject({shallow: true}) : null;
 }
 
-function objectValsToObject(obj) {
+function objectValsToObject(obj, options) {
   const work = {};
   R.keysIn(obj).forEach((key) => {
-    work[key] = obj[key].toObject();
+    work[key] = obj[key].toObject(options);
   });
   return work;
 }

@@ -82,7 +82,7 @@ class Currency {
    * Get a representation of this object useful for logging or converting to yaml
    * @return {Object<String, *>}
    */
-  toObject() {
+  toObject(options) {
     return utils.stripFalsyExcept({
       id: this.id,
       name: this.name,

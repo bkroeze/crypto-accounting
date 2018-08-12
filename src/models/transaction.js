@@ -150,19 +150,20 @@ class Transaction {
 
   /**
    * Get a representation of this object useful for logging or converting to yaml
+   * @param {Object} options "byDay", "yaml", "shallow"
    * @return {Object<String, *>}
    */
-  toObject(shortDate) {
+  toObject(options = {}) {
     return utils.stripFalsyExcept({
       id: this.id,
       note: this.note,
       account: this.account,
       status: this.status,
-      utc: shortDate ? this.utc.format('YYYY-MM-DD') : this.utc.toISOString(),
+      utc: options.byDay ? this.utc.format('YYYY-MM-DD') : this.utc.toISOString(),
       address: this.address,
       party: this.party,
       tags: this.tags,
-      entries: this.entries.map(t => t.toObject()),
+      entries: this.entries.map(t => t.toObject(options)),
       fees: this.fees, // change to this.fees.map(f => t.toObject()) when unstub
       details: this.details,
     }, ['entries']);
@@ -178,7 +179,7 @@ class Transaction {
    * @return {String} YAML representation
    */
   toYaml(byDay) {
-    const data = this.toObject(byDay);
+    const data = this.toObject({byDay});
     const work = [];
     KEYS.forEach((key) => {
       if (R.has(key, data)) {

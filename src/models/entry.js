@@ -582,22 +582,27 @@ class Entry {
 
   /**
    * Get a representation of this object useful for logging or converting to yaml
-   * @param {Boolean} shallow - reduce output of child objects if true
+   * @param {props} object with optional "shallow" and "yaml" fields
    * @return {Object<String, *>}
    */
-  toObject(shallow) {
-    return utils.stripFalsyExcept({
+  toObject({shallow, yaml}) {
+    const props = {
       id: this.id,
       quantity: this.quantity.toFixed(8),
       currency: this.currency,
       account: this.getAccountPath(),
       type: this.type,
-      pair: (!this.pair || shallow) ? null : this.pair.toObject(true),
-      balancing: (!this.balancing || shallow) ? null : this.balancing.toObject(true),
-      lots: shallow ? null : describeLots(this.lots),
       note: this.note,
       virtual: this.virtual,
-    });
+    };
+
+    if (!yaml) {
+      props.pair = (!this.pair || shallow) ? null : this.pair.toObject({ yaml, shallow: true});
+      props.balancing = (!this.balancing || shallow) ? null : this.balancing.toObject({ yaml, shallow: true });
+      props.lots = shallow ? null : describeLots(this.lots);
+    }
+
+    return utils.stripFalsy(props);
   }
 
   toString() {

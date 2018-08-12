@@ -10,14 +10,14 @@ const getApplied = R.map(R.prop('applied'));
 
 function makeCreditObjects(wrappers) {
   return wrappers.map(wrapper => ({
-    ...wrapper.credit.toObject(true),
+    ...wrapper.credit.toObject({shallow: true}),
     applied: wrapper.applied.toFixed(8),
   }));
 }
 
 function makeDebitObjects(wrappers) {
   return wrappers.map(wrapper => ({
-    ...wrapper.debit.toObject(true),
+    ...wrapper.debit.toObject({shallow: true}),
     applied: wrapper.applied.toFixed(8),
   }));
 }
@@ -75,7 +75,7 @@ class Lot {
       return false;
     }
     if (debit.balancing) {
-      // console.log('debit is lot', debit.toObject(true));
+      // console.log('debit is lot', debit.toObject({shallow: true}));
       return true;
     }
 
