@@ -13,6 +13,7 @@ const sets = require('../utils/sets');
  */
 const DEFAULT_PROPS = {
   id: null,
+  note: null,
   name: null,
   accounts: {},
   currencies: {},
@@ -32,6 +33,7 @@ class Journal {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
     this.id = R.propOr(merged.name, 'id', merged);
     this.name = merged.name;
+    this.note = merged.note;
     this.accounts = new Accounts(merged.accounts);
     this.currencies = makeCurrencies(merged.currencies);
     this.transactions = Transaction.makeTransactions(merged.transactions);
@@ -215,6 +217,7 @@ class Journal {
     return utils.stripFalsyExcept({
       id: this.id,
       name: this.name,
+      note: this.note,
       accounts: this.accounts.toObject(options),
       currencies: utils.objectValsToObject(this.currencies, options),
       transactions: utils.arrayToObjects(this.transactions, options),
