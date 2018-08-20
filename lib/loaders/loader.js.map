@@ -20,17 +20,15 @@
     "parse",
     "base",
     "dir",
-    "console",
-    "log",
     "data",
     "journal",
     "module",
     "exports"
   ],
-  "mappings": "AAAA;AACA,MAAM,EAAEA,wBAAF,KAA+BC,QAAQ,eAAR,CAArC;AACA,MAAM,EAAEC,SAAF,KAAgBD,QAAQ,iBAAR,CAAtB;AACA,MAAM,EAAEE,MAAF,KAAaF,QAAQ,qBAAR,CAAnB;AACA,MAAMG,UAAUH,QAAQ,mBAAR,CAAhB;AACA,MAAMI,OAAOJ,QAAQ,MAAR,CAAb;;AAEA,SAASK,2BAAT,CAAqCC,KAArC,EAA4CC,YAAY,IAAxD,EAA8D;AAC5D,MAAI,CAACD,KAAL,EAAY;AACV,UAAML,UAAUC,OAAOM,iBAAjB,EAAoC,kBAApC,CAAN;AACD;AACD,MAAIC,aAAaH,KAAjB;AACA,MAAII,WAAWH,SAAf;AACA,MAAIA,cAAc,IAAlB,EAAwB;AACtB,UAAMI,SAASP,KAAKQ,KAAL,CAAWN,KAAX,CAAf;AACAG,iBAAaE,OAAOE,IAApB;AACAH,eAAWC,OAAOG,GAAlB;AACD;AACDC,UAAQC,GAAR,CAAa,WAAUN,QAAS,IAAGD,UAAW,EAA9C;AACA,QAAMQ,OAAOlB,yBAAyBU,UAAzB,EAAqCC,QAArC,CAAb;AACAK,UAAQC,GAAR,CAAY,UAAZ;AACA,QAAME,UAAU,IAAIf,OAAJ,CAAYc,IAAZ,CAAhB;AACAF,UAAQC,GAAR,CAAY,aAAZ;AACA,SAAOE,OAAP;AACD;;AAEDC,OAAOC,OAAP,GAAiB;AACff;AADe,CAAjB",
+  "mappings": "AAAA;AACA,MAAM,EAAEA,wBAAF,KAA+BC,QAAQ,eAAR,CAArC;AACA,MAAM,EAAEC,SAAF,KAAgBD,QAAQ,iBAAR,CAAtB;AACA,MAAM,EAAEE,MAAF,KAAaF,QAAQ,qBAAR,CAAnB;AACA,MAAMG,UAAUH,QAAQ,mBAAR,CAAhB;AACA,MAAMI,OAAOJ,QAAQ,MAAR,CAAb;;AAEA,SAASK,2BAAT,CAAqCC,KAArC,EAA4CC,YAAY,IAAxD,EAA8D;AAC5D,MAAI,CAACD,KAAL,EAAY;AACV,UAAML,UAAUC,OAAOM,iBAAjB,EAAoC,kBAApC,CAAN;AACD;AACD,MAAIC,aAAaH,KAAjB;AACA,MAAII,WAAWH,SAAf;AACA,MAAIA,cAAc,IAAlB,EAAwB;AACtB,UAAMI,SAASP,KAAKQ,KAAL,CAAWN,KAAX,CAAf;AACAG,iBAAaE,OAAOE,IAApB;AACAH,eAAWC,OAAOG,GAAlB;AACD;AACD,QAAMC,OAAOhB,yBAAyBU,UAAzB,EAAqCC,QAArC,CAAb;AACA,QAAMM,UAAU,IAAIb,OAAJ,CAAYY,IAAZ,CAAhB;AACA,SAAOC,OAAP;AACD;;AAEDC,OAAOC,OAAP,GAAiB;AACfb;AADe,CAAjB",
   "file": "loader.js",
   "sourceRoot": "../../src/loaders",
   "sourcesContent": [
-    "/* eslint import/prefer-default-export: off */\nconst { loadYamlFromFilenameSync } = require('./yaml_loader');\nconst { makeError } = require('../utils/errors');\nconst { ERRORS } = require('../models/constants');\nconst Journal = require('../models/journal');\nconst path = require('path');\n\nfunction loadJournalFromFilenameSync(fname, directory = null) {\n  if (!fname) {\n    throw makeError(ERRORS.MISSING_PARAMETER, 'Missing filename');\n  }\n  let cleanFname = fname;\n  let cleanDir = directory;\n  if (directory === null) {\n    const parsed = path.parse(fname);\n    cleanFname = parsed.base;\n    cleanDir = parsed.dir;\n  }\n  console.log(`loading ${cleanDir}/${cleanFname}`);\n  const data = loadYamlFromFilenameSync(cleanFname, cleanDir);\n  console.log('got data');\n  const journal = new Journal(data);\n  console.log('Got journal');\n  return journal;\n}\n\nmodule.exports = {\n  loadJournalFromFilenameSync,\n};\n"
+    "/* eslint import/prefer-default-export: off */\nconst { loadYamlFromFilenameSync } = require('./yaml_loader');\nconst { makeError } = require('../utils/errors');\nconst { ERRORS } = require('../models/constants');\nconst Journal = require('../models/journal');\nconst path = require('path');\n\nfunction loadJournalFromFilenameSync(fname, directory = null) {\n  if (!fname) {\n    throw makeError(ERRORS.MISSING_PARAMETER, 'Missing filename');\n  }\n  let cleanFname = fname;\n  let cleanDir = directory;\n  if (directory === null) {\n    const parsed = path.parse(fname);\n    cleanFname = parsed.base;\n    cleanDir = parsed.dir;\n  }\n  const data = loadYamlFromFilenameSync(cleanFname, cleanDir);\n  const journal = new Journal(data);\n  return journal;\n}\n\nmodule.exports = {\n  loadJournalFromFilenameSync,\n};\n"
   ]
 }
