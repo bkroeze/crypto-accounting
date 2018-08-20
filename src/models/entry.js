@@ -45,6 +45,10 @@ const KEYS = R.keysIn(mergeProps({}));
 const getProps = R.pick(KEYS);
 const hasCredits = R.has('credits');
 const hasDebits = R.has('debits');
+const hasEntries = R.has('entries');
+const isCredit = R.propEq('type', 'credit');
+const isDebit = R.propEq('type', 'debit');
+
 const hasLeadingSymbol = (symbol, val) => {
   return val.slice(0,1) === symbol && utils.looksNumeric(val.slice(1));
 }
@@ -177,14 +181,29 @@ class Entry {
    */
   static objectToEntries(raw, transaction) {
     let entries = [];
-    if (hasDebits(raw)) {
-      entries = Entry.arrayToEntries(raw.debits, DEBIT, transaction);
-    }
-    if (hasCredits(raw)) {
-      entries = R.concat(entries, Entry.arrayToEntries(raw.credits, CREDIT, transaction));
+    let debits = [];
+    let credits = [];
+    if (hasEntries(raw)) {
+      credits = raw.entries.filter(isCredit);
+      debits = raw.entries.filter(isDebit);
     }
 
-    return entries;
+    if (hasDebits(raw)) {
+      debits = R.concat(debits, raw.debits);
+    }
+    if (hasCredits(raw)) {
+      credits = R.concat(credits, raw.credits);
+    }
+
+    if (debits) {
+      debits = Entry.arrayToEntries(debits, DEBIT, transaction);
+    }
+
+    if (credits) {
+      credits = Entry.arrayToEntries(credits, CREDIT, transaction);
+    }
+
+    return R.concat(debits, credits);
   }
 
   /**
@@ -582,10 +601,11 @@ class Entry {
 
   /**
    * Get a representation of this object useful for logging or converting to yaml
-   * @param {props} object with optional "shallow" and "yaml" fields
+   * @param {options} object with optional "shallow" and "yaml" fields
    * @return {Object<String, *>}
    */
-  toObject({shallow, yaml}) {
+  toObject(options = {}) {
+    const {shallow, yaml} = options;
     const props = {
       id: this.id,
       quantity: this.quantity.toFixed(8),

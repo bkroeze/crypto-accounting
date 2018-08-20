@@ -49,6 +49,6 @@ test('Can load a simple set of ledger formatted entries', t => {
   party: Test
   utc: 2018-01-01T08:00:00.000Z
   entries:
-    - 1 USD assets:test @ 1 USD
+    - 1 USD assets:test
 `);
 });

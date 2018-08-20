@@ -66,7 +66,7 @@ test('Can load an object entry with shortcuts', (t) => {
       currency: 'USD',
     }],
   }, TX);
-  t.is(entries.length, 3);
+  t.is(entries.length, 3); 
   t.is(entries[0].currency, 'ETH');
   t.is(entries[0].quantity.toFixed(0), '100');
   t.is(entries[0].type, 'debit');
@@ -94,6 +94,19 @@ test('Can load objects and strings interchangeably', (t) => {
   t.is(e1[1].equals(e2[1]), true);
   t.is(e1[0].equals(e3[0]), true);
   t.is(e1[1].equals(e3[1]), true);
+});
+
+test('Can load objects with "entries" member', (t) => {
+  const entries = flexibleToEntries({
+    entries: [
+      {quantity: "1.00000000", currency: "BTC", account: "assets:exchanges:coinbase", type: "debit"},
+      {quantity: "20000.00000000", currency: "USD", account: "assets:banks:checking", type: "credit"}
+    ]
+  }, TX);
+  t.is(entries.length, 2);
+  t.is(entries[0].quantity.toFixed(0), '1');
+  t.is(entries[0].type, 'debit');
+  t.is(entries[0].currency, 'BTC');
 });
 
 test('Can load a list of mixed types', (t) => {

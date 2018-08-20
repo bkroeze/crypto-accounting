@@ -137,7 +137,8 @@ class PairPrice {
    * @param {Object} options - "shallow" or "yaml" reduce output of child objects if true
    * @return {Object<String, *>}
    */
-  toObject({shallow, yaml}) {
+  toObject(options = {}) {
+    const {shallow, yaml} = options;
     const props = {
       pair: this.pair,
       utc: this.utc.toISOString(),
