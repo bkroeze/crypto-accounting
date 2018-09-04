@@ -24,6 +24,7 @@ const lineCommentSpaces = /\; */;
 const isCommentToken = R.startsWith(LEDGER_LINE_COMMENT);
 const lastTokenIsComment = (val) => isCommentToken(R.last(val));
 const findConnector = R.findIndex(isConnector);
+const isNegative = R.startsWith('-');
 
 function shortcutFromLedgerLine(line) {
   const clean = line
@@ -33,10 +34,21 @@ function shortcutFromLedgerLine(line) {
   const comment = lastTokenIsComment(parts) ? parts.pop() : null;
   const account = parts.shift();
   if (parts.length <= 3) {
-    // in Ledger format, if it is a single-posting, then it is a debit
-    // so use the leading-equals shortcut for that.
-    parts = addEqualsConnector(parts);
+    // in Ledger format, a single posting could be a credit
+    // if it is negative
+    if (isNegative(parts[0])) {
+      parts[0] = parts[0].slice(1);  // strip the negative
+      // console.log('single credit posting', parts);
+    }
+    else {
+      // it is a debit, so use the leading equals to indicate it
+      parts = addEqualsConnector(parts);
+      // console.log('single debit posting', parts);
+    }
   }
+  // else {
+  //   console.log('connector', parts);
+  // }
 
   const connectorIx = findConnector(parts);
   if (connectorIx) {
@@ -48,10 +60,11 @@ function shortcutFromLedgerLine(line) {
   if (comment) {
     parts.push(comment);
   }
+  //console.log('final', parts);
   return parts.join(' ');
 }
 
-function convertLedgerTransaction(lines) {
+function ledgerTransactionToObject(lines) {
   const header = splitAndTrim(lines.shift());
   // get the utc, replacing / with -.
   let utc = header.shift().split('/').join('-');
@@ -69,8 +82,6 @@ function convertLedgerTransaction(lines) {
   }
   const party = header.join(' ');
   const extra = {};
-  let account = '';
-  const address = '';
   const notes = [];
   const props = {};
   const entryLines = [];
@@ -84,8 +95,8 @@ function convertLedgerTransaction(lines) {
         notes.push(linetext);
       } else {
         const parts = linetext.split(':');
-        const key = parts[0].toLowerCase();
-        const val = parts.slice(1).join(':');
+        const key = parts[0].toLowerCase().trim();
+        const val = parts.slice(1).join(':').trim();
         if (key === 'notes') {
           notes.push(val);
         } else if (isAccountKey(key)) {
@@ -101,28 +112,28 @@ function convertLedgerTransaction(lines) {
     const lastLine = entryLines[entryLines.length - 1];
     if (lastLine.indexOf(' ') === -1) {
       // yes, this is an "elided" Ledger entry
-      account = entryLines.pop();
+      props.account = entryLines.pop();
     }
   }
 
   const entries = entryLines.map(shortcutFromLedgerLine);
 
-  const tx = {
+  return {
     ...props,
     utc,
     status,
     party,
-    account,
-    address,
     note: notes.join('\n'),
     extra,
     entries,
   };
-  //console.log('new TX:', JSON.stringify(tx, null, 2));
-  return new Transaction(tx);
 }
 
-function loadLedgerTransactions(raw) {
+function convertLedgerTransaction(lines) {
+  return new Transaction(ledgerTransactionToObject(lines));
+}
+
+function splitLedgerTransactions(raw) {
   const lines = raw.replace(/\r/g, '').split('\n');
   const linesets = [];
   let accum = [];
@@ -143,7 +154,17 @@ function loadLedgerTransactions(raw) {
   }
 
   // now we have an array of "linesets" which each are a transaction, hopefully.
-  return linesets.map(convertLedgerTransaction);
+  return linesets;
+}
+
+function loadLedgerTransactions(raw) {
+  return splitLLedgerTransactions(raw)
+    .map(convertLedgerTransaction);
+}
+
+function loadObjectsFromString(raw) {
+  return splitLedgerTransactions(raw)
+    .map(ledgerTransactionToObject);
 }
 
 function loadTransactionsFromFilenameSync(fname, directory) {
@@ -156,6 +177,7 @@ function loadTransactionsFromFilenameSync(fname, directory) {
 
 module.exports = {
   shortcutFromLedgerLine,
+  loadObjectsFromString,
   loadTransactionsFromFilenameSync,
   loadLedgerTransactions,
   convertLedgerTransaction,

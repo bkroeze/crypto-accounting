@@ -1,0 +1,29 @@
+- pattern: 'assets:wallets:'
+  replace:
+    - 'Assets:Wallets:'
+    - 'Assets:Crypto:Wallet:'
+    - 'Assets:Crypto:Wallets:'
+
+- pattern: liabilities:sharedmasternode
+  replace:
+    - Liabilities:SharedMasternode
+
+- pattern: assets:exchanges:cryptobridge
+  replace:
+    - Assets:Exchanges:CryptoBridge
+
+- pattern: assets:exchanges:coinbase
+  replace:
+    - Assets:Exchanges:Coinbase
+
+- pattern: expenses:exchanges
+  replace:
+    - Expenses:Exchanges:Fees
+
+- pattern: expenses:txfee
+  replace:
+    - Expenses:Crypto:Fees
+
+- pattern: income:masternode
+  replace:
+    - Income:Crypto:MN

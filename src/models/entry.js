@@ -6,7 +6,7 @@ const utils = require('../utils/models');
 const BigNumber = require('bignumber.js');
 const { makeError } = require('../utils/errors');
 const {
-  BIG_0, addBigNumbers, isNegativeString, positiveString,
+  BIG_0, addBigNumbers, isNegativeString, positiveString, calcHashId,
 } = require('../utils/numbers');
 const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP, LEDGER_COMMENTS, LEDGER_LINE_COMMENT } = require('./constants');
 const log = require('js-logger').get('c.a.models.entry');
@@ -153,6 +153,9 @@ class Entry {
 
     // doesn't hurt to re-wrap if it isn't already a BigNumber
     this.quantity = new BigNumber(this.quantity);
+    if (!this.id) {
+      this.id = calcHashId(this.toObject({shallow: true}));
+    }
   }
 
   /**

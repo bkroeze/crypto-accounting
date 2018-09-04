@@ -4,6 +4,10 @@ This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
 * Pre-release version 0.0.3
+** DONE Possibly converting/loading from Ledger.dat is reversed!  Test and fix.
+   CLOSED: [2018-09-03 Mon 20:25]
+   - State "DONE"       from              [2018-09-03 Mon 20:25]
+    See [[file:~/work/crypto-accounting/test/loaders/fixtures/ark.dat][file:~/work/crypto-accounting/test/loaders/fixtures/ark.dat]]
 ** DONE Work through a real ledger file, fixing parser to handle edge cases
    CLOSED: [2018-08-10 Fri 15:34]
    - State "DONE"       from              [2018-08-10 Fri 15:34]

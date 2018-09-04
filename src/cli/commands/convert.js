@@ -4,8 +4,10 @@ const path = require('path');
 const moment = require('moment');
 const fs = require('graceful-fs');
 const log = require('js-logger').get('cli.commands.convert');
+const { safeLoad, safeDump } = require('js-yaml');
 
 const Transaction = require('../../models/transaction');
+const { stripFalsy } = require('../../utils/models');
 const { parseWalletCSV, rowToYaml, mergeTransactionLists } = require('../../loaders/csv_converter');
 const ledgerLoader = require('../../loaders/ledger_loader');
 const { flexibleLoadByExtSync } = require('../../loaders/yaml_loader');
@@ -13,19 +15,15 @@ const { flexibleLoadByExtSync } = require('../../loaders/yaml_loader');
 const ascendingDate = R.ascend(R.prop('utc'));
 const descendingDate = R.descend(R.prop('utc'));
 
-function readCSV(filename, currency, debit, credit) {
+function readCSV(raw, currency, debit, credit) {
   return parseWalletCSV(
-    fs.readFileSync(filename).toString(),
+    raw,
     currency,
     debit,
     credit);
 }
 
-function readJSON(filename, base, cb) {
-  let raw = fs.readFileSync(filename).toString();
-  //const re = /\"amount\" : (.*),/g
-  // quote the amount, so that we don't lose precision
-  //raw = raw.replace(re, '"Amount" : "$1"');
+function readJSON(raw, base, cb) {
   const work = JSON.parse(raw);
   let results = work.map(row => {
     return {
@@ -38,9 +36,24 @@ function readJSON(filename, base, cb) {
   return R.reject((row) => row.amount === 0, results);
 }
 
-function readLedger(filename) {
-  return ledgerLoader.loadTransactionsFromFilenameSync(filename);
+class LedgerWrapper {
+  constructor(props) {
+    this.props = props;
+    this.utc = moment(props.utc);
+  }
+
+  toYaml() {
+    return safeDump([stripFalsy(this.props)]).replace(/'/g, '');
+  }
 }
+
+const ledgerWrapFactory = (props) => new LedgerWrapper(props);
+
+function readLedger(raw) {
+  return ledgerLoader.loadObjectsFromString(raw)
+    .map(ledgerWrapFactory)
+}
+
 
 function printResults(results, base, credit, debit, descending, byDay, startDate) {
   let work = results;
@@ -59,15 +72,15 @@ function printResults(results, base, credit, debit, descending, byDay, startDate
     sorted.forEach(row => {
       if (!current) {
         current = R.clone(row);
-        current.date = current.date.startOf('day');
+        current.date = current.utc.startOf('day');
         current.amount = BigNumber(current.amount);
-      } else if (current.date.isSame(row.date, 'day') && row.address === current.address) {
+      } else if (current.utc.isSame(row.utc, 'day') && row.address === current.address) {
         current.amount = current.amount.plus(BigNumber(row.amount));
       } else {
         current.amount = current.amount.toFixed(8);
         work.push(current);
         current = R.clone(row);
-        current.date = current.date.startOf('day');
+        current.utc = current.utc.startOf('day');
         current.amount = BigNumber(current.amount);
       }
     });
@@ -75,23 +88,13 @@ function printResults(results, base, credit, debit, descending, byDay, startDate
     sorted = work;
   }
   sorted.forEach(row => {
-    let line;
-    try {
-      line = row.toYaml(byDay);
-    } catch (e) {
-      if (e.name === 'TypeError') {
-        line = row.toYaml(byDay);
-      } else {
-        throw e;
-      }
-    }
-    console.log(line);
+    console.log(row.toYaml(byDay));
   });
   return true;
 }
 
 function handler(args) {
-  const {merge, filename, currency, credit, descending} = args;
+  const {merge, filename, currency, credit, descending, conversion} = args;
   if (!fs.existsSync(filename)) {
     console.log(`File not found: ${filename}`);
     process.exit(1);
@@ -102,6 +105,27 @@ function handler(args) {
     process.exit(1);
   }
 
+  if (conversion && !fs.existsSync(conversion)) {
+    console.log(`Conversion file not found: ${conversion}`);
+    process.exit(1);
+  }
+
+  let raw = fs.readFileSync(filename, 'utf-8');
+
+  if (conversion) {
+    const conversions = [];
+    const conversionMap = safeLoad(fs.readFileSync(conversion));
+    conversionMap.forEach(patternSet => {
+      patternSet.replace.forEach(replacement => {
+        conversions.push(x => x.replace(new RegExp(replacement, 'g'), patternSet.pattern));
+      })
+    });
+
+    conversions.forEach(conversion => {
+      raw = conversion(raw);
+    });
+  }
+
   const debit = args.debit.replace('{CURRENCY}', currency);
 
   let processed;
@@ -110,15 +134,15 @@ function handler(args) {
       console.log('Please specify a --currency');
       process.exit(1);
     }
-    processed = readCSV(filename, currency, debit, credit);
+    processed = readCSV(raw, currency, debit, credit);
   } else if (R.endsWith('.json', filename)) {
     if (!currency) {
       console.log('Please specify a --currency');
       process.exit(1);
     }
-    processed = readJSON(filename, currency);
+    processed = readJSON(raw, currency);
   } else if (R.endsWith('.dat', filename)) {
-    processed = readLedger(filename);
+    processed = readLedger(raw);
   }
 
   let work;
@@ -140,6 +164,7 @@ function builder(yargs) {
     .option('start', {type: 'string', desc: 'Starting date', default: false})
     .option('currency', {type: 'string', desc: 'Which symbol for this conversion. EX: BTC'})
     .option('merge', {type: 'string', desc: 'Merge with existing YAML file'})
+    .option('conversion', {type: 'string', desc: 'Yaml file for account conversions'})
     .positional('filename', {type: 'string', desc: 'CSV file to read'});
 }
 
