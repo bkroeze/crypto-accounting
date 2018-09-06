@@ -15,6 +15,8 @@ const { flexibleLoadByExtSync } = require('../../loaders/yaml_loader');
 const ascendingDate = R.ascend(R.prop('utc'));
 const descendingDate = R.descend(R.prop('utc'));
 
+const randomSeed = Math.floor(Math.random() * 10000);
+
 function readCSV(raw, currency, debit, credit) {
   return parseWalletCSV(
     raw,
@@ -36,10 +38,20 @@ function readJSON(raw, base, cb) {
   return R.reject((row) => row.amount === 0, results);
 }
 
+let wrapperIndex = 0;
+function nextIndex() {
+  wrapperIndex = wrapperIndex + 1;
+  return wrapperIndex;
+}
+
 class LedgerWrapper {
   constructor(props) {
-    this.props = props;
+    this.props = {
+      id: `import-${moment().format('YYMMDD')}-${randomSeed}-${nextIndex()}`,
+      ...props,
+    };
     this.utc = moment(props.utc);
+    this.props.utc = this.utc.toISOString();
   }
 
   toYaml() {
@@ -116,8 +128,8 @@ function handler(args) {
     const conversions = [];
     const conversionMap = safeLoad(fs.readFileSync(conversion));
     conversionMap.forEach(patternSet => {
-      patternSet.replace.forEach(replacement => {
-        conversions.push(x => x.replace(new RegExp(replacement, 'g'), patternSet.pattern));
+      patternSet.from.forEach(toreplace => {
+        conversions.push(x => x.replace(new RegExp(toreplace, 'g'), patternSet.account));
       })
     });
 

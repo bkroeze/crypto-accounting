@@ -1,29 +1,53 @@
-- pattern: 'assets:wallets:'
-  replace:
+- account: assets:wallets:ETH:mining
+  from:
+    - Assets:Crypto:Wallet:Mining
+
+- account: 'assets:wallets:'
+  from:
     - 'Assets:Wallets:'
     - 'Assets:Crypto:Wallet:'
     - 'Assets:Crypto:Wallets:'
 
-- pattern: liabilities:sharedmasternode
-  replace:
+- account: income:affiliate
+  from:
+    - Income:Crypto:Affiliate
+
+- account: income:mining
+  from:
+    - Income:Crypto:Mining
+
+- account: liabilities:sharedmasternode
+  from:
     - Liabilities:SharedMasternode
 
-- pattern: assets:exchanges:cryptobridge
-  replace:
+- account: assets:exchanges:bittrex
+  from:
+    - Assets:Exchanges:Bittrex
+
+- account: assets:exchanges:cryptobridge
+  from:
     - Assets:Exchanges:CryptoBridge
 
-- pattern: assets:exchanges:coinbase
-  replace:
+- account: assets:exchanges:coinbase
+  from:
     - Assets:Exchanges:Coinbase
 
-- pattern: expenses:exchanges
-  replace:
+- account: expenses:exchange
+  from:
     - Expenses:Exchanges:Fees
 
-- pattern: expenses:txfee
-  replace:
+- account: expenses:txfee
+  from:
     - Expenses:Crypto:Fees
 
-- pattern: income:masternode
-  replace:
+- account: expenses:hosting
+  from:
+    - Expenses:Crypto:Hosting
+
+- account: income:masternode
+  from:
     - Income:Crypto:MN
+
+- account: receivables:crypto
+  from:
+    - Receivables:Crypto
