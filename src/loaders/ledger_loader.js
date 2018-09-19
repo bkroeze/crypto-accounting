@@ -158,7 +158,7 @@ function splitLedgerTransactions(raw) {
 }
 
 function loadLedgerTransactions(raw) {
-  return splitLLedgerTransactions(raw)
+  return splitLedgerTransactions(raw)
     .map(convertLedgerTransaction);
 }
 

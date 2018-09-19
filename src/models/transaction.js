@@ -2,12 +2,13 @@
 const R = require('ramda');
 const RA = require('ramda-adjunct');
 const Moment = require('moment');
-
-const { makeEntries } = require('./entry');
+const Entry = require('./entry');
+const Credit = require('./credit');
+const Debit = require('./debit');
 const utils = require('../utils/models');
 const { makeError } = require('../utils/errors');
 const { calcHashId } = require('../utils/numbers');
-const { CREDIT, DEBIT, ERRORS } = require('./constants');
+const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } = require('./constants');
 
 // stub out fee descriptors
 const makeFees = fees => fees;
@@ -23,6 +24,8 @@ const DEFAULT_PROPS = {
   fees: [],
   tags: [],
   entries: [],
+  debits: [],
+  credits: [],
   details: {},
 };
 
@@ -41,15 +44,15 @@ class Transaction {
    */
   constructor(props = {}) {
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
-    const { entries, fees } = merged;
+    const { trades, debits, credits, entries, fees } = merged;
+
+    if (R.has('account', merged) && RA.isString(merged.account)) {
+      merged.account = {credit: merged.account, debit: merged.account};
+    }
 
     KEYS.forEach((key) => {
-      if (key !== 'transactions' && key !== 'fees') {
-        let val = merged[key];
-        if (key === 'account' && RA.isString(val)) {
-          val = { debit: val, credit: val };
-        }
-        this[key] = val;
+      if (key !== 'debits' && key !== 'credits' && key !== 'entries') {
+        this[key] = merged[key];
       }
     });
 
@@ -62,7 +65,24 @@ class Transaction {
       );
     }
     this.utc = Moment(this.utc);
-    this.entries = makeEntries(entries, this);
+
+    // TODO: remove
+    this.entries = Entry.makeEntries(entries, this);
+
+    if (credits) {
+      this.makeBalancedPairs(credits, true).forEach(pair => {
+        this.entries.push(pair.credit);
+        this.entries.push(pair.debit);
+      });
+    }
+    if (debits) {
+      this.makeBalancedPairs(debits, false).forEach(pair => {
+        this.entries.push(pair.credit);
+        this.entries.push(pair.debit);
+      });
+    }
+
+    // TODO: add makeTrades
     this.fees = makeFees(fees);
     if (!this.id) {
       this.id = calcHashId(this.toObject());
@@ -132,6 +152,29 @@ class Transaction {
     return allBalanced(this.getDebits());
   }
 
+  makeBalancedPair(shortcut, isCredit, leadingSymbolMap) {
+    const tokens = Entry.tokenizeShortcut(shortcut, leadingSymbolMap);
+    const accountShortcut = tokens.join(' ');
+    const noAccountShortcut = tokens.slice(0, 2).join(' '); // strip the account and comment, if any
+
+    let credit;
+    let debit;
+    if (isCredit) {
+      credit = new Credit({shortcut: noAccountShortcut, transaction: this});
+      debit = new Debit({shortcut: accountShortcut, transaction: this});
+      credit.setPair(debit, false);
+    } else {
+      credit = new Credit({shortcut: accountShortcut, transaction: this})
+      debit = new Debit({shortcut: noAccountShortcut, transaction: this});
+      debit.setPair(credit, false);
+    }
+    return {credit, debit};
+  }
+
+  makeBalancedPairs(rawArray, isCredit, leadingSymbolMap = SYMBOL_MAP) {
+    return rawArray.map(shortcut => this.makeBalancedPair(shortcut, isCredit, leadingSymbolMap));
+  }
+
   /**
    * Apply a function to all entries.
    * @param {Function} function to apply
@@ -179,6 +222,7 @@ class Transaction {
    * @return {String} YAML representation
    */
   toYaml(byDay) {
+    // TODO: split entries into trades, credits, debits
     const data = this.toObject({byDay});
     const work = [];
     KEYS.forEach((key) => {

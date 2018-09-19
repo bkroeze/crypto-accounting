@@ -16,7 +16,8 @@ test('loads a transaction with a dollar sign', (t) => {
   t.is(results[0].entries.length, 2);
   t.is(results[0].entries[0].shortcut, '0.96555 BTC Assets:Exchanges:Coinbase');
   t.is(results[0].entries[1].shortcut, '200 USD');
-  t.is(results[0].toYaml(), `- id: 485bd268d3e7c16d219bfc0c35450669cc2ead8b8dc029d6a1cfb19a7637286e
+  results[0].id = 'test';
+  t.is(results[0].toYaml(), `- id: test
   account: Equity:Checking
   status: cleared
   party: Coinbase
@@ -43,7 +44,8 @@ test('Can load a simple set of ledger formatted entries', t => {
   //   console.log(JSON.stringify(r.toObject(), null, 2));
   // });
   t.is(result.length, 2);
-  t.is(result[0].toYaml(), `- id: 17e6cd23672d9a0d308037f72552c72bc8e7f0e225f3ac0b881efd68c0a0ff03
+  result[0].id = 'test';
+  t.is(result[0].toYaml(), `- id: test
   account: income
   status: cleared
   party: Test

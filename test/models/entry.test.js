@@ -36,6 +36,7 @@ test('Entry can instantiate a full set of props', (t) => {
   const e = new Entry({ ...props, transaction: TX });
   t.deepEqual(e.toObject(), {
     ...props,
+    id: 'c7cf4888b95846652a9ad42bcbf64276cc37fe3a03b2efe51d5ecd70eec05feb',
     quantity: '1.00000000',
   });
 });
