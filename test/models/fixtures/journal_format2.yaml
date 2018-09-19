@@ -1,0 +1,71 @@
+id: TestGains2
+name: Test Fixture for testing capital gains calculations using intermediate pairs for translations
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  - id: import-180905-2013-1
+    account: equity:bank
+    utc: 2013-08-01T07:00:00.000Z
+    status: cleared
+    party: Coinbase
+    trades:
+      - 0.96555 BTC assets:exchanges:coinbase @ 192.931 USD
+
+  - id: import-180905-2013-2
+    account: assets:banks:onpoint:checking
+    utc: 2017-07-09T07:00:00.000Z
+    status: cleared
+    party: Coinbase
+    trades:
+      - 1.00122728 ETH assets:exchanges:coinbase @ 238.621 USD
+    credits:
+      - 3.56 USD expenses:exchange
+
+  - id: import-180905-2013-4
+    account: assets:exchanges:coinbase
+    utc: 2017-07-14T07:00:00.000Z
+    status: cleared
+    party: Jaxx
+    debits:
+      - 0.1 LTC assets:wallets:Jaxx
+      - 0.000226 LTC expenses:exchange
+
+  - id: import-180905-2013-3
+    account: assets:banks:onpoint:checking
+    utc: 2017-07-14T07:00:00.000Z
+    status: cleared
+    party: Coinbase
+    trades:
+      - 5.60709017 LTC assets:exchanges:coinbase @ 44.51150105 USD
+    debits:
+      - 9.58 USD expenses:exchange
+
+  - id: import-180905-2013-5
+    account: assets:banks:onpoint:checking
+    utc: 2017-07-26T07:00:00.000Z
+    status: cleared
+    party: Coinbase
+    trades:
+      - 1.01295416 ETH assets:exchanges:coinbase @ 197.44 USD
+    credits:
+      - 2.99 USD expenses:exchange
+
+  - id: import-180905-2013-8
+    account: assets:exchanges:coinbase
+    utc: 2017-07-27T07:00:00.000Z
+    status: cleared
+    party: Coinbase
+    credits:
+      - 0.96555 BTC assets:wallets:Jaxx
+
+  - id: import-180905-2013-7
+    account: assets:exchanges:coinbase
+    utc: 2017-07-27T07:00:00.000Z
+    status: cleared
+    party: Coinbase
+    credits:
+      - 5 LTC assets:wallets:Jaxx
+      - 0.00023205 LTC expenses:exchange
+
