@@ -9,3 +9,5 @@ yarn.lock
 es.save
 package-lock.json
 .tern-port
+TAGS
+.tern-project
