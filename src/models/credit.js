@@ -8,7 +8,6 @@ class Credit extends Entry {
       type: CREDIT,
     });
   }
-
 }
 
 module.exports = Credit;

@@ -71,7 +71,7 @@ class Journal {
   getCleanlinessOfAccounts() {
     const problems = [];
     const accountsUsed = sets.mergeSets(this.transactions.map(tx => tx.getAccounts()));
-    accountsUsed.forEach(account => {
+    accountsUsed.forEach((account) => {
       if (!this.accounts.has(account)) {
         problems.push(`${account} not defined in accounts list`);
       }
@@ -85,7 +85,7 @@ class Journal {
     const currenciesUsed = sets.mergeSets(this.transactions.map(tx => tx.getCurrencies()));
     const currenciesAvailable = new Set(Object.keys(this.currencies));
     const currenciesMissing = sets.setDifference(currenciesUsed, currenciesAvailable);
-    currenciesMissing.forEach(missing => {
+    currenciesMissing.forEach((missing) => {
       problems.push(`${missing} currency not defined in currencies list`);
     });
     return problems;
@@ -93,7 +93,7 @@ class Journal {
 
   getCleanlinessOfTransactions() {
     const problems = [];
-    this.transactions.forEach(tx => {
+    this.transactions.forEach((tx) => {
       if (!tx.isBalanced()) {
         problems.push(`Transaction ${tx.id} is not balanced.`);
       }

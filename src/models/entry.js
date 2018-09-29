@@ -60,7 +60,13 @@ function getLotCredits(currency, lots) {
 }
 
 function splitComment(val) {
-  const cleaned = val.replace(lineSpaces, ' ').replace(tabRe, ' ');
+  let cleaned;
+  try {
+    cleaned = val.replace(lineSpaces, ' ').replace(tabRe, ' ');
+  } catch (e) {
+    throw new Error(`Bad val: ${JSON.stringify(val, null, 2)}`);
+    console.log('could not splitComment', val);
+  }
 
   let ix = cleaned.indexOf(LEDGER_LINE_COMMENT);
   if (ix > -1) {
@@ -156,13 +162,18 @@ class Entry {
     if (!this.id) {
       this.id = calcHashId(this.toObject({shallow: true}));
     }
+
+    const account = this.getAccount();
+    if (R.endsWith(` ${account}`, this.shortcut)) {
+      this.shortcut = this.shortcut.slice(0, -account.length).trim();
+    }
   }
 
   /**
    * parses a list of entries, which may be objects or strings
    * @param {Array<Object|String} rawArray input
    * @param {String} entryType credit or debit
-   */
+   */ 
   static arrayToEntries(rawArray, entryType, transaction) {
     return rawArray.map((entry) => {
       let props;
@@ -310,10 +321,10 @@ class Entry {
         }
       }
       if (debit) {
-        entries.push(debit)
+        entries.push(debit);
       };
       if (credit) {
-        entries.push(credit)
+        entries.push(credit);
       };
       ix += 2;
     }
@@ -484,13 +495,32 @@ class Entry {
   }
 
   /**
-   * Get a shortcut for this entry.  If it is a debit and has a credit, then add that to the shortcut.
+   * An entry is a "trade" if it was exchanged for a different currency
    */
-  getFullShortcut() {
-    if (this.type === DEBIT && this.pair && !(this.pair.quantity.eq(this.quantity) && this.pair.currency === this.currency)) {
-      return `${this.shortcut} @ ${this.pair.shortcut}`;
+  isTrade() {
+    return (this.pair && this.pair.currency !== this.currency);
+  }
+
+  /**
+   * Get a shortcut for this entry.  If it is a debit and a trade then add that to the shortcut.
+   */
+  getFullShortcut(transaction = this) {
+    const parts = this.shortcut.split(' ').slice(0, 2);
+    if (this.account && this.account !== transaction.account[this.type]) {
+      parts.push(this.account);
     }
-    return this.shortcut;
+    if (this.type === DEBIT && this.isTrade()) {
+      parts.push('@');
+      this.pair.shortcut
+        .split(' ')
+        .slice(0, 2)
+        .forEach((part) => { parts.push(part); });
+      
+      if (this.pair.account && this.pair.account !== transaction.account[this.pair.type]) {
+        parts.push(this.pair.account);
+      }
+    }
+    return parts.join(' ');
   }
 
   /**

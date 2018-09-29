@@ -22,7 +22,6 @@ test('Transaction can instantiate a full set of props', (t) => {
     tags: ['test'],
     party: 'Mr. Happy',
     address: 12345,
-    entries: [],
   };
   const tx = new Transaction(props);
   t.deepEqual(tx.toObject(), props);
@@ -32,7 +31,7 @@ test('Transaction with entries are loaded', (t) => {
   const tx = new Transaction({
     utc: '2018-01-01',
     account: 'test',
-    entries: ['10 ETH income'],
+    debits: ['10 ETH income'],
     details: {
       zip: 'zap',
     },
@@ -53,6 +52,7 @@ test('makeBalancedPair from Credit', t => {
   t.is(credit.getAccount(), 'test');
   t.is(debit.quantity.toFixed(0), '1');
   t.is(debit.getAccount(), 'foo');
+  t.is(tx.isBalanced(), true);
 });
 
 test('makeBalancedPair from Debit', t => {
@@ -66,6 +66,7 @@ test('makeBalancedPair from Debit', t => {
   t.is(credit.getAccount(), 'foo');
   t.is(debit.quantity.toFixed(0), '1');
   t.is(debit.getAccount(), 'test');
+  t.is(tx.isBalanced(), true);
 });
 
 test('load debit entries', t => {
@@ -79,4 +80,21 @@ test('load debit entries', t => {
   t.is(tx.entries[0].type, 'credit')
   t.is(tx.entries[1].getAccount(), 'test');
   t.is(tx.entries[1].type, 'debit');
-})
+  t.is(tx.isBalanced(), true);
+});
+
+test('load trades', t => {
+  const tx = new Transaction({
+    utc: '2018-01-01',
+    account: 'test',
+    trades: ['10 ETH @ $200 bank'],
+  });
+  t.is(tx.entries.length, 2);
+  t.is(tx.entries[0].getAccount(), 'bank');
+  t.is(tx.entries[0].type, 'credit');
+  t.is(tx.entries[0].currency, 'USD');
+  t.is(tx.entries[0].quantity.toFixed(0), '2000');
+  t.is(tx.entries[1].getAccount(), 'test');
+  t.is(tx.entries[1].type, 'debit');
+  t.is(tx.isBalanced(), true);
+});

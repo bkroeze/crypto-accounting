@@ -54,3 +54,6 @@
 
 const {b: a} = {b: 'test'};
 console.log(`a is ${a}`);
+test (foo)
+
+testing foo

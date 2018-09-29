@@ -175,4 +175,10 @@ test('Entry.tokenizeShortcut account', (t) => {
   t.deepEqual(Entry.tokenizeShortcut('100 BTC Income:Gift ;  test'), ['100', 'BTC', 'Income:Gift', ';test']);
 });
 
-
+test('Can make a full shortcut from a trade pair', (t) => {
+  const entries = shortcutToEntries('10 GIN @ 10 USD bank', TX);
+  t.is(entries[0].type, 'debit');
+  t.is(entries[0].getFullShortcut(), '10 GIN @ 10 USD bank');
+  t.is(entries[1].quantity.toFixed(0), '100');
+  t.is(entries[1].getFullShortcut(), '10 USD bank');
+});

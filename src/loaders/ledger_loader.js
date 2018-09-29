@@ -19,7 +19,6 @@ const isCommentLine = val => isCommentChar(val.trimLeft().slice(0, 1));
 const isNumeric = contained('0123456789');
 const isNewTransactionLine = val => isNumeric(val.slice(0, 1));
 const isAccountKey = contained(['id', 'account', 'note', 'status', 'address', 'party']);
-const addEqualsConnector = R.insert(0, '=');
 const lineCommentSpaces = /\; */;
 const isCommentToken = R.startsWith(LEDGER_LINE_COMMENT);
 const lastTokenIsComment = (val) => isCommentToken(R.last(val));
@@ -33,25 +32,22 @@ function shortcutFromLedgerLine(line) {
   let parts = Entry.tokenizeShortcut(clean);
   const comment = lastTokenIsComment(parts) ? parts.pop() : null;
   const account = parts.shift();
+  const pair = {};
+  let type = 'trades';
+
   if (parts.length <= 3) {
     // in Ledger format, a single posting could be a credit
     // if it is negative
     if (isNegative(parts[0])) {
+      type = 'credits';
       parts[0] = parts[0].slice(1);  // strip the negative
-      // console.log('single credit posting', parts);
-    }
-    else {
-      // it is a debit, so use the leading equals to indicate it
-      parts = addEqualsConnector(parts);
-      // console.log('single debit posting', parts);
+    } else {
+      type = 'debits';
     }
   }
-  // else {
-  //   console.log('connector', parts);
-  // }
 
   const connectorIx = findConnector(parts);
-  if (connectorIx) {
+  if (connectorIx > -1) {
     parts = R.insert(connectorIx, account, parts);
   } else {
     parts.push(account);
@@ -60,8 +56,7 @@ function shortcutFromLedgerLine(line) {
   if (comment) {
     parts.push(comment);
   }
-  //console.log('final', parts);
-  return parts.join(' ');
+  return { type, shortcut: parts.join(' ') };
 }
 
 function ledgerTransactionToObject(lines) {
@@ -116,7 +111,16 @@ function ledgerTransactionToObject(lines) {
     }
   }
 
-  const entries = entryLines.map(shortcutFromLedgerLine);
+  const entries = {
+    credits: [],
+    debits: [],
+    trades: [],
+  };
+
+  entryLines.map(shortcutFromLedgerLine)
+    .forEach((entry) => {
+      entries[entry.type].push(entry.shortcut);
+    });
 
   return {
     ...props,
@@ -125,7 +129,7 @@ function ledgerTransactionToObject(lines) {
     party,
     note: notes.join('\n'),
     extra,
-    entries,
+    ...entries,
   };
 }
 
