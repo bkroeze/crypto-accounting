@@ -12,8 +12,9 @@ test('Can make a lot with a debit', (t) => {
   const transaction = new Transaction({
     account: 'test',
     utc: '2018-07-04',
-    entries: ['10 ETH @ 400 USD exchange']
+    trades: ['10 ETH @ 400 USD exchange']
   });
+  t.is(transaction.entries.length, 2);
   const debits = transaction.getDebits();
   t.is(debits.length, 1);
   const lot = new Lot(debits[0]);
@@ -25,7 +26,7 @@ test('Calculates remaining credit left to apply to lots', (t) => {
   const transaction = new Transaction({
     account: 'test',
     utc: '2018-07-04',
-    entries: ['10 ETH @ 400 USD exchange']
+    trades: ['10 ETH @ 400 USD exchange']
   });
   const debits = transaction.getDebits();
   t.is(debits.length, 1);
@@ -40,7 +41,7 @@ test('Calculates gains', (t) => {
   const transaction = new Transaction({
     account: 'test',
     utc: '2018-07-04',
-    entries: [
+    trades: [
       '10 ETH @ 400 USD exchange',
     ]
   });
@@ -51,7 +52,7 @@ test('Calculates gains', (t) => {
   const sale = new Transaction({
     account: 'test',
     utc: '2018-07-04',
-    entries: [
+    trades: [
       '-5 ETH @ 600 USD exchange',
     ]
   });

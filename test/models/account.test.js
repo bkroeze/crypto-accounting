@@ -110,8 +110,9 @@ test('Accounts can get simple balances', (t) => {
   const tx = new Transaction({
     utc: '2018-01-01',
     account: 'test',
-    entries: ['100 ETH @ .2 BTC'],
+    trades: ['100 ETH @ .2 BTC'],
   });
+  t.is(tx.entries.length, 2);
   account.addEntry(tx.entries[0]);
   account.addEntry(tx.entries[1]);
   const balances = account.getBalances();
@@ -132,7 +133,7 @@ test('Accounts can get balances with or without children', (t) => {
   const tx = new Transaction({
     utc: '2018-01-01',
     account: 'test',
-    entries: ['100 ETH @ .2 BTC'],
+    trades: ['100 ETH @ .2 BTC'],
   });
   account.addEntry(tx.entries[0]);
   account.addEntry(tx.entries[1]);
@@ -140,7 +141,7 @@ test('Accounts can get balances with or without children', (t) => {
   const tx2 = new Transaction({
     utc: '2018-01-01',
     account: 'test:child',
-    entries: ['0.2 BTC @ 5 ETH'],
+    trades: ['0.2 BTC @ 5 ETH'],
   });
 
   const { child } = account.children;

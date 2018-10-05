@@ -7,40 +7,43 @@
 - account: assets:banks:checking
   utc: 2018-06-15
   note: equity into bank
-  entries:
+  debits:
     - 500 USD equity
 - account: assets:exchanges:coinbase
   utc: 2018-06-16
   note: Sending $500 from bank, and buying 1.1 ETH with $440 of it.
   # this is a new lot = 1.1 ETH
-  entries:
+  debits:
     - 500 USD assets:banks:checking
+  trades:
     - 1.1 ETH @ 400 USD
 - account: assets:exchanges:binance
   utc: 2018-06-17
   note: sending 1 ETH to Binance, and buying 40 GIN with it.
   # this is a new lot - 40 GIN
-  entries:
+  debits:
     - 1 ETH assets:exchanges:coinbase
+  trades:
     - 40 GIN = 1 ETH
 - account: assets:exchanges:binance
   utc: 2018-06-18
   note: selling 40 GIN for 2 ETH total, nice profit!
   # this is two new lots - each with 1 ETH
-  entries:
+  trades:
     - -20 GIN @ 0.05 ETH
     - -20 GIN = 1 ETH
 - account: assets:exchanges:coinbase
   utc: 2018-06-19
   note: cashing out 2 ETH
   # Not a new lot - these ETH are already in a lot
-  entries:
+  debits:
     - 2 ETH assets:exchanges:binance
+  trades:
     - -2 ETH @ 500 USD
 - account: assets:banks:checking
   utc: 2018-06-20
   note: sending cash to bank
-  entries:
+  debits:
     - 1000 USD assets:exchanges:coinbase
 # - totals:
 #     assets:exchanges:coinbase:

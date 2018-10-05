@@ -1,6 +1,7 @@
 import test from 'ava';
 
 import Transaction from '../../src/models/transaction';
+import { CREDIT, DEBIT } from '../../src/models/constants';
 
 test('Transaction can instantiate via props', (t) => {
   const tx = new Transaction({
@@ -47,7 +48,7 @@ test('makeBalancedPair from Credit', t => {
     account: 'test',
   });
   const pair = tx.makeBalancedPair('1 BTC foo', true);
-  const {credit, debit} = pair;
+  const {credit, debit} = pair.merge();
   t.is(credit.quantity.toFixed(0), '1');
   t.is(credit.getAccount(), 'test');
   t.is(debit.quantity.toFixed(0), '1');
@@ -61,7 +62,7 @@ test('makeBalancedPair from Debit', t => {
     account: 'test',
   });
   const pair = tx.makeBalancedPair('1 BTC foo', false);
-  const {credit, debit} = pair;
+  const {credit, debit} = pair.merge();
   t.is(credit.quantity.toFixed(0), '1');
   t.is(credit.getAccount(), 'foo');
   t.is(debit.quantity.toFixed(0), '1');
@@ -96,5 +97,25 @@ test('load trades', t => {
   t.is(tx.entries[0].quantity.toFixed(0), '2000');
   t.is(tx.entries[1].getAccount(), 'test');
   t.is(tx.entries[1].type, 'debit');
+  t.is(tx.isBalanced(), true);
+});
+
+
+test('load negative trades', t => {
+  const tx = new Transaction({
+    utc: '2018-01-01',
+    account: 'test',
+    trades: ['-10 ETH @ $200 bank'],
+  });
+  t.is(tx.entries.length, 2);
+  const [credit, debit] = tx.entries;
+  t.is(debit.type, DEBIT);
+  t.is(debit.getAccount(), 'bank');
+  t.is(debit.quantity.toFixed(0), '2000');
+
+  t.is(credit.getAccount(), 'test');
+  t.is(credit.type, CREDIT);
+  t.is(credit.currency, 'ETH');
+  t.is(credit.quantity.toFixed(0), '10');
   t.is(tx.isBalanced(), true);
 });

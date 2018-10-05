@@ -1,5 +1,5 @@
 import test from 'ava';
-
+import { CREDIT, DEBIT } from '../../src/models/constants';
 import Entry, {
   shortcutToEntries,
   flexibleToEntries,
@@ -48,17 +48,6 @@ test('Entry can instatiate via shortcut', (t) => {
   t.is(e.getAccount(), 'test');
 });
 
-test('Can instantiate a trade pair of entries from a shortcut', (t) => {
-  const entries = shortcutToEntries('1 BTC @ 10000 USD', TX);
-  t.is(entries.length, 2);
-  t.is(entries[0].type, 'debit');
-  t.is(entries[0].quantity.toFixed(0), '1');
-  t.is(entries[0].currency, 'BTC');
-  t.is(entries[1].type, 'credit');
-  t.is(entries[1].quantity.toFixed(0), '10000');
-  t.is(entries[1].currency, 'USD');
-});
-
 test('Can load an object entry with shortcuts', (t) => {
   const entries = objectToEntries({
     debits: ['100 ETH', '.01 ETH'],
@@ -78,107 +67,42 @@ test('Can load an object entry with shortcuts', (t) => {
   t.is(entries[2].type, 'credit');
 });
 
-test('Can load objects and strings interchangeably', (t) => {
-  const e1 = flexibleToEntries({
-    debits: ['100 ETH'],
-    credits: [{
-      quantity: 10000,
-      currency: 'USD',
-    }],
-  }, TX);
-  const e2 = flexibleToEntries('100 ETH @ 100 USD', TX);
-  const e3 = flexibleToEntries('100 ETH = 10000 USD', TX);
-  t.is(e1.length, 2);
-  t.is(e2.length, 2);
-  t.is(e2.length, 2);
-  t.is(e1[0].equals(e2[0]), true);
-  t.is(e1[1].equals(e2[1]), true);
-  t.is(e1[0].equals(e3[0]), true);
-  t.is(e1[1].equals(e3[1]), true);
-});
-
-test('Can load objects with "entries" member', (t) => {
-  const entries = flexibleToEntries({
-    entries: [
-      {quantity: "1.00000000", currency: "BTC", account: "assets:exchanges:coinbase", type: "debit"},
-      {quantity: "20000.00000000", currency: "USD", account: "assets:banks:checking", type: "credit"}
-    ]
-  }, TX);
-  t.is(entries.length, 2);
-  t.is(entries[0].quantity.toFixed(0), '1');
-  t.is(entries[0].type, 'debit');
-  t.is(entries[0].currency, 'BTC');
-});
-
-test('Can load a list of mixed types', (t) => {
-  const entries = makeEntries([
-    {
-      debits: ['100 ETH'],
-      credits: [{
-        quantity: 10000,
-        currency: 'USD',
-      }],
-    },
-    '100 ETH @ 100 USD',
-    '100 ETH = 10000 USD',
-  ], TX);
-  t.is(entries.length, 6);
-  t.is(entries[0].equals(entries[2]), true);
-  t.is(entries[0].equals(entries[4]), true);
-  t.is(entries[1].equals(entries[3]), true);
-  t.is(entries[1].equals(entries[5]), true);
-});
-
 test('Can check whether entry is balanced', (t) => {
-  const good = shortcutToEntries('10 ETH ^revenue', TX);
-  t.is(good[0].isBalanced(), true);
-  t.is(good[1].isBalanced(), true);
-
-  // invalid because it is in the same account and is the same currency
-  const bad = shortcutToEntries('10 ETH', TX);
-  t.is(bad[0].isBalanced(), false);
-  t.is(bad[1].isBalanced(), false);
+  const good = new Entry({
+    transaction: TX,
+    shortcut: '10 eth revenue',
+    type: DEBIT,
+    
+  });
+  t.is(good.isBalanced(), false);
+  const partner = good.makeBalancingClone({path: 'equity'});
+  t.is(good.isBalanced(), false);
+  good.setPair(partner, '=');
+  t.is(good.pair, partner);
+  t.is(good.isBalanced(), true);
+  t.is(good.pair.isBalanced(), true);
 });
 
-test('Handles negative shortcuts', (t) => {
-  const entries = shortcutToEntries('-10 GIN @ 10 USD', TX);
-  // console.log(JSON.stringify(entries.map(e => e.toObject()), null, 2));
-  t.is(entries.length, 2);
-  t.is(entries[1].type, 'credit');
-  t.is(entries[1].quantity.toFixed(0), '10');
-  t.is(entries[1].currency, 'GIN');
-  t.is(entries[0].type, 'debit');
-  t.is(entries[0].quantity.toFixed(0), '100');
-  t.is(entries[0].currency, 'USD');
+test('same currency, same account is not balanced', (t) => {
+  const first = new Entry({
+    transaction: TX,
+    shortcut: '10 eth',
+    type: DEBIT,
+    
+  });
+  t.is(first.isBalanced(), false);
+  const partner = first.makeBalancingClone({});
+  t.is(first.isBalanced(), false);
+  first.setPair(partner, '=');
+  t.is(first.pair, partner);
+  t.is(first.isBalanced(), false);
+  t.is(partner.isBalanced(), false);
 });
 
 test('shortcut with tabs', (t) => {
   const tab = '	';
   const e = new Entry({transaction: TX, shortcut: `0.00000370${tab}BTC${tab}Assets:Exchanges:CryptoBridge`});
-});
-
-test('Entry.tokenizeShortcut simple', (t) => {
-  t.deepEqual(Entry.tokenizeShortcut('10 ETH'), ['10', 'ETH']);
-});
-
-test('Entry.tokenizeShortcut $', (t) => {
-  t.deepEqual(Entry.tokenizeShortcut('$100'), ['100', 'USD']);
-});
-
-test('Entry.tokenizeShortcut comment', (t) => {
-  t.deepEqual(Entry.tokenizeShortcut('$100 ; testing'), ['100', 'USD', ';testing']);
-  t.deepEqual(Entry.tokenizeShortcut('$100 ; testing one two'), ['100', 'USD', ';testing one two']);
-});
-
-test('Entry.tokenizeShortcut account', (t) => {
-  t.deepEqual(Entry.tokenizeShortcut('100 BTC Income:Gift'), ['100', 'BTC', 'Income:Gift']);
-  t.deepEqual(Entry.tokenizeShortcut('100 BTC Income:Gift ;  test'), ['100', 'BTC', 'Income:Gift', ';test']);
-});
-
-test('Can make a full shortcut from a trade pair', (t) => {
-  const entries = shortcutToEntries('10 GIN @ 10 USD bank', TX);
-  t.is(entries[0].type, 'debit');
-  t.is(entries[0].getFullShortcut(), '10 GIN @ 10 USD bank');
-  t.is(entries[1].quantity.toFixed(0), '100');
-  t.is(entries[1].getFullShortcut(), '10 USD bank');
+  t.is(e.account, 'Assets:Exchanges:CryptoBridge');
+  t.is(e.quantity.toFixed(8), '0.00000370');
+  t.is(e.currency, 'BTC');
 });

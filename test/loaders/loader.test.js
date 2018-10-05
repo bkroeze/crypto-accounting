@@ -71,7 +71,7 @@ test('Can load a journal with transactions', (t) => {
     transactions: [{
       utc: '2018-01-01',
       account: 'test',
-      entries: ['100 ETH @ 0.1 BTC'],
+      trades: ['100 ETH @ 0.1 BTC'],
     }],
   };
   const yaml = safeDump(work);
@@ -104,7 +104,7 @@ test('Can load a full journal', (t) => {
     transactions: [{
       utc: '2018-01-01',
       account: 'testa',
-      entries: [
+      trades: [
         '100 ETH @ 0.1 BTC',
       ],
     }],

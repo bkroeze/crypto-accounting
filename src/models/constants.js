@@ -1,3 +1,5 @@
+const { union, derivations } = require('folktale/adt/union');
+
 const constants = {
   CREDIT: 'credit',
   DEBIT: 'debit',
@@ -22,5 +24,22 @@ const constants = {
 ].forEach((k) => {
   constants.ERRORS[k] = `ERR_${k}`;
 });
+
+function InvalidShortcut(message) {
+  return { message };
+}
+
+function InvalidTrade(message) {
+  return { message };
+}
+
+constants.ERRORS.ParseErrors = union('parse-errors', {
+  InvalidShortcut,
+  InvalidTrade,
+}).derive(
+  derivations.equality,
+  derivations.debugRepresentation
+);
+
 
 module.exports = constants;

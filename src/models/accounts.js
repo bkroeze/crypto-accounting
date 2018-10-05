@@ -131,7 +131,8 @@ class Accounts {
       throw makeError(
         ReferenceError,
         ERRORS.NOT_FOUND,
-        path);
+        path
+      );
     }
     return val;
   }

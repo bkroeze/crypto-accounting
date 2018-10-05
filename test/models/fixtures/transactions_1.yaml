@@ -1,13 +1,13 @@
 - account: assets:exchanges:coinbase
   utc: 2018-06-15
-  entries:
+  trades:
     - 1 ETH @ 500 USD assets:banks:checking
 - account: assets:exchanges:coinbase
   utc: 2018-06-16
-  entries:
+  trades:
     - 2 ETH @ 400 USD assets:banks:checking
 - account: assets:exchanges:binance
   utc: 2018-06-17
-  entries:
+  debits:
     - 2 ETH assets:exchanges:coinbase
   

@@ -12,6 +12,7 @@
     "csv-parse": "^2.5.0",
     "csvtojson": "^2.0.8",
     "dotenv": "^6.0.0",
+    "folktale": "^2.3.0",
     "graceful-fs": "^4.1.11",
     "js-logger": "^1.4.1",
     "js-yaml": "^3.12.0",

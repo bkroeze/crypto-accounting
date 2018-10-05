@@ -2,10 +2,12 @@
 const R = require('ramda');
 const RA = require('ramda-adjunct');
 const Moment = require('moment');
-const Entry = require('./entry');
+const Result = require('folktale/result');
+const log = require('js-logger').get('models.transaction');
 const Credit = require('./credit');
 const Debit = require('./debit');
 const utils = require('../utils/models');
+const Parser = require('../utils/parser');
 const { makeError } = require('../utils/errors');
 const { calcHashId } = require('../utils/numbers');
 const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } = require('./constants');
@@ -36,13 +38,6 @@ const getProps = R.pick(KEYS);
 const allBalanced = R.all(e => e.isBalanced());
 const getDebits = R.filter(R.propEq('type', DEBIT));
 const getCredits = R.filter(R.propEq('type', CREDIT));
-const pairToObject = (pair) => {
-  const obj = {};
-  pair.forEach((entry) => {
-    obj[entry.type.toLowerCase()] = entry;
-  });
-  return obj;
-};
 
 class Transaction {
   /**
@@ -51,8 +46,9 @@ class Transaction {
    * @param {object} props
    */
   constructor(props = {}) {
+    this.errors = [];
     const merged = R.merge(DEFAULT_PROPS, getProps(props));
-    const { trades, debits, credits, entries, fees } = merged;
+    const { trades, debits, credits, fees } = merged;
 
     if (R.has('account', merged) && RA.isString(merged.account)) {
       merged.account = { credit: merged.account, debit: merged.account };
@@ -74,8 +70,7 @@ class Transaction {
     }
     this.utc = Moment(this.utc);
 
-    // TODO: remove
-    this.entries = Entry.makeEntries(entries, this);
+    this.entries = [];
 
     const addEntryPair = (pair) => {
       this.entries.push(pair.credit);
@@ -89,7 +84,7 @@ class Transaction {
       this.makeBalancedPairs(debits, false).forEach(addEntryPair);
     }
     if (trades) {
-      this.makeTrades(trades).forEach(addEntryPair);
+      this.makeTrades(trades)[0].forEach(addEntryPair);
     }
     this.fees = makeFees(fees);
     if (!this.id) {
@@ -171,40 +166,77 @@ class Transaction {
   }
 
   makeBalancedPair(shortcut, isCredit, leadingSymbolMap) {
-    const tokens = Entry.tokenizeShortcut(shortcut, leadingSymbolMap);
-    const accountShortcut = tokens.join(' ');
-    const noAccountShortcut = tokens.slice(0, 2).join(' '); // strip the account and comment, if any
-
-    let credit;
-    let debit;
-    if (isCredit) {
-      credit = new Credit({ shortcut: noAccountShortcut, transaction: this });
-      debit = new Debit({ shortcut: accountShortcut, transaction: this });
-      credit.setPair(debit, false);
-    } else {
-      credit = new Credit({ shortcut: accountShortcut, transaction: this });
-      debit = new Debit({ shortcut: noAccountShortcut, transaction: this });
-      debit.setPair(credit, false);
-    }
-    return { credit, debit };
+    const parser = new Parser(leadingSymbolMap);
+    return parser.parseEntry(shortcut)
+      .chain(({ entry, comment }) => {
+        const accountShortcut = entry.join(' ');
+        const noAccountShortcut = entry.slice(0, 2).join(' '); // strip the account and comment, if any
+        let credit;
+        let debit;
+        if (isCredit) {
+          credit = new Credit({ shortcut: noAccountShortcut, transaction: this });
+          debit = new Debit({ shortcut: accountShortcut, transaction: this, note: comment });
+        } else {
+          credit = new Credit({ shortcut: accountShortcut, transaction: this });
+          debit = new Debit({ shortcut: noAccountShortcut, transaction: this });
+        }
+        debit.setPair(credit, '=');
+        return Result.Ok({ credit, debit });
+      });
   }
 
   makeBalancedPairs(rawArray, isCredit, leadingSymbolMap = SYMBOL_MAP) {
-    return rawArray.map(shortcut => this.makeBalancedPair(shortcut, isCredit, leadingSymbolMap));
+    const results = rawArray.map(
+      shortcut => this.makeBalancedPair(shortcut, isCredit, leadingSymbolMap)
+    );
+    this.errors = this.errors.concat(
+      results.filter(x => x instanceof Result.Error).map(x => x.merge())
+    );
+
+    return results.filter(x => x instanceof Result.Ok).map(x => x.merge());
   }
 
   makeTrades(rawArray, leadingSymbolMap = SYMBOL_MAP) {
-    return rawArray.map((shortcut) => {
-      const pair = Entry.shortcutToEntries(shortcut, this, leadingSymbolMap);
-      if (pair.length !== 2) {
-        throw makeError(
-          TypeError,
-          ERRORS.INVALID_TERM,
-          `Invalid trade: ${shortcut}`
-        );
-      }
-      return pairToObject(pair);
+    const parser = new Parser(leadingSymbolMap);
+    const trades = [];
+    const errors = [];
+    const transaction = this;
+
+    const makeCredit = (value) => {
+      const [quantity, currency, account] = value.credit;
+      return new Credit({ quantity, currency, transaction, account });
+    };
+
+    const makeDebit = (value) => {
+      const [quantity, currency, account] = value.debit;
+      return new Debit({ quantity, currency, transaction, account, note: value.comment });
+    };
+
+    rawArray.forEach((shortcut) => {
+      parser.parseTrade(shortcut)
+        .matchWith({
+          Ok: ({ value }) => {
+            const credit = makeCredit(value);
+            const debit = makeDebit(value);
+            if (value.connector === '@') {
+              // if parser reversed the trade sides because of a leading "-", make sure
+              // to adjust quantity appropriately
+              if (value.reversed) {
+                debit.quantity = debit.quantity.times(credit.quantity);
+              } else {
+                credit.quantity = credit.quantity.times(debit.quantity);
+              }
+            }
+            debit.setPair(credit, value.connector);
+            trades.push({ credit, debit });
+          },
+          Error: ({ value }) => {
+            log.error(value);
+            errors.push(value);
+          },
+        });
     });
+    return [trades, errors];
   }
 
   /**

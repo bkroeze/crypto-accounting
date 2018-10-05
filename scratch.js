@@ -1,9 +1,9 @@
-// var loader = require('./src/loaders/loader');
-// var journal = loader.loadJournalFromFilenameSync('journal_2.yaml', 'test/models/fixtures/');
-// var acct = journal.getAccount('cb');
-// //console.log(acct.toObject(true));
+var loader = require('./src/loaders/loader');
+var journal = loader.loadJournalFromFilenameSync('journal_gains1.yaml', 'test/models/fixtures/');
+var acct = journal.getAccount('cb');
+//console.log(acct.toObject(true));
 
-// //console.log('debits', acct.getEntries('debit').map(e => e.toObject(true)));
+//console.log('debits', acct.getEntries('debit').map(e => e.toObject(true)));
 
 // const lots = acct.getLots(journal.currencies);
 // console.log('got');
@@ -52,8 +52,11 @@
 // console.log('credits\n',transaction.getCredits().map(x => x.toObject()));
 // console.log('debuts\n',transaction.getDebits().map(x => x.toObject()));
 
-const {b: a} = {b: 'test'};
-console.log(`a is ${a}`);
-test (foo)
+const Transaction = require('./src/models/transaction');
 
-testing foo
+const tx = new Transaction({
+    account: 'test',
+    utc: '2018-07-04',
+    trades: ['10 ETH @ 400 USD exchange']
+  });
+

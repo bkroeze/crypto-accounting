@@ -9,7 +9,7 @@ transactions:
     id: Txn 1
     note: lot 0
     utc: 2018-01-01
-    entries:
+    trades:
       - 1 BTC @ 20000 USD assets:banks:checking
       # cost basis $20000 each, total $20000
       # Credits:
@@ -31,7 +31,7 @@ transactions:
     id: Txn 2
     note: lot 1
     utc: 2018-01-01
-    entries:
+    trades:
       - 2 ETH @ 500 USD assets:banks:checking
       # cost basis $500 each, total $1000
       # Credits:
@@ -51,7 +51,7 @@ transactions:
     id: Txn 3
     utc: 2018-01-15
     note: lot 2
-    entries:
+    trades:
       - 3 ETH @ 0.031 BTC
       # cost basis
       #   3 ETH @ 0.31 BTC = 0.031 * $15000 = $465 each, 3 * $465 = $1395 total
@@ -72,17 +72,17 @@ transactions:
   - account: assets:exchanges:coinbase
     id: Txn 4
     utc: 2018-02-01
-    entries:
+    trades:
       - -1 ETH @ 400 USD # 1 ETH -> lot 1
   - account: assets:exchanges:coinbase
     id: Txn5
     utc: 2018-03-01
-    entries:
+    trades:
       - -2 ETH @ .12 BTC # 1 ETH -> lot 1, 1 ETH -> lot 2, 0.24 BTC -> lot 3
   - account: assets:exchanges:coinbase
     id: Txn6
     utc: 2018-03-01
-    entries:
+    trades:
       - -2 ETH @ .15 BTC # 2 ETH -> lot 2, 0.30 BTC -> lot 4
 pricehistory:
   - 2018-01-01 ETH/BTC 0.025

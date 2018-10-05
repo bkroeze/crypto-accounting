@@ -1,22 +1,15 @@
 /* eslint prefer-destructuring: ["error", { array: false }] */
 const R = require('ramda');
 const RA = require('ramda-adjunct');
-
-const utils = require('../utils/models');
 const BigNumber = require('bignumber.js');
+const log = require('js-logger').get('cryptoaccounting.models.entry');
+const utils = require('../utils/models');
+const Parser = require('../utils/parser');
 const { makeError } = require('../utils/errors');
-const {
-  BIG_0, addBigNumbers, isNegativeString, positiveString, calcHashId,
-} = require('../utils/numbers');
-const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP, LEDGER_COMMENTS, LEDGER_LINE_COMMENT } = require('./constants');
-const log = require('js-logger').get('c.a.models.entry');
-const lineSpaces = new RegExp(/  /, 'g');
-const lineCommentSpaces = /\; */;
-const tabRe = new RegExp(/\t/, 'g');
-const commaRe = new RegExp(/,/, 'g');
+const { BIG_0, addBigNumbers, calcHashId } = require('../utils/numbers');
+const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } = require('./constants');
 
-const isCommentToken = R.startsWith(LEDGER_LINE_COMMENT);
-const lastTokenIsComment = (val) => isCommentToken(R.last(val));
+const commaRe = new RegExp(/,/, 'g');
 
 function describeLots(wrappers) {
   return wrappers.map(wrapper => ({
@@ -49,69 +42,10 @@ const hasEntries = R.has('entries');
 const isCredit = R.propEq('type', 'credit');
 const isDebit = R.propEq('type', 'debit');
 
-const hasLeadingSymbol = (symbol, val) => {
-  return val.slice(0,1) === symbol && utils.looksNumeric(val.slice(1));
-}
-
 function getLotCredits(currency, lots) {
   return lots
     .filter(R.propEq('currency', currency))
     .map(R.prop('applied'));
-}
-
-function splitComment(val) {
-  let cleaned;
-  try {
-    cleaned = val.replace(lineSpaces, ' ').replace(tabRe, ' ');
-  } catch (e) {
-    throw new Error(`Bad val: ${JSON.stringify(val, null, 2)}`);
-    console.log('could not splitComment', val);
-  }
-
-  let ix = cleaned.indexOf(LEDGER_LINE_COMMENT);
-  if (ix > -1) {
-    return [cleaned.slice(0, ix), cleaned.slice(ix).replace(lineCommentSpaces, ';')];
-  }
-  return [cleaned, null];
-}
-
-function tokenizeShortcut(shortcut, leadingSymbolMap = SYMBOL_MAP) {
-  const fixLeadingSymbol = (token) => {
-    let work = token;
-    leadingSymbolMap.forEach((currency, symbol) => {
-      if (hasLeadingSymbol(symbol, token)) {
-        work = `${token.slice(1)} ${currency}`;
-      }
-    });
-    return work;
-  };
-
-  // check for comment
-  let [cleaned, comment] = splitComment(shortcut);
-
-  // have to pass over string twice, first time to clean up any
-  // $100 style entries, converting to 100 USD
-  cleaned = utils.splitAndTrim(cleaned)
-        .map(fixLeadingSymbol)
-        .join(' ');
-
-  // The second time, we want to tokenize the string
-  const tokens = utils.splitAndTrim(cleaned);
-
-  // minimal shortcut: "10 BTC"
-  if (tokens.length < 2) {
-    console.error(`Invalid shortcut (need 2 parts): ${shortcut}`);
-    throw makeError(
-      TypeError,
-      ERRORS.INVALID_SHORTCUT,
-      `Invalid shortcut (need 2 parts): ${shortcut}`
-    );
-  }
-
-  if (comment) {
-    tokens.push(comment);
-  }
-  return tokens;
 }
 
 class Entry {
@@ -141,12 +75,14 @@ class Entry {
       );
     }
 
+    const leadingSymbolMap = props.leadingSymbolMap || SYMBOL_MAP;
+
     KEYS.forEach((key) => {
       this[key] = merged[key];
     });
 
     if (merged.shortcut) {
-      this.applyShortcut(merged.shortcut);
+      this.applyShortcut(merged.shortcut, leadingSymbolMap);
     }
 
     if (R.isNil(this.quantity)) {
@@ -160,7 +96,11 @@ class Entry {
     // doesn't hurt to re-wrap if it isn't already a BigNumber
     this.quantity = new BigNumber(this.quantity);
     if (!this.id) {
-      this.id = calcHashId(this.toObject({shallow: true}));
+      this.id = calcHashId(this.toObject({ shallow: true }));
+    }
+
+    if (!this.shortcut) {
+      this.shortcut = `${merged.quantity} ${this.currency}`;
     }
 
     const account = this.getAccount();
@@ -173,7 +113,7 @@ class Entry {
    * parses a list of entries, which may be objects or strings
    * @param {Array<Object|String} rawArray input
    * @param {String} entryType credit or debit
-   */ 
+   */
   static arrayToEntries(rawArray, entryType, transaction) {
     return rawArray.map((entry) => {
       let props;
@@ -194,7 +134,6 @@ class Entry {
    * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
    */
   static objectToEntries(raw, transaction) {
-    let entries = [];
     let debits = [];
     let credits = [];
     if (hasEntries(raw)) {
@@ -221,207 +160,31 @@ class Entry {
   }
 
   /**
-   * Parses an entry "shortcut" into balanced Entries.
-   * Shortcut can be in three forms:
-   * - Single posting (credit): "quantity currency [account]"
-   *   which will have a balancing debit created for it using the transaction debit account.
-   * - Single posting (debit): "= quantity currency [account]"
-   * - Pair posting: debit [@|=] credit
-   *
-   * @param {String} shortcut
-   * @return {Object<string: Array<Posting>>} postings, keyed by "credits" and "debits"
-   * @throws {TypeError} if shortcut cannot be parsed
-   * @example "10 BTC", "$ 10", "10 BTC @ $ 8000", "-10 ETH @ .03 BTC"
-   */
-  static shortcutToEntries(rawShortcut, transaction, leadingSymbolMap = SYMBOL_MAP) {
-    const tokens = tokenizeShortcut(rawShortcut, leadingSymbolMap);
-    let accum = [];
-    let connector = '';
-    let current;
-    let shortcuts = [];
-
-    while (tokens.length > 0) {
-      current = tokens.shift();
-      if (!utils.isConnector(current)) {
-        accum.push(current);
-      } else {
-        if (accum.length > 0) {
-          shortcuts.push(accum);
-        }
-        connector = current;
-        accum = [];
-      }
-    }
-    if (accum.length < 2) {
-      throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        `Invalid shortcut: ${rawShortcut}`
-      );
-    }
-    shortcuts.push(accum);
-
-    if (shortcuts.length === 1) {
-      if (connector !== '=') {
-        // insert a debit at the front, without a specified account
-        // this allows the default action to be from and to the same account
-        // but if one is specified, then that is the credit account.
-        shortcuts = [shortcuts[0].slice(0, 2), shortcuts[0]];
-        connector = '=';
-      } else {
-        // a leading "=" connector means that this single-entry is a debit
-        // so add a matching credit.
-        shortcuts = [shortcuts[0], shortcuts[0].slice(0, 2)];
-      }
-    }
-    let ix = 0;
-    let debit;
-    let credit;
-    const entries = [];
-    while (ix < shortcuts.length) {
-      let debitIx = ix;
-      let creditIx = ix + 1;
-
-      const firstAmount = shortcuts[debitIx][0];
-      const negativeFirst = isNegativeString(firstAmount);
-      if (negativeFirst) {
-        // this is a credit, not a debit
-        // take the positive value
-        shortcuts[debitIx][0] = positiveString(firstAmount);
-        // and swap the shortcuts
-        debitIx = ix + 1;
-        creditIx = ix;
-      }
-
-      const catcher = (err) => {
-        console.error(err.message, err.detail);
-        return null;
-      }
-
-      const maker = (props) => new Entry(props);
-
-      const makeEntry = R.tryCatch(maker, catcher);
-
-      debit = makeEntry({
-        shortcut: shortcuts[debitIx].join(' '),
-        transaction,
-        type: DEBIT,
-      });
-      credit = makeEntry({
-        shortcut: shortcuts[creditIx].join(' '),
-        transaction,
-        type: CREDIT,
-      });
-
-      if (credit && debit) {
-        if (negativeFirst) {
-          credit.setPair(debit, connector === '@');
-        } else {
-          debit.setPair(credit, connector === '@');
-        }
-      }
-      if (debit) {
-        entries.push(debit);
-      };
-      if (credit) {
-        entries.push(credit);
-      };
-      ix += 2;
-    }
-    return entries;
-  }
-
-  /**
-   * Parses an one or more entries from a yaml-style "entry".
-   * This means it may be:
-   * - A string: shortcut
-   * - An object: with one or both of "credits" or "debits" fields
-   * @param {Object|String} raw object to parse
-   * @return {Array<Entry>} List of entries parsed
-   */
-  static flexibleToEntries(raw, transaction) {
-    if (RA.isString(raw)) {
-      return Entry.shortcutToEntries(raw, transaction);
-    }
-    if (RA.isObj(raw)) {
-      return Entry.objectToEntries(raw, transaction);
-    }
-    console.error('Invalid Entry', raw);
-    throw makeError(
-      TypeError,
-      ERRORS.INVALID_SHORTCUT,
-      'Invalid Entry: cannot parse'
-    );
-  }
-
-  /**
-   * Parse an entire list of shortcut or object entries and return a list of Entries
-   * @param {Array<Object|String}} entries
-   * @param {Transaction} transaction parent
-   */
-  static makeEntries(entries, transaction) {
-    return R.flatten(entries.map(entry => Entry.flexibleToEntries(entry, transaction)));
-  }
-
-  static tokenizeShortcut (shortcut, leadingSymbolMap) {
-    return tokenizeShortcut(shortcut, leadingSymbolMap);
-  }
-
-  /**
    * Parse and apply the shortcut to this object.
    * @param {String} shortcut
    * @param {Map} leadingSymbols to use, defaulting to {'$': 'USD', '£': 'GBP', '€': EUR'}
    */
   applyShortcut(shortcut, leadingSymbolMap = SYMBOL_MAP) {
-    const tokens = Entry.tokenizeShortcut(shortcut, leadingSymbolMap);
-
-    if (lastTokenIsComment(tokens)) {
-      this.note = tokens.pop().slice(1).trim(); // strip leading comment char
-    }
-
-    if (tokens.length > 3) {
-      throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        `Invalid shortcut (unknown extra fields): ${shortcut}`
-      );
-    }
-    // determine which token is the currency
-    let quantity;
-    let currency;
-
-    const numeric1 = utils.looksNumeric(tokens[0]);
-    const numeric2 = utils.looksNumeric(tokens[1]);
-
-    if (tokens.length === 3) {
-      this.account = tokens[2];
-    }
-
-    if (numeric1 && numeric2) {
-      throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        `Invalid Posting, two numeric in shortcut: ${shortcut}`
-      );
-    }
-
-    if (!(numeric1 || numeric2)) {
-      throw makeError(
-        TypeError,
-        ERRORS.INVALID_SHORTCUT,
-        `Invalid Posting, no numeric in shortcut: ${shortcut}`
-      );
-    }
-
-    if (numeric1) {
-      [quantity, currency] = tokens;
-    } else {
-      [currency, quantity] = tokens;
-    }
-
-    quantity = quantity.replace(commaRe, '');
-    this.quantity = BigNumber(quantity);
-    this.currency = currency;
+    const parser = new Parser(leadingSymbolMap);
+    parser.parseEntry(shortcut)
+      .matchWith({
+        Ok: ({ value }) => {
+          const { entry, comment } = value;
+          const [quantity, currency, account] = entry;
+          this.quantity = BigNumber(quantity.replace(commaRe, ''));
+          this.currency = currency;
+          if (comment) {
+            this.note = comment;
+          }
+          if (account) {
+            this.account = account;
+          }
+        },
+        Error: ({ value }) => {
+          log.error('Could not apply shortcut', value);
+          this.error = value;
+        },
+      });
   }
 
   /**
@@ -510,12 +273,12 @@ class Entry {
       parts.push(this.account);
     }
     if (this.type === DEBIT && this.isTrade()) {
-      parts.push('@');
+      parts.push(this.connector);
       this.pair.shortcut
         .split(' ')
         .slice(0, 2)
         .forEach((part) => { parts.push(part); });
-      
+
       if (this.pair.account && this.pair.account !== transaction.account[this.pair.type]) {
         parts.push(this.pair.account);
       }
@@ -605,27 +368,13 @@ class Entry {
   }
 
   /**
-   * Multiplies the current quantity by the quantity in the passed `Posting`.
-   * @param {Posting} posting
-   * @return {Posting} this
-   */
-  multiplyBy(posting) {
-    this.quantity = this.quantity.times(posting.quantity);
-    return this;
-  }
-
-  /**
    * Set the "other side" of the entry on this and its partner.
    * @param {Entry} other side (credit if this is debit, debit if this is credit)
    * @param {Boolean} true if the price is specified as "per each"
    */
-  setPair(partner, priceEach) {
+  setPair(partner, connector) {
+    this.connector = connector;
     this.pair = partner;
-    if (priceEach) {
-      // price specified as 'each', so it needs to be multiplied by
-      // this quantity
-      partner.multiplyBy(this);
-    }
     if (partner.pair !== this) {
       // set the partner, but don't multiply
       partner.setPair(this, false);
@@ -638,7 +387,7 @@ class Entry {
    * @return {Object<String, *>}
    */
   toObject(options = {}) {
-    const {shallow, yaml} = options;
+    const { shallow, yaml } = options;
     const props = {
       id: this.id,
       quantity: this.quantity.toFixed(8),
@@ -650,7 +399,7 @@ class Entry {
     };
 
     if (!yaml) {
-      props.pair = (!this.pair || shallow) ? null : this.pair.toObject({ yaml, shallow: true});
+      props.pair = (!this.pair || shallow) ? null : this.pair.toObject({ yaml, shallow: true });
       props.balancing = (!this.balancing || shallow) ? null : this.balancing.toObject({ yaml, shallow: true });
       props.lots = shallow ? null : describeLots(this.lots);
     }
