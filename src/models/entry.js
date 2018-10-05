@@ -31,6 +31,7 @@ const mergeProps = props => ({
   pair: null,
   balancing: null, // the other entry in a balancing pair
   virtual: false,
+  fee: false,
   ...props,
 });
 
@@ -367,6 +368,10 @@ class Entry {
     return this.balancing;
   }
 
+  setFee(state) {
+    this.fee = state;
+  }
+
   /**
    * Set the "other side" of the entry on this and its partner.
    * @param {Entry} other side (credit if this is debit, debit if this is credit)
@@ -396,12 +401,16 @@ class Entry {
       type: this.type,
       note: this.note,
       virtual: this.virtual,
+      fee: this.fee,
     };
 
     if (!yaml) {
-      props.pair = (!this.pair || shallow) ? null : this.pair.toObject({ yaml, shallow: true });
-      props.balancing = (!this.balancing || shallow) ? null : this.balancing.toObject({ yaml, shallow: true });
-      props.lots = shallow ? null : describeLots(this.lots);
+      props.pair = (!this.pair || shallow) ? null
+        /* otherwise */: this.pair.toObject({ yaml, shallow: true });
+      props.balancing = (!this.balancing || shallow) ? null
+        /* otherwise */ : this.balancing.toObject({ yaml, shallow: true });
+      props.lots = shallow ? null
+        /* otherwise */ : describeLots(this.lots);
     }
 
     return utils.stripFalsy(props);

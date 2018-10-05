@@ -12,9 +12,6 @@ const { makeError } = require('../utils/errors');
 const { calcHashId } = require('../utils/numbers');
 const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } = require('./constants');
 
-// stub out fee descriptors
-const makeFees = fees => fees;
-
 const DEFAULT_PROPS = {
   id: '',
   account: { credit: '', debit: '' },
@@ -38,6 +35,7 @@ const getProps = R.pick(KEYS);
 const allBalanced = R.all(e => e.isBalanced());
 const getDebits = R.filter(R.propEq('type', DEBIT));
 const getCredits = R.filter(R.propEq('type', CREDIT));
+const getFees = R.filter(R.propEq('fee', true));
 
 class Transaction {
   /**
@@ -84,9 +82,21 @@ class Transaction {
       this.makeBalancedPairs(debits, false).forEach(addEntryPair);
     }
     if (trades) {
-      this.makeTrades(trades)[0].forEach(addEntryPair);
+      const tradeResults = this.makeTrades(trades);
+      tradeResults[0].forEach(addEntryPair);
+      if (tradeResults[1].length > 0) {
+        this.errors = this.errors.concat(tradeResults[1]);
+      }
     }
-    this.fees = makeFees(fees);
+
+    if (fees) {
+      this.makeBalancedPairs(fees, true).forEach((pair) => {
+        pair.credit.setFee(true);
+        pair.debit.setFee(true);
+        addEntryPair(pair);
+      });
+    }
+    
     if (!this.id) {
       this.id = calcHashId(this.toObject());
     }
@@ -146,6 +156,10 @@ class Transaction {
    */
   getDebits() {
     return getDebits(this.entries);
+  }
+
+  getFees() {
+    return getFees(this.entries);
   }
 
   /**

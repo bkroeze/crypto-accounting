@@ -119,3 +119,38 @@ test('load negative trades', t => {
   t.is(credit.quantity.toFixed(0), '10');
   t.is(tx.isBalanced(), true);
 });
+
+
+test('load trade with fee', t => {
+  const tx = new Transaction({
+    utc: '2018-01-01',
+    account: 'test',
+    trades: ['1 ETH @ $200 bank'],
+    fees: ['.01 ETH fees'],
+  });
+  t.is(tx.entries.length, 4);
+  const [credit, debit, feeCredit, feeDebit] = tx.entries;
+  t.is(credit.type, CREDIT);
+  t.is(credit.getAccount(), 'bank');
+  t.is(credit.quantity.toFixed(0), '200');
+
+  t.is(debit.type, DEBIT);
+  t.is(debit.getAccount(), 'test');
+  t.is(debit.currency, 'ETH');
+  t.is(debit.quantity.toFixed(0), '1');
+
+  t.is(feeCredit.type, CREDIT);
+  t.is(feeCredit.getAccount(), 'test');
+  t.is(feeCredit.currency, 'ETH');
+  t.is(feeCredit.quantity.toFixed(2), '0.01');
+
+  t.is(feeDebit.type, DEBIT);
+  t.is(feeDebit.getAccount(), 'fees');
+  t.is(feeDebit.currency, 'ETH');
+  t.is(feeDebit.quantity.toFixed(2), '0.01');
+
+  const fees = tx.getFees();
+  t.deepEqual(fees, [freeCredit, feeDebit]);
+  
+  t.is(tx.isBalanced(), true);1
+});
