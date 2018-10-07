@@ -171,7 +171,7 @@ class Accounts {
       lots.sort(Lot.compare);
       // we've got lots, now go through credits for all accounts and apply
 
-      const isTrade = (entry) => {
+      const isTradeOrFee = (entry) => {
         if (entry.isBalancingEntry()) {
           return false;
         }
@@ -180,7 +180,8 @@ class Accounts {
         if (!currency || currency.isFiat()) {
           return false;
         }
-        return entry.pair && entry.currency !== entry.pair.currency;
+
+        return entry.fee || entry.isTrade();
       };
 
       const applyCreditToLots = (c) => {
@@ -203,7 +204,7 @@ class Accounts {
         .filter(Account.isNotVirtualAccount)
         .forEach((a) => {
           a.getEntries(CREDIT)
-            .filter(isTrade)
+            .filter(isTradeOrFee)
             .forEach(applyCreditToLots);
         });
       this.lots = lots;

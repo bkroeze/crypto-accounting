@@ -158,8 +158,9 @@ class Transaction {
     return getDebits(this.entries);
   }
 
-  getFees() {
-    return getFees(this.entries);
+  getFees(ofType = null) {
+    return ofType ? R.filter(R.propEq('type', ofType), getFees(this.entries))
+      : getFees(this.entries);
   }
 
   /**
@@ -291,7 +292,7 @@ class Transaction {
       credits: this.getCredits().map(t => t.toObject(options)),
       debits: this.getDebits().map(t => t.toObject(options)),
       trades,
-      fees: this.fees, // change to this.fees.map(f => t.toObject()) when unstub
+      fees: this.getFees().map(t => t.toObject(options)),
       details: this.details,
     });
   }

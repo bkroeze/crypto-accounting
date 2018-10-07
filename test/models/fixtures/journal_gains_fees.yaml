@@ -1,0 +1,60 @@
+d: TestGainsFees
+name: Test Gains Fees
+note: Test Fixture for testing capital gains calculations with fees included
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  - account: assets:banks:checking
+    id: Bank 1
+    utc: 2018-01-01
+    debits:
+      - $810 equity
+  - account: assets:exchanges:coinbase
+    id: Txn 1
+    note: lot 0
+    utc: 2018-01-02
+    trades:
+      - 4 ETH @ 100 USD assets:banks:checking
+    fees:
+      - $10 expenses:exchanges
+      # cost basis ((4 * 100) + 10)/4 = $102.5
+      # Credits:
+      # 1 + 0.01 = 1.01 ETH with gain (1 * 200 - 0.01 * 200 - 1.01 * 102.5) = $94.475
+      # 0.5 + 0.005 = 0.505 ETH with gain (0.5 * 220 - 0.005 * 220 - 0.505 * 102.5) = $57.1375
+      # 0.48 + 0.005 = 0.485 ETH with gain (0.48 * 400 - 0.005 * 350 - 0.485 * 102.5) = $140.5375
+      # Capital gains:
+      # (1 * 200 - 0.01 * 200 + 0.5 * 220 - 0.005 * 220 + 0.48 * 400 - 0.005 * 350) - (2 * 102.5) = $292.15
+      # Capital gains from fee conversion:
+      # 
+      # Unrealized gains:
+      # (2 * 350) - (2 * 102.5)  = $495
+      # Calculations:
+  - account: assets:exchanges:coinbase
+    id: Txn 2
+    utc: 2018-01-03
+    trades:
+      - -1 ETH @ 200 USD assets:banks:checking
+    fees:
+      - 0.01 ETH expenses:exchanges
+  - account: assets:exchanges:coinbase
+    id: Txn 3
+    utc: 2018-01-04
+    trades:
+      - -0.5 ETH @ 220 USD
+    fees:
+      - 0.005 ETH
+  - account: assets:exchanges:coinbase
+    id: Txn 4
+    utc: 2018-01-05
+    trades:
+      - -0.48 ETH @ 400 USD
+    fees:
+      - 0.005 ETH
+pricehistory:
+  - 2018-01-01 ETH/USD 100
+  - 2018-01-02 ETH/USD 180
+  - 2018-01-03 ETH/USD 200
+  - 2018-01-04 ETH/USD 220
+  - 2018-01-05 ETH/USD 350

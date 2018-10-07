@@ -183,3 +183,18 @@ test('Calculates unrealized gains', t => {
 });
 
 
+test ('Calculates gains, including fees', t => {
+  const journal = getJournal('journal_gains_fees.yaml');
+  const lots = journal.getLots();
+  //lots.forEach(lot => console.log(lot.toObject()));
+  t.is(lots.length, 1);
+  const lot = lots[0];
+  const priceEa = lot.getPurchasePriceEach(journal.pricehistory, 'USD');
+  t.is(priceEa.toFixed(2), '102.50');
+  const unrealized = lot.getUnrealizedGains('2018-03-01', journal.pricehistory, 'income:unrealized', 'USD');
+  t.is(unrealized.quantity.toFixed(2), '495.00');
+  const gains = lot.getCapitalGains(journal.pricehistory, 'income:capitalgains', 'USD');
+  t.is(gains.length, 6); // includes 3 gains from the fees themselves
+  const totalGains = addBigNumbers(gains.map(R.prop('quantity')));
+  t.is(totalGains.toFixed(2), '301.85');
+});

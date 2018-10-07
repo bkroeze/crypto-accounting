@@ -150,7 +150,7 @@ test('load trade with fee', t => {
   t.is(feeDebit.quantity.toFixed(2), '0.01');
 
   const fees = tx.getFees();
-  t.deepEqual(fees, [freeCredit, feeDebit]);
+  t.deepEqual(fees, [feeCredit, feeDebit]);
   
   t.is(tx.isBalanced(), true);1
 });

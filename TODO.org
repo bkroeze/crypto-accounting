@@ -1,9 +1,7 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
-** Add a loader test with Fees
 ** Add a loader test that detects bad formatted "1 ETH" style trades
-** Make a gains test that includes fees for cap-gains
 ** Get transactions from wallets via JSONRPC call?
 *** add dotenv for JSONRPC auth
 ** Transaction can auto-determine if it needs to be settled to fiat, given a currency object

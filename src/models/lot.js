@@ -1,10 +1,11 @@
+
 const Moment = require('moment');
 const R = require('ramda');
 
 const Entry = require('./entry');
 const utils = require('../utils/models');
 const { DEBIT } = require('./constants');
-const { addBigNumbers, BIG_0 } = require('../utils/numbers');
+const { addBigNumbers, BIG_0, BIG_1 } = require('../utils/numbers');
 
 const getApplied = R.map(R.prop('applied'));
 
@@ -104,20 +105,20 @@ class Lot {
   addCredit(credit, maxQuantity) {
     const applied = credit.setLot(this, maxQuantity);
     if (applied.gt(BIG_0)) {
-      this.credits.push({ credit, applied });
+      this.credits.push({ credit, fees: credit.transaction.getFees('credit'), applied });
     }
     return applied;
   }
 
   /**
-   * Add a credit to this lot.
+   * Add a debit to this lot.
    * @param {Entry} debit
    * @return {BigNumber} amount remaining to be applied in lot
    */
   addDebit(debit) {
     const applied = debit.setLot(this, debit.quantity);
     if (applied.gt(BIG_0)) {
-      this.debits.push({ debit, applied });
+      this.debits.push({ debit, fees: debit.transaction.getFees('credit'), applied });
     }
     return this.getRemaining();
   }
@@ -131,18 +132,18 @@ class Lot {
    * @return {BigNumber} price
    */
   getPurchasePriceEach(pricehistory, fiat, transCurrencies = ['BTC', 'ETH'], within = null) {
-    const { debit } = this.debits[0];
+    const { debit, fees } = this.debits[0];
     const credit = debit.pair;
+    const getRateForCurrency = currency => (currency === fiat ? BIG_1
+                                            : pricehistory.findPrice(this.utc, currency, fiat, transCurrencies, within).rate);
+    
+    const getFiatPrice = entry => getRateForCurrency(entry.currency).times(entry.quantity);
+
+    const feeTotal = addBigNumbers(fees.map(getFiatPrice));
+    const feeEach = feeTotal.div(debit.quantity);
     const eachPrice = credit.quantity.div(debit.quantity);
-    if (credit.currency === fiat) {
-      // easy, purchase price is the "each" price of the credit
-      return eachPrice;
-    }
-    const translation = pricehistory.findPrice(
-      this.utc, credit.currency, fiat, transCurrencies, within
-    );
-    // console.log('got translation', translation.toObject());
-    return translation.rate.times(eachPrice);
+    const fiatPriceEach = getRateForCurrency(credit.currency).times(eachPrice);
+    return fiatPriceEach.plus(feeEach);
   }
 
   /**
