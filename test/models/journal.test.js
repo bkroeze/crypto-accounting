@@ -84,8 +84,11 @@ test('getBalancesByCurrency is accurate for multiple accounts', (t) => {
   const journal = getJournalFromYaml('journal_2.yaml');
   t.true(journal.getAccount('equity').isVirtual());
   t.false(journal.getAccount('cb').isVirtual());
+  const checking = journal.getAccount('assets:banks:checking');
+  t.false(checking.isVirtual());
   const byCurrency = journal.getBalancesByCurrency();
-  //console.log(`byCurrency ${JSON.stringify(byCurrency, null, 2)}`);
+  // console.log(`byCurrency ${JSON.stringify(byCurrency, null, 2)}`);
+  // console.log(JSON.stringify(checking.toObject(), null, 2));
   t.is(byCurrency.USD.quantity.toFixed(0), '1060');
   t.deepEqual(Object.keys(byCurrency.USD.accounts), ['assets:banks:checking', 'assets:exchanges:coinbase']);
   t.is(byCurrency.ETH.quantity.toFixed(2), '0.10');

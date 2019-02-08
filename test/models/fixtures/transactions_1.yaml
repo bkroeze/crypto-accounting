@@ -8,6 +8,5 @@
     - 2 ETH @ 400 USD assets:banks:checking
 - account: assets:exchanges:binance
   utc: 2018-06-17
-  debits:
+  credits:
     - 2 ETH assets:exchanges:coinbase
-  

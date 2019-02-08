@@ -50,9 +50,9 @@ test('makeBalancedPair from Credit', t => {
   const pair = tx.makeBalancedPair('1 BTC foo', true);
   const {credit, debit} = pair.merge();
   t.is(credit.quantity.toFixed(0), '1');
-  t.is(credit.getAccount(), 'test');
+  t.is(credit.getAccount(), 'foo');
   t.is(debit.quantity.toFixed(0), '1');
-  t.is(debit.getAccount(), 'foo');
+  t.is(debit.getAccount(), 'test');
   t.is(tx.isBalanced(), true);
 });
 
@@ -64,9 +64,9 @@ test('makeBalancedPair from Debit', t => {
   const pair = tx.makeBalancedPair('1 BTC foo', false);
   const {credit, debit} = pair.merge();
   t.is(credit.quantity.toFixed(0), '1');
-  t.is(credit.getAccount(), 'foo');
+  t.is(credit.getAccount(), 'test');
   t.is(debit.quantity.toFixed(0), '1');
-  t.is(debit.getAccount(), 'test');
+  t.is(debit.getAccount(), 'foo');
   t.is(tx.isBalanced(), true);
 });
 
@@ -77,9 +77,9 @@ test('load debit entries', t => {
     debits: ['10 ETH income'],
   });
   t.is(tx.entries.length, 2);
-  t.is(tx.entries[0].getAccount(), 'income');
+  t.is(tx.entries[0].getAccount(), 'test');
   t.is(tx.entries[0].type, 'credit')
-  t.is(tx.entries[1].getAccount(), 'test');
+  t.is(tx.entries[1].getAccount(), 'income');
   t.is(tx.entries[1].type, 'debit');
   t.is(tx.isBalanced(), true);
 });
@@ -151,6 +151,6 @@ test('load trade with fee', t => {
 
   const fees = tx.getFees();
   t.deepEqual(fees, [feeCredit, feeDebit]);
-  
+
   t.is(tx.isBalanced(), true);1
 });

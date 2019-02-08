@@ -374,11 +374,12 @@ class Account {
       props.entries = utils.arrayToObjects(this.entries, options);
     }
 
+
     return utils.stripFalsyExcept(props);
   }
 
   toString() {
-    return `Currency: ${this.id}`;
+    return `Account: ${this.path}`;
   }
 }
 

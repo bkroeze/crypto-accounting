@@ -126,9 +126,9 @@ test('Can load a simple set of ledger formatted entries', t => {
   party: Test
   utc: 2018-01-01T08:00:00.000Z
   debits:
-    - 1 USD
-  credits:
     - 1 USD assets:test
+  credits:
+    - 1 USD
 `);
   t.is(result[1].toYaml(), `- id: test2
   account: income
