@@ -126,7 +126,7 @@ class Account {
 
   /**
    * Create a set of child accounts for a parent.
-   * @param {Account} parent
+   * @param {Account} parentfacc
    * @param {Array<Account>} children
    * @return {Object<String, Account>} accounts keyed by path
    */

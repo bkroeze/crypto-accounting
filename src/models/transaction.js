@@ -90,13 +90,13 @@ class Transaction {
     }
 
     if (fees) {
-      this.makeBalancedPairs(fees, true).forEach((pair) => {
+      this.makeBalancedPairs(fees, false).forEach((pair) => {
         pair.credit.setFee(true);
         pair.debit.setFee(true);
         addEntryPair(pair);
       });
     }
-    
+
     if (!this.id) {
       this.id = calcHashId(this.toObject());
     }
@@ -189,11 +189,11 @@ class Transaction {
         let credit;
         let debit;
         if (isCredit) {
+          credit = new Credit({ shortcut: accountShortcut, transaction: this });
+          debit = new Debit({ shortcut: noAccountShortcut, transaction: this, note: comment });
+        } else {
           credit = new Credit({ shortcut: noAccountShortcut, transaction: this });
           debit = new Debit({ shortcut: accountShortcut, transaction: this, note: comment });
-        } else {
-          credit = new Credit({ shortcut: accountShortcut, transaction: this });
-          debit = new Debit({ shortcut: noAccountShortcut, transaction: this });
         }
         debit.setPair(credit, '=');
         return Result.Ok({ credit, debit });

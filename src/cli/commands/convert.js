@@ -22,25 +22,24 @@ function readCSV(raw, currency, debit, credit) {
     raw,
     currency,
     debit,
-    credit);
+    credit
+  );
 }
 
 function readJSON(raw, base, cb) {
   const work = JSON.parse(raw);
-  let results = work.map(row => {
-    return {
-      date: moment(row.time * 1000),
-      address: row.address,
-      label: base,
-      amount: row.amount,
-    };
-  });
-  return R.reject((row) => row.amount === 0, results);
+  const results = work.map(row => ({
+    date: moment(row.time * 1000),
+    address: row.address,
+    label: base,
+    amount: row.amount,
+  }));
+  return R.reject(R.propEqual('amount', 0), results);
 }
 
 let wrapperIndex = 0;
 function nextIndex() {
-  wrapperIndex = wrapperIndex + 1;
+  wrapperIndex++;
   return wrapperIndex;
 }
 
@@ -59,20 +58,20 @@ class LedgerWrapper {
   }
 }
 
-const ledgerWrapFactory = (props) => new LedgerWrapper(props);
+const ledgerWrapFactory = props => new LedgerWrapper(props);
 
 function readLedger(raw) {
   return ledgerLoader.loadObjectsFromString(raw)
-    .map(ledgerWrapFactory)
+    .map(ledgerWrapFactory);
 }
 
 
 function printResults(results, base, credit, debit, descending, byDay, startDate) {
   let work = results;
-  //console.log(work);
+  // console.log(work);
   if (startDate) {
     const searchDate = moment(startDate);
-    console.log('filtering for startDate', results.length)
+    console.log('filtering for startDate', results.length);
     work = results.filter(x => searchDate.isSameOrBefore(x.utc));
     console.log('trimmed to', results.length);
   }
@@ -127,14 +126,14 @@ function handler(args) {
   if (conversion) {
     const conversions = [];
     const conversionMap = safeLoad(fs.readFileSync(conversion));
-    conversionMap.forEach(patternSet => {
-      patternSet.from.forEach(toreplace => {
+    conversionMap.forEach((patternSet) => {
+      patternSet.from.forEach((toreplace) => {
         conversions.push(x => x.replace(new RegExp(toreplace, 'g'), patternSet.account));
-      })
+      });
     });
 
-    conversions.forEach(conversion => {
-      raw = conversion(raw);
+    conversions.forEach((c) => {
+      raw = c(raw);
     });
   }
 
@@ -177,7 +176,7 @@ function builder(yargs) {
     .option('currency', {type: 'string', desc: 'Which symbol for this conversion. EX: BTC'})
     .option('merge', {type: 'string', desc: 'Merge with existing YAML file'})
     .option('conversion', {type: 'string', desc: 'Yaml file for account conversions'})
-    .positional('filename', {type: 'string', desc: 'CSV file to read'});
+    .positional('filename', {type: 'string', desc: 'File to read'});
 }
 
 module.exports = {

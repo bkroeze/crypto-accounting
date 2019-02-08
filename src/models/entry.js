@@ -1,6 +1,7 @@
 /* eslint prefer-destructuring: ["error", { array: false }] */
 const R = require('ramda');
 const RA = require('ramda-adjunct');
+const Moment = require('moment');
 const BigNumber = require('bignumber.js');
 const log = require('js-logger').get('cryptoaccounting.models.entry');
 const utils = require('../utils/models');
@@ -97,7 +98,11 @@ class Entry {
     // doesn't hurt to re-wrap if it isn't already a BigNumber
     this.quantity = new BigNumber(this.quantity);
     if (!this.id) {
-      this.id = calcHashId(this.toObject({ shallow: true }));
+      this.id = calcHashId({
+        ...this.toObject({ shallow: true }),
+        transactionId: this.transaction.id,
+        shortcut: this.shortcut,
+      });
     }
 
     if (!this.shortcut) {
@@ -204,6 +209,36 @@ class Entry {
       }
     }
     return acct;
+  }
+
+  compare(entry) {
+    const dateA = Moment(this.getUtc());
+    const dateB = Moment(entry.getUtc());
+    if (dateA.isBefore(dateB)) {
+      return -1;
+    }
+    if (dateB.isBefore(dateA)) {
+      return 1;
+    }
+    if (isCredit(this) && isDebit(entry)) {
+      return -1;
+    }
+    if (isDebit(this) && isCredit(entry)) {
+      return 1;
+    }
+    if (this.currency < entry.currency) {
+      return -1;
+    }
+    if (this.currency > entry.currency) {
+      return 1;
+    }
+    if (this.quantity.lt(entry.quantity)) {
+      return -1;
+    }
+    if (this.quantity.gt(entry.quantity)) {
+      return 1;
+    }
+    return 0;
   }
 
   equals(entry) {
@@ -348,6 +383,10 @@ class Entry {
    */
   isBalancingEntry() {
     return this.balancing && this.virtual;
+  }
+
+  isDebit() {
+    return isDebit(this);
   }
 
   /**

@@ -173,6 +173,14 @@ class Journal {
     return balances;
   }
 
+  getEntries() {
+    return R.sort((a, b) => a.compare(b),
+                  R.flatten(
+                    R.map(
+                      R.prop('entries'),
+                      this.transactions)));
+  }
+
   /**
    * Get the lots for this journal.
    * @param {boolean} force - always recalculate if true
