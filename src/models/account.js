@@ -304,6 +304,14 @@ class Account {
     return balances;
   }
 
+  getPathDepth() {
+    return this.path.split(':').length - 1;
+  }
+
+  getLastPath() {
+    return R.last(this.path.split(':'));
+  }
+
   /**
    * Get Total balances, keyed by currency
    * @param {function} filter to apply to the entries
