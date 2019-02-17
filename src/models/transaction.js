@@ -6,6 +6,7 @@ const Result = require('folktale/result');
 const log = require('js-logger').get('models.transaction');
 const Credit = require('./credit');
 const Debit = require('./debit');
+const Trade = require('./trade');
 const utils = require('../utils/models');
 const Parser = require('../utils/parser');
 const { makeError } = require('../utils/errors');
@@ -81,11 +82,17 @@ class Transaction {
     if (debits) {
       this.makeBalancedPairs(debits, false).forEach(addEntryPair);
     }
+
+    this.trades = [];
+
     if (trades) {
-      const tradeResults = this.makeTrades(trades);
-      tradeResults[0].forEach(addEntryPair);
-      if (tradeResults[1].length > 0) {
-        this.errors = this.errors.concat(tradeResults[1]);
+      const [tradeSuccesses, tradeErrors] = this.makeTrades(trades);
+      tradeSuccesses.forEach(t => {
+        addEntryPair(t),
+        this.trades.push(t);
+      });
+      if (tradeErrors.length > 0) {
+        this.errors = this.errors.concat(tradeErrors);
       }
     }
 
@@ -227,23 +234,13 @@ class Transaction {
       return new Debit({ quantity, currency, transaction, account, note: value.comment });
     };
 
+    const tx = this;
+
     rawArray.forEach((shortcut) => {
       parser.parseTrade(shortcut)
         .matchWith({
           Ok: ({ value }) => {
-            const credit = makeCredit(value);
-            const debit = makeDebit(value);
-            if (value.connector === '@') {
-              // if parser reversed the trade sides because of a leading "-", make sure
-              // to adjust quantity appropriately
-              if (value.reversed) {
-                debit.quantity = debit.quantity.times(credit.quantity);
-              } else {
-                credit.quantity = credit.quantity.times(debit.quantity);
-              }
-            }
-            debit.setPair(credit, value.connector);
-            trades.push({ credit, debit });
+            trades.push(new Trade(value, tx));
           },
           Error: ({ value }) => {
             log.error(value);
@@ -276,10 +273,6 @@ class Transaction {
    * @return {Object<String, *>}
    */
   toObject(options = {}) {
-    const trades = this.getTradePairs().map(pair => ({
-      credit: pair.credit.toObject(options),
-      debit: pair.debit.toObject(options),
-    }));
     return utils.stripFalsy({
       id: this.id,
       note: this.note,
@@ -291,7 +284,7 @@ class Transaction {
       tags: this.tags,
       credits: this.getCredits().map(t => t.toObject(options)),
       debits: this.getDebits().map(t => t.toObject(options)),
-      trades,
+      trades: this.trades.map(t => t.toObject(options)),
       fees: this.getFees().map(t => t.toObject(options)),
       details: this.details,
     });
@@ -309,7 +302,7 @@ class Transaction {
   toYaml(byDay) {
     const data = this.toObject({ byDay });
     const work = [];
-    const trades = this.getTradePairs();
+    const {trades} = this;
     const credits = this.getCredits().filter(entry => !entry.isTrade());
     const debits = this.getDebits().filter(entry => !entry.isTrade());
 
@@ -333,11 +326,11 @@ class Transaction {
         } else if (key === 'trades') {
           if (trades && trades.length > 0) {
             work.push(`${prefix} ${key}:`);
-            trades.forEach((entry) => {
+            trades.forEach((trade) => {
               try {
-                work.push(`    - ${entry.debit.getFullShortcut(this)}`);
+                work.push(`    - ${trade.shortcut}`);
               } catch (e) {
-                throw new Error(`Not a trade: ${JSON.stringify(entry)}`);
+                throw new Error(`Not a trade: ${JSON.stringify(trade)}`);
               }
             });
           }

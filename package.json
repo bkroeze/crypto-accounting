@@ -1,6 +1,6 @@
 {
   "name": "crypto-accounting",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Multi-currency/commodity accounting using human-readable text files",
   "main": "src/cli.js",
   "repository": "https://github.com/bkroeze/crypto-accounting.git",

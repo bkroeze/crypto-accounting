@@ -183,7 +183,7 @@ test('Calculates unrealized gains', t => {
 });
 
 
-test ('Calculates gains, including fees', t => {
+test('Calculates gains, including fees', t => {
   const journal = getJournal('journal_gains_fees.yaml');
   const lots = journal.getLots();
   //lots.forEach(lot => console.log(lot.toObject()));
@@ -197,4 +197,19 @@ test ('Calculates gains, including fees', t => {
   t.is(gains.length, 6); // includes 3 gains from the fees themselves
   const totalGains = addBigNumbers(gains.map(R.prop('quantity')));
   t.is(totalGains.toFixed(2), '301.85');
+});
+
+test('finds entries in lots', t => {
+  const journal = getJournal('journal_gains1.yaml');
+  const lots = journal.getLots();
+  const lot0 = lots[0].toObject();
+  const lot1 = lots[1].toObject();
+  const entry0 = lot0.debits[0];
+  const entry1 = R.last(lot1.debits);
+  t.truthy(entry0);
+  t.is(lots[0].contains(entry0), true);
+  t.is(lots[0].contains(entry1), false);
+  t.is(lots[1].contains(entry0), false);
+  t.truthy(entry1);
+  t.is(lots[1].contains(entry1), true);
 });

@@ -3,6 +3,20 @@
 This changelog will be maintained with sections for releases, denoted by release
 date and version, with any unreleased code in an "unreleased" section.
 
+* Pre-release version 0.0.4
+** DONE Added Trade model
+** DONE Fix shortcut generation to account for @ vs =.
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2018-10-04 Thu 21:44
+  :ARCHIVE_FILE: ~/ssd/work/crypto-accounting/TODO.org
+  :ARCHIVE_OLPATH: Active Task List
+  :ARCHIVE_CATEGORY: TODO
+  :ARCHIVE_TODO: DONE
+  :ARCHIVE_ITAGS: crypto_acct
+  :END:
+[[file:test/loaders/ledger_loader.test.js::t.is(results%5B0%5D.entries%5B1%5D.getFullShortcut(),%20'0.96555%20BTC%20Assets:Exchanges:Coinbase%20@%20200%20USD');][Test to modify]]
+
+
 * Pre-release version 0.0.3
 ** DONE Corrected fees to be debits to expenses (not credit)
 ** DONE Settle capital gains in lots

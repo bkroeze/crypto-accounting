@@ -39,7 +39,7 @@ function splitComment(val) {
     shortcut = val.replace(lineSpaces, ' ').replace(tabRe, ' ');
   } catch (e) {
     log.error('Could not split comment', val);
-    return Result.Error(ERRORS.parseErrors.InvalidShortcut(val));
+    return Result.Error(ERRORS.ParseErrors.InvalidShortcut(val, 'could not split comment'));
   }
 
   const ix = shortcut.indexOf(LEDGER_LINE_COMMENT);
@@ -90,7 +90,7 @@ class Parser {
           ));
         }
         return sanityCheckTokens(tokens)
-          .chain(entry => Result.Ok({ entry, comment }));
+          .chain(entry => Result.Ok({ entry, comment, shortcut: rawShortcut }));
       });
   }
 
@@ -125,7 +125,7 @@ class Parser {
         const errors = shortcuts
               .map(sanityCheckTokens)
               .filter(x => x instanceof Result.Error);
-        
+
         if (errors.length > 0) {
           return Result.Error(errors);
         }
@@ -148,6 +148,7 @@ class Parser {
           comment,
           connector,
           reversed,
+          shortcut: rawShortcut,
         });
       });
   }

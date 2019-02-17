@@ -30,6 +30,7 @@ const mergeProps = props => ({
   note: '',
   shortcut: '',
   pair: null,
+  trade: null,
   balancing: null, // the other entry in a balancing pair
   virtual: false,
   fee: false,
@@ -323,7 +324,7 @@ class Entry {
   }
 
   /**
-   * Get the date for this entry, defaulting to the transaction date if not directly set.
+   * Get the date for this entry, defaulting to the transaction date if not direcly set.
    * @return {Moment} date
    */
   getUtc() {
@@ -415,13 +416,14 @@ class Entry {
    * Set the "other side" of the entry on this and its partner.
    * @param {Entry} other side (credit if this is debit, debit if this is credit)
    * @param {Boolean} true if the price is specified as "per each"
+   * @param {Trade}
    */
-  setPair(partner, connector) {
+  setPair(partner, connector, trade = null) {
     this.connector = connector;
     this.pair = partner;
+    this.trade = trade;
     if (partner.pair !== this) {
-      // set the partner, but don't multiply
-      partner.setPair(this, false);
+      partner.setPair(this, connector, trade);
     }
   }
 

@@ -138,12 +138,12 @@ test('Can load a simple set of ledger formatted entries', t => {
   trades:
     - 1 USD assets:test @ 1 GIN
 `);
-    t.is(result[2].toYaml(), `- id: test3
+  t.is(result[2].toYaml(), `- id: test3
   account: exchange
   status: cleared
   party: Test3
   utc: 2018-01-03T08:00:00.000Z
   trades:
-    - 10 ETH @ 200 USD
+    - 10 ETH exchange @ 200 USD
 `);
 });

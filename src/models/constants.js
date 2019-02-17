@@ -25,12 +25,12 @@ const constants = {
   constants.ERRORS[k] = `ERR_${k}`;
 });
 
-function InvalidShortcut(message) {
-  return { message };
+function InvalidShortcut(shortcut, message) {
+  return { shortcut, message };
 }
 
-function InvalidTrade(message) {
-  return { message };
+function InvalidTrade(shortcut, message) {
+  return { shortcut, message };
 }
 
 constants.ERRORS.ParseErrors = union('parse-errors', {

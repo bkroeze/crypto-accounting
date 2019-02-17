@@ -1,10 +1,8 @@
-
 const Moment = require('moment');
 const R = require('ramda');
-
+const { DEBIT } = require('./constants');
 const Entry = require('./entry');
 const utils = require('../utils/models');
-const { DEBIT } = require('./constants');
 const { addBigNumbers, BIG_0, BIG_1 } = require('../utils/numbers');
 
 const getApplied = R.map(R.prop('applied'));
@@ -26,7 +24,7 @@ function makeDebitObjects(wrappers) {
 class Lot {
   /**
    * Instantiate the lot with its first debit.
-   * @param {Entry} debit
+   * @param {Debit} debit
    */
   constructor(debit) {
     this.account = debit.getAccount();
@@ -64,11 +62,11 @@ class Lot {
   /**
    * Tests a debit to see if it is a "lot" type entry.
    * @param {Object<String,Currency>} currencies
-   * @param {Entry} debit
+   * @param {Debit} debit
    * @return {Boolean} true if the debit should be in a lot
    */
   static isLot(currencies, debit) {
-    if (debit.type !== DEBIT) {
+    if (!debit.isDebit()) {
       return false;
     }
     const curr = currencies[debit.currency];
@@ -86,7 +84,7 @@ class Lot {
   /**
    * Create lots from a list of debits.
    * @param {Object<String,Currency>} currencies
-   * @param {Array<Entry>} debits
+   * @param {Array<Debit>} debits
    * @return {Array<Lot>} lots
    */
   static makeLots(currencies, debits) {
@@ -98,7 +96,7 @@ class Lot {
 
   /**
    * Add a credit to this lot.
-   * @param {Entry} credit
+   * @param {Credit} credit
    * @param {BigNumber} max to apply
    * @return {BigNumber} amount applied
    */
@@ -112,7 +110,7 @@ class Lot {
 
   /**
    * Add a debit to this lot.
-   * @param {Entry} debit
+   * @param {Debit} debit
    * @return {BigNumber} amount remaining to be applied in lot
    */
   addDebit(debit) {
@@ -136,7 +134,7 @@ class Lot {
     const credit = debit.pair;
     const getRateForCurrency = currency => (currency === fiat ? BIG_1
                                             : pricehistory.findPrice(this.utc, currency, fiat, transCurrencies, within).rate);
-    
+
     const getFiatPrice = entry => getRateForCurrency(entry.currency).times(entry.quantity);
 
     const feeTotal = addBigNumbers(fees.map(getFiatPrice));
@@ -174,7 +172,7 @@ class Lot {
    * @param {String} currency for the price
    * @param {Array<String>} list of currencies to use as translations
    * @param {Integer} seconds to search for dates within
-   * @return {Array<Entry>} list of debits representing capital gains
+   * @return {Array<Debit>} list of debits representing capital gains
    */
   getCapitalGains(pricehistory, account, fiat, transCurrencies = ['BTC', 'ETH'], within = null) {
     const purchasePrice = this.getPurchasePriceEach(pricehistory, fiat, transCurrencies, within);
@@ -223,7 +221,7 @@ class Lot {
    * @param {String} currency for the price
    * @param {Array<String>} list of currencies to use as translations
    * @param {Integer} seconds to search for dates within
-   * @return {Entry} debits representing unrealized capital gains
+   * @return {Debit} debits representing unrealized capital gains
    */
   getUnrealizedGains(utc, pricehistory, account, currency, transCurrencies = ['BTC', 'ETH'], within = null) {
     let quantity = BIG_0;
@@ -266,6 +264,11 @@ class Lot {
    */
   isClosed() {
     return this.getRemaining().eq(BIG_0);
+  }
+
+  contains(entry) {
+    const entries = entry.type === DEBIT ? makeDebitObjects(this.debits) : makeCreditObjects(this.credits);
+    return R.any(R.propEq('id', entry.id), entries);
   }
 
   /**
