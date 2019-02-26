@@ -33,6 +33,7 @@ class Lot {
     this.credits = [];
     this.utc = debit.getUtc();
     this.addDebit(debit);
+    this.id = `lot-${debit.id}`
   }
 
   /**
@@ -70,10 +71,10 @@ class Lot {
       return false;
     }
     const curr = currencies[debit.currency];
-    if (!curr || curr.isFiat()) {
+    if (!curr) {
       return false;
     }
-    if (debit.balancing) {
+    if (debit.isBalanced()) {
       // console.log('debit is lot', debit.toObject({shallow: true}));
       return true;
     }
