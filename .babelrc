@@ -4,10 +4,18 @@
     "stage-3"
   ],
   "env": {
-        "development": {
-            "sourceMaps": "inline",
-            "plugins": ["source-map-support"]
-        }
+    "targets" : {
+      "node": "current"
     },
-  "plugins": ["transform-es2015-destructuring"]
+    "development": {
+      "sourceMaps": "inline",
+      "plugins": ["source-map-support"]
+    }
+  },
+  "plugins": [
+    "transform-es2015-destructuring",
+    ["transform-runtime", {
+      "polyfill": false,
+      "regenerator": true
+    }]]
 }

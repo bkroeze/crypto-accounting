@@ -4,12 +4,14 @@
 #   - coin-to-coin trade
 #   - transfer back
 #   - partial cash-out
-- account: assets:banks:checking
+- id: transactions2_1
+  account: assets:banks:checking
   utc: 2018-06-15
   note: equity into bank
   credits:
     - 500 USD equity
-- account: assets:exchanges:coinbase
+- id: transactions2_2
+  account: assets:exchanges:coinbase
   utc: 2018-06-16
   note: Sending $500 from bank, and buying 1.1 ETH with $440 of it.
   # this is a new lot = 1.1 ETH
@@ -17,7 +19,8 @@
     - 500 USD assets:banks:checking
   trades:
     - 1.1 ETH @ 400 USD
-- account: assets:exchanges:binance
+- id: transactions2_3
+  account: assets:exchanges:binance
   utc: 2018-06-17
   note: sending 1 ETH to Binance, and buying 40 GIN with it.
   # this is a new lot - 40 GIN
@@ -25,22 +28,28 @@
     - 1 ETH assets:exchanges:coinbase
   trades:
     - 40 GIN = 1 ETH
-- account: assets:exchanges:binance
+- id: transactions2_4
+  account: assets:exchanges:binance
   utc: 2018-06-18
   note: selling 40 GIN for 2 ETH total, nice profit!
   # this is two new lots - each with 1 ETH
   trades:
     - -20 GIN @ 0.05 ETH
     - -20 GIN = 1 ETH
-- account: assets:exchanges:coinbase
+- id: transactions2_5
+  account: assets:exchanges:coinbase
   utc: 2018-06-19
   note: cashing out 2 ETH
   # Not a new lot - these ETH are already in a lot
-  credits:
+  debits:
     - 2 ETH assets:exchanges:binance
+- id: transaction2_6
+  account: assets:exchanges:binance
+  utc: 2018-06-19
   trades:
     - -2 ETH @ 500 USD
-- account: assets:banks:checking
+- id: transactions2_7
+  account: assets:banks:checking
   utc: 2018-06-20
   note: sending cash to bank
   credits:

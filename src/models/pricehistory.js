@@ -8,7 +8,10 @@ const dates = require('../utils/dates');
 const { arrayToObjects } = require('../utils/models');
 const { ERRORS } = require('./constants');
 const { makeError } = require('../utils/errors');
-const CurrencyPrices = require('./currencyprices');
+const { initDB, ensureUTC } = require('../loaders/storage');
+const { getPriceCollection, addPrice } = require('../loaders/priceDB');
+const { ensureDate, ensureMoment } = require('../utils/dates');
+const log = require('../utils/logging').get('models.pricehistory');
 
 /**
  * A collection of prices for multiple currencies.
@@ -17,27 +20,52 @@ class PriceHistory {
   /**
    * Instantiate via a raw list of prices
    * @param {Array<String|Object>} raw prices
+   * @param {String} filename of LokiDB to open or create
    */
-  constructor(pricelist) {
-    this.pairs = {};
-    if (pricelist) {
-      if (RA.isArray(pricelist)) {
-        pricelist.forEach((p) => {
-          const price = new PairPrice(p);
-          if (!R.has(price.pair, this.pairs)) {
-            this.pairs[price.pair] = new CurrencyPrices();
-          }
-          this.pairs[price.pair].insert(price);
-        });
-      } else {
-        Object.keys(pricelist).forEach((key) => {
-          this.pairs[key] = new CurrencyPrices();
-          pricelist[key].forEach((priceProps) => {
-            this.pairs[key].insert(new PairPrice(priceProps));
+  constructor(pricelist, filename='prices') {
+    initDB(filename);
+    this.isLoaded = false;
+    this.priceCollection = null;
+    this.addPrices(pricelist);
+  }
+
+  static load(pricelist, filename='prices') {
+    const history = new PriceHistory(pricelist, filename);
+    return history.waitForLoad();
+  }
+
+  waitForLoad() {
+    return new Promise((resolve) => {
+      const checker = () => {
+        if (this.isLoaded) {
+          resolve(this);
+        } else {
+          log.info('polling for price load complete');
+          setTimeout(checker, 10);
+        }
+      };
+      setTimeout(checker, 10);
+    });
+  }
+
+  addPrices(pricelist) {
+    getPriceCollection(prices => {
+      this.priceCollection = prices;
+      if (pricelist) {
+        if (RA.isArray(pricelist)) {
+          pricelist.forEach((p) => {
+            addPrice(new PairPrice(p), prices);
           });
-        });
+        } else {
+          Object.keys(pricelist).forEach((key) => {
+            pricelist[key].forEach((priceProps) => {
+              addPrice(new PairPrice(priceProps), prices);
+            });
+          });
+        }
       }
-    }
+      this.isLoaded = true;
+    });
   }
 
   /**
@@ -101,24 +129,52 @@ class PriceHistory {
    * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
    */
   findPrice(utc, base, quote, transCurrencies = ['BTC', 'ETH'], within = null) {
+    const utcMoment = ensureMoment(utc);
+    const utcDate = ensureDate(utc);
     const status = this.hasPair(base, quote);
+    if (status === 0) {
+      return this.derivePrice(utc, base, quote, transCurrencies, within);
+    }
+
+    const pairColl = status === -1 ? this.getPair(quote, base)
+          : this.getPair(base, quote);
+
+    const possibles = R.flatten([
+      pairColl.find({'utc': {$gte, utc}}).simplesort('utc').limit(1),
+      pairColl.find({'utc': {$lte, utc}}).simplesort('utc', false).limit(1),
+    ]);
+
+    let best = null;
+
+    if (possibles.length === 1) {
+      best = new PairPrice(possibles[0]);
+    }
+    if (possibles.length === 2) {
+      const diff0 = Math.abs(utcMoment.diff(ensureMoment(possibles[0].utc)));
+      const diff1 = Math.abs(utcMoment.diff(ensureMoment(possibles[1].utc)));
+      best = (diff0 < diff1) ? possibles[0] : possibles[1];
+    }
+
+    if (Math.abs(utcMoment.diff(ensureMoment(best.utc)) > (within * 1000))) {
+      this.log.debug(`Nearest price ${best} is farther than ${within} seconds from ${utc}, attempting to derive`);
+      return this.derivePrice(utc, base, quote, transCurrencies, within);
+    }
+
+    const price = new PairPrice(best);
     if (status === -1) {
-      return this.getPair(quote, base).findNearest(utc).invert();
+      return price.invert();
     }
-    if (status === 1) {
-      return this.pairs[`${base}/${quote}`].findNearest(utc);
-    }
-    return this.derivePrice(utc, base, quote, transCurrencies, within);
+    return price;
   }
 
   /**
    * Get the prices for a pair
    * @param {String} base
    * @param {String} quote
-   * @return {CurrencyPrices} prices
+   * @return {LokiCollection} prices
    */
   getPair(base, quote) {
-    return this.pairs[`${base}/${quote}`];
+    return this.priceCollection.find({base, quote});
   }
 
   /**
@@ -131,10 +187,10 @@ class PriceHistory {
     if (base === quote) {
       return 0;
     }
-    if (R.has(`${base}/${quote}`, this.pairs)) {
+    if (this.priceCollection.findOne({pair: `${base}/${quote}`}) !== null) {
       return 1;
     }
-    if (R.has(`${quote}/${base}`, this.pairs)) {
+    if (this.priceCollection.findOne({pair: `${quote}/${base}`}) !== null) {
       return -1;
     }
     return 0;

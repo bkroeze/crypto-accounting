@@ -71,7 +71,7 @@ class Lot {
       return false;
     }
     const curr = currencies[debit.currency];
-    if (!curr) {
+    if (!curr || curr.isFiat()) {
       return false;
     }
     if (debit.isBalanced()) {

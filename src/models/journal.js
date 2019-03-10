@@ -19,6 +19,7 @@ const DEFAULT_PROPS = {
   currencies: {},
   transactions: [],
   pricehistory: null,
+  pricedb: null,
 };
 
 const KEYS = R.keysIn(DEFAULT_PROPS);
@@ -37,7 +38,8 @@ class Journal {
     this.accounts = new Accounts(merged.accounts);
     this.currencies = makeCurrencies(merged.currencies);
     this.transactions = Transaction.makeTransactions(merged.transactions);
-    this.pricehistory = new PriceHistory(merged.pricehistory);
+    this.pricedb = merged.pricedb ? merged.pricedb : `${this.id}.json`;
+    this.pricehistory = new PriceHistory(merged.pricehistory, this.pricedb);
     this.checkAndApply();
   }
 
@@ -114,7 +116,8 @@ class Journal {
    */
   findPrice(utc, base, quote, transCurrencies = null, within = null) {
     const translations = transCurrencies || this.getTranslationCurrencies().map(R.prop('id'));
-    return this.pricehistory.findPrice(utc, base, quote, translations, within);
+    return this.pricehistory.waitForLoad()
+      .then(history =>  history.findPrice(utc, base, quote, translations, within));
   }
 
   /**

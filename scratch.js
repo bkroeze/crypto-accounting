@@ -52,11 +52,33 @@ var acct = journal.getAccount('cb');
 // console.log('credits\n',transaction.getCredits().map(x => x.toObject()));
 // console.log('debuts\n',transaction.getDebits().map(x => x.toObject()));
 
-const Transaction = require('./src/models/transaction');
+// const Transaction = require('./src/models/transaction');
 
-const tx = new Transaction({
-    account: 'test',
-    utc: '2018-07-04',
-    trades: ['10 ETH @ 400 USD exchange']
-  });
+// const tx = new Transaction({
+//     account: 'test',
+//     utc: '2018-07-04',
+//     trades: ['10 ETH @ 400 USD exchange']
+//   });
 
+
+const storage = require('./src/loaders/storage');
+const priceDB = require('./src/loaders/priceDB');
+const PairPrice = require('./src/models/pairprice');
+
+storage.initDB('pricedb.json');
+
+const prices = [
+  '2018-01-02 ETH/USD 400',
+  '2018-01-02 BTC/USD 500',
+  '2018-01-02 ETH/BTC 500',
+  '2018-01-02 ETH/XRP 1000',
+  '2018-01-01 ETH/XRP 1001',
+];
+
+prices.forEach(p => priceDB.addPrice(new PairPrice(p)));
+
+let pc;
+priceDB.getPriceCollection().then(coll => {
+  pc = coll;
+  console.log(`Got ${pc.count()}`);
+});

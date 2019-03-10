@@ -191,7 +191,7 @@ class Accounts {
           // console.log('-- qty now', qty.toFixed(2));
           const lot = search(findLot, lots);
           if (!lot) {
-            throw makeError(RangeError, `${ERRORS.EXHAUSTED}, Ran out of lots looking for ${c.currency}`);
+            throw makeError(RangeError, `${ERRORS.EXHAUSTED}, Ran out of lots looking for ${qty.toFixed(8)} ${c.currency}`, lots);
           }
           // console.log('going to add to', lot.toObject());
           const applied = lot.addCredit(c, qty);

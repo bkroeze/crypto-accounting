@@ -9,6 +9,7 @@ const { ERRORS } = require('./constants');
 const { makeError } = require('../utils/errors');
 
 const DEFAULT_PROPS = {
+  id: null,
   utc: null,
   pair: null,
   base: null,
@@ -87,6 +88,9 @@ class PairPrice {
     if (!this.pair) {
       this.pair = `${this.base}/${this.quote}`;
     }
+    if (!this.id) {
+      this.id = `${this.pair}:${this.utc.format('x')}`;
+    }
   }
 
   static sort(prices) {
@@ -138,16 +142,20 @@ class PairPrice {
    * @return {Object<String, *>}
    */
   toObject(options = {}) {
-    const {shallow, yaml} = options;
+    const {shallow, yaml, db} = options;
     const props = {
+      id: this.id,
       pair: this.pair,
-      utc: this.utc.toISOString(),
+      utc: db ? this.utc.toDate() : this.utc.toISOString(),
       base: this.base,
       quote: this.quote,
       rate: this.rate.toFixed(8),
       note: this.note,
     };
-    if (!yaml) {
+    if (db) {
+      props.derived = this.derived;
+    }
+    if (!yaml && !db) {
       props.derived = this.derived;
       props.translationChain = utils.arrayToObjects(this.translationChain || [], shallow);
     }

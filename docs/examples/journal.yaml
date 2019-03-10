@@ -1,4 +1,5 @@
 name: Example Journal
+id: example
 accounts:
   $ref: ./accounts.yaml
 currencies:

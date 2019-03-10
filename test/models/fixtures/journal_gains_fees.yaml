@@ -27,7 +27,7 @@ transactions:
       # Capital gains:
       # (1 * 200 - 0.01 * 200 + 0.5 * 220 - 0.005 * 220 + 0.48 * 400 - 0.005 * 350) - (2 * 102.5) = $292.15
       # Capital gains from fee conversion:
-      # 
+      #
       # Unrealized gains:
       # (2 * 350) - (2 * 102.5)  = $495
       # Calculations:
@@ -44,14 +44,14 @@ transactions:
     trades:
       - -0.5 ETH @ 220 USD
     fees:
-      - 0.005 ETH
+      - 0.005 ETH expenses:exchanges
   - account: assets:exchanges:coinbase
     id: Txn 4
     utc: 2018-01-05
     trades:
       - -0.48 ETH @ 400 USD
     fees:
-      - 0.005 ETH
+      - 0.005 ETH expenses:exchanges
 pricehistory:
   - 2018-01-01 ETH/USD 100
   - 2018-01-02 ETH/USD 180

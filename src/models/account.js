@@ -257,7 +257,7 @@ class Account {
    * @return {Array<Lot>} lots
    */
   getLots(currencies, force) {
-    if (this.isVirtual()) {
+    if (this.isVirtual() || this.isExpense()) {
       return [];
     }
     if (this.dirty.lots || force) {
@@ -345,6 +345,13 @@ class Account {
       return this.parent.inPath(path);
     }
     return false;
+  }
+
+  isExpense() {
+    return (this.parent && this.parent.isExpense()) ||
+      R.startsWith('expense', this.path.toLowerCase()) ||
+      R.has('fee', this.tags) ||
+      R.has('expense', this.tags);
   }
 
   /**

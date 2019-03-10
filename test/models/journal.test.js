@@ -157,10 +157,13 @@ test('Can get lots by currency', (t) => {
   t.is(lots.GIN.length, 1);
 });
 
-test('Loads Price History', (t) => {
+test('Loads Price History', async (t) => {
   const journal = getJournalFromYaml('journal_2.yaml');
-  const price = journal.pricehistory.findPrice('2018-06-18', 'GIN', 'BTC');
-  t.deepEqual(price.rate.toFixed(5), '0.00011');
+  history.findPrice('2018-06-18', 'GIN', 'BTC')
+    .then(price => {
+      t.deepEqual(price.rate.toFixed(5), '0.00011');
+      t.done();
+    });
 });
 
 test('Finds translation currencies', (t) => {
@@ -168,10 +171,13 @@ test('Finds translation currencies', (t) => {
   t.deepEqual(journal.getTranslationCurrencies(), [journal.currencies.BTC, journal.currencies.ETH]);
 });
 
-test('Finds prices', (t) => {
+test('Finds prices', async (t) => {
   const journal = getJournalFromYaml('journal_2.yaml');
-  const price = journal.findPrice('2018-06-17', 'GIN', 'USD');
-  t.is(price.rate.toFixed(2), '0.70');
+  journal.findPrice('2018-06-17', 'GIN', 'USD')
+    .then(price => {
+      t.is(price.rate.toFixed(2), '0.70');
+      t.done();
+    });
 });
 
 test('Finds no currency problems on a clean journal', (t) => {

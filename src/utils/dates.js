@@ -23,7 +23,34 @@ function compareByDate(a, b) {
   return 0;
 }
 
+function ensureDate(work) {
+  if (Moment.isMoment(work)) {
+    return work.toDate();
+  }
+  if (RA.isString(work) || RA.isNumber(work)) {
+    return Moment(work).toDate();
+  }
+  if (RA.isObj(work) && R.has('utc', work)) {
+    return ensureDate(work.utc);
+  }
+  throw new Error(`Cannot parse date: ${work}`);
+}
+
+function ensureMoment(work) {
+  if (Moment.isMoment(work)) {
+    return work;
+  } if (RA.isString(work)) {
+    return Moment(work);
+  } if (RA.isObj(work) && R.has('utc', work)) {
+    return ensureMoment(work.utc);
+  }
+  throw makeError(TypeError, ERRORS.INVALID_TERM, `Invalid search term: ${work}`);
+}
+
+
 module.exports = {
   averageDates,
   compareByDate,
+  ensureDate,
+  ensureMoment,
 };
