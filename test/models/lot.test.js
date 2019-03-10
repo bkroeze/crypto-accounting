@@ -83,7 +83,6 @@ test('Calculates gains', async (t) => {
 test('getPurchasePrice direct-to-fiat', async t => {
   const journal = getJournal('journal_gains1.yaml');
   const lots = journal.getLots();
-  console.log(lots.map(l => l.toObject()));
   t.is(lots.length, 2);
   let lot = lots[0];
   journal.pricehistory.waitForLoad()
@@ -216,7 +215,6 @@ test('Calculates unrealized gains', async t => {
 test('Calculates gains, including fees', async t => {
   const journal = getJournal('journal_gains_fees.yaml');
   const lots = journal.getLots();
-  lots.forEach((lot, ix) => console.log(`${ix}\n---------\n${JSON.stringify(lot.toObject(), null, 2)}`));
   t.is(lots.length, 1);
   const lot = lots[0];
   journal.pricehistory.waitForLoad()

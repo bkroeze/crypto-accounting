@@ -74,7 +74,7 @@ class Lot {
     if (!curr || curr.isFiat()) {
       return false;
     }
-    if (debit.isBalanced()) {
+    if (debit.isTrade()) {
       // console.log('debit is lot', debit.toObject({shallow: true}));
       return true;
     }

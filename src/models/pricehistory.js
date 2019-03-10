@@ -40,11 +40,10 @@ class PriceHistory {
         if (this.isLoaded) {
           resolve(this);
         } else {
-          log.info('polling for price load complete');
-          setTimeout(checker, 10);
+          setTimeout(checker, 100);
         }
       };
-      setTimeout(checker, 10);
+      setTimeout(checker, 50);
     });
   }
 

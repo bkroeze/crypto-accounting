@@ -2,6 +2,23 @@ import test from 'ava';
 
 import Transaction from '../../src/models/transaction';
 import { CREDIT, DEBIT } from '../../src/models/constants';
+import * as R from 'ramda';
+
+test('Transactions can be sorted', (t) => {
+  const txs = [
+    new Transaction({
+      utc: '2019-01-01',
+      account: 'test',
+    }),
+    new Transaction({
+      utc: '2018-01-01',
+      account: 'test2',
+    }),
+  ];
+  const sorted = Transaction.sort(txs);
+  t.is(sorted[0].account, txs[1].account);
+  t.is(sorted[1].account, txs[0].account);
+});
 
 test('Transaction can instantiate via props', (t) => {
   const tx = new Transaction({

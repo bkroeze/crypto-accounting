@@ -1,4 +1,5 @@
 const Moment = require('moment');
+const RA = require('ramda-adjunct');
 
 function averageDates(date1, date2) {
   let d1;

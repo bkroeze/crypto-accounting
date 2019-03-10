@@ -8,7 +8,7 @@ test('PriceHistory loads multiple currencies', async (t) => {
   const btc1 = new PairPrice('2018-07-01 BTC/USD 6500');
   const btc2 = new PairPrice('2018-05-11 BTC/USD 7800');
   const eth1 = new PairPrice('2018-05-01 ETH/USD 500');
-  PriceHistory.load([btc1,btc2, eth1])
+  PriceHistory.load([btc1,btc2, eth1], 'test.db')
     .then(history => {
       t.is(history.hasPair('BTC', 'USD'), 1);
       t.is(history.hasPair('USD', 'BTC'), -1);
@@ -23,7 +23,7 @@ test('PriceHistory searches by date', async (t) => {
   const btc1 = new PairPrice('2018-07-01 BTC/USD 6500');
   const btc2 = new PairPrice('2018-05-11 BTC/USD 7800');
   const eth1 = new PairPrice('2018-05-01 ETH/USD 500');
-  PriceHistory.load([btc1,btc2, eth1])
+  PriceHistory.load([btc1,btc2, eth1], 'test.db')
     .then(history => {
       const result = history.findPrice('2018-05-11', 'BTC', 'USD');
       t.deepEqual(result, btc2);
@@ -46,7 +46,7 @@ test('Calculates price by inversion if needed', async (t) => {
     '2018-06-19 ETH/USD 700',
     '2018-06-20 ETH/USD 650',
   ];
-  PriceHistory.load(prices)
+  PriceHistory.load(prices, 'test.db')
     .then(history => {
       const price = history.findPrice('2018-06-17', 'USD', 'ETH');
       t.is(price.pair, 'USD/ETH');
@@ -67,7 +67,7 @@ test('Derives price if needed', async (t) => {
     '2018-06-19 ETH/USD 700',
     '2018-06-20 ETH/USD 650',
   ];
-  PriceHistory.load(prices)
+  PriceHistory.load(prices, 'test.db')
     .then(history => {
       const price = history.findPrice('2018-06-17', 'GIN', 'USD');
       t.is(price.pair, 'GIN/USD');

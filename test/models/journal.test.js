@@ -61,7 +61,6 @@ test('Simple fixture test', (t) => {
 test('Tracks sales through multiple hops', (t) => {
   const journal = getJournalFromYaml('journal_2.yaml');
   const byAccount = journal.getBalancesByAccount();
-  // console.log(`byAccount ${JSON.stringify(byAccount, null, 2)}`);
   const coinbase = byAccount['assets:exchanges:coinbase'];
   const binance = byAccount['assets:exchanges:binance'];
   t.is(coinbase.ETH.toFixed(2), '0.10');
@@ -159,8 +158,9 @@ test('Can get lots by currency', (t) => {
 
 test('Loads Price History', async (t) => {
   const journal = getJournalFromYaml('journal_2.yaml');
-  history.findPrice('2018-06-18', 'GIN', 'BTC')
-    .then(price => {
+  journal.pricehistory.waitForLoad()
+    .then(history => {
+      price = history.findPrice('2018-06-18', 'GIN', 'BTC');
       t.deepEqual(price.rate.toFixed(5), '0.00011');
       t.done();
     });
@@ -219,3 +219,4 @@ test('Finds no problems on a clean journal', (t) => {
   const probs = journal.getCleanliness();
   t.true(R.isEmpty(probs));
 });
+62

@@ -1,6 +1,8 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
+** DONE Fix lot calculations
+   CLOSED: [2019-03-10 Sun 16:29]
 ** Make sure converters understand new format.
 ** Add a loader test that detects bad formatted "1 ETH" style trades
 ** Get transactions from wallets via JSONRPC call?

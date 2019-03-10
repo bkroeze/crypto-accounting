@@ -110,6 +110,34 @@ class Transaction {
   }
 
   /**
+   * Sort function for transactions
+   * @param {Transaction} a
+   * @param {Transaction} b
+   * @param {Integer} -1, 0, 1
+   */
+  static compare(a, b) {
+    const utcA = Moment(a.utc);
+    const utcB = Moment(b.utc);
+    if (utcA.isBefore(utcB)) {
+      return -1;
+    }
+    if (utcB.isBefore(utcA)) {
+      return 1;
+    }
+    if (a.account.debit < b.account.debit) {
+      return -1;
+    }
+    if (a.account.debit > b.account.debit) {
+      return 1;
+    }
+    return 0;
+  }
+
+  static sort(transactions) {
+    return R.sort((a, b) => Transaction.compare(a, b), transactions);
+  }
+
+  /**
    * Create transactions from a raw list
    * @param {Array<Object>} raw transaction objections
    * @return {Array<Transaction>} transactions

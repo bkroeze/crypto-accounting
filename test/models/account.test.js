@@ -234,7 +234,6 @@ test('getLots should not create lots unless it is a transfer in', (t) => {
   const journal = getJournal('journal_2.yaml');
   const acct = journal.getAccount('binance');
   const lots = acct.getLots(journal.currencies);
-  lots.forEach((l, i) => console.log(`${i}\n----\n${JSON.stringify(l.toObject(), null,  2)}`));
   t.is(lots.length, 3);
   t.deepEqual(lots.map(l => [l.currency, l.getTotal().toFixed(0)]),
               [['GIN', '40'], ['ETH', '1'], ['ETH', '1']]);

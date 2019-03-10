@@ -39,12 +39,13 @@
 - id: transactions2_5
   account: assets:exchanges:coinbase
   utc: 2018-06-19
-  note: cashing out 2 ETH
+  note: sending the 2 ETH from binance (credit) to coinbase (debit)
   # Not a new lot - these ETH are already in a lot
-  debits:
+  credits:
     - 2 ETH assets:exchanges:binance
 - id: transaction2_6
-  account: assets:exchanges:binance
+  account: assets:exchanges:coinbase
+  note: cashing out 2 ETH
   utc: 2018-06-19
   trades:
     - -2 ETH @ 500 USD
