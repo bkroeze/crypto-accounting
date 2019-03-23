@@ -1,6 +1,7 @@
 #+Title: Task list for Crypto-Accounting
 
 * Active Task List                                              :crypto_acct:
+** Add CLI command to load prices to DB
 ** DONE Fix lot calculations
    CLOSED: [2019-03-10 Sun 16:29]
 ** Make sure converters understand new format.

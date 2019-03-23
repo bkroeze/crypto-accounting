@@ -1,9 +1,10 @@
 const pino = require('pino');
 
 let level = process.env.CRYPTOACCOUNTING_LOGLEVEL || process.env.CRYPTOACCOUNTING_LOGLEVEL || 'info';
+
 let LOGGER = pino({
   application: 'apiserver',
-  level: pino.levels.values[level.toLowerCase()],
+  level: level.toLowerCase(),
 });
 
 function getLogger(module) {
@@ -12,6 +13,7 @@ function getLogger(module) {
 
 function setLogger(logger) {
   LOGGER = logger;
+  LOGGER.warn('Set custom logger');
   return LOGGER;
 }
 
