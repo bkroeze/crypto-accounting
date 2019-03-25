@@ -11,6 +11,8 @@ const requireCommands = R.map((cmd) => {
 
 const commands = requireCommands([
   'convert',
+  'prices',
+  'loadprices',
 ]);
 
 module.exports = commands;

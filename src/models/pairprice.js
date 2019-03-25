@@ -120,6 +120,7 @@ class PairPrice {
    */
   invert() {
     return new PairPrice({
+      pair: `${this.quote}/${this.base}`,
       base: this.quote,
       quote: this.base,
       utc: this.utc.toISOString(),

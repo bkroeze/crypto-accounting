@@ -2,7 +2,7 @@ const SortedArray = require('sorted-array');
 const Moment = require('moment');
 const R = require('ramda');
 const RA = require('ramda-adjunct');
-
+const Maybe = require('folktale/maybe');
 const PairPrice = require('./pairprice');
 const dates = require('../utils/dates');
 const { arrayToObjects } = require('../utils/models');
@@ -12,6 +12,8 @@ const { initDB, ensureUTC } = require('../loaders/storage');
 const { getPriceCollection, addPrice } = require('../loaders/priceDB');
 const { ensureDate, ensureMoment } = require('../utils/dates');
 const log = require('../utils/logging').get('models.pricehistory');
+
+const isPairPrice = R.is(PairPrice);
 
 /**
  * A collection of prices for multiple currencies.
@@ -27,11 +29,32 @@ class PriceHistory {
     this.isLoaded = false;
     this.priceCollection = null;
     this.addPrices(pricelist);
+    this.filename = filename;
   }
 
   static load(pricelist, filename='prices') {
     const history = new PriceHistory(pricelist, filename);
     return history.waitForLoad();
+  }
+
+  /**
+   * Find any missing days in a sorted collection.
+   */
+  static findGaps(collection) {
+    const gaps = [];
+    if (collection.length > 0) {
+      let current = Moment(collection[0].utc);
+      let record;
+      for (let i=1; i<collection.length; i++) {
+        current.add(1, 'day');
+        record = Moment(collection[i].utc);
+        while (!current.isSame(record, 'day')) {
+          gaps.push(current.clone());
+          current.add(1, 'day');
+        }
+      }
+    }
+    return gaps;
   }
 
   waitForLoad() {
@@ -47,24 +70,42 @@ class PriceHistory {
     });
   }
 
+  addPrice(price) {
+    if (!this.isLoaded) {
+      throw new Error('DB not yet loaded.');
+    }
+    return addPrice(new PairPrice(price), this.priceCollection);
+  }
+
   addPrices(pricelist) {
-    getPriceCollection(prices => {
-      this.priceCollection = prices;
-      if (pricelist) {
-        if (RA.isArray(pricelist)) {
-          pricelist.forEach((p) => {
-            addPrice(new PairPrice(p), prices);
-          });
-        } else {
-          Object.keys(pricelist).forEach((key) => {
-            pricelist[key].forEach((priceProps) => {
-              addPrice(new PairPrice(priceProps), prices);
+    getPriceCollection()
+      .then(prices => {
+        this.priceCollection = prices;
+        if (pricelist) {
+          if (RA.isArray(pricelist)) {
+            pricelist.forEach((p) => {
+              if (isPairPrice(p)) {
+                addPrice(p, prices);
+              } else {
+                addPrice(new PairPrice(p), prices);
+              }
             });
-          });
+          } else {
+            Object.keys(pricelist).forEach((key) => {
+              pricelist[key].forEach((priceProps) => {
+                addPrice(new PairPrice(priceProps), prices);
+              });
+            });
+          }
         }
-      }
-      this.isLoaded = true;
-    });
+        this.isLoaded = true;
+      });
+  }
+
+  flush() {
+    if (this.isLoaded) {
+      this.priceCollection.flushChanges();
+    }
   }
 
   /**
@@ -117,7 +158,56 @@ class PriceHistory {
   }
 
   /**
-   * Find the nearest price for the given currency pair
+   * Finds all "gaps" in the price history, for any transaction pair in the journal
+   * @param {Journal} journal
+   * @returns {Array<Object<pair: string, utc: Moment>>} Array of pair, utc objects
+   */
+  findMissingDatesInJournal(journal, fiatCurrency=null) {
+    const NEED=1;
+    const TRANSLATE=2;
+
+    const datesNeeded = {};
+    const fiat = fiatCurrency ? fiatCurrency : journal.getFiatDefault().id;
+    const translations = journal.getTranslationCurrencies().map(curr => curr.id);
+    const isTranslation = (currency) => translations.indexOf(currency) > -1;
+
+    journal.transactions.forEach(transaction => {
+      const utc = transaction.utc.format('YYYYMMDD');
+      transaction.forEach(entry => {
+        if (entry.currency !== fiat) {
+          const status = isTranslation(entry.currency) ? TRANSLATE : NEED;
+          datesNeeded[`${entry.currency}/${fiat}@${utc}`] = status;
+        }
+      });
+    });
+
+    // see if we have dates for each;
+    Object.keys(datesNeeded).forEach(key => {
+      const status = datesNeeded[key];
+      const [symbol, utc] = key.split('@');
+      const [base, quote] = symbol.split('/');
+
+      if (this.hasDayPrice(base, quote, utc)) {
+        log.debug(`Found price for ${key}`)
+        delete datesNeeded[key];
+      }
+    });
+
+    // now we have removed all dates for which we have prices
+    // if they are "TRANSLATE" ones, we can check for translations
+
+
+    // get keys for dates not found
+    const keys = Object.keys(datesNeeded);
+    keys.sort();
+    return keys.map(key => {
+      const [pair, utc] = key.split('@');
+      return {pair, utc: Moment(utc).startOf('day')};
+    });
+  }
+
+  /**
+   * Find the nearest price on the same UTC day for the given currency pair
    * @param {String|Moment|Object} utc
    * @param {String} base currency
    * @param {String} quote currency - the rate refers to this many of this currency for 1 base
@@ -128,42 +218,53 @@ class PriceHistory {
    * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
    */
   findPrice(utc, base, quote, transCurrencies = ['BTC', 'ETH'], within = null) {
-    const utcMoment = ensureMoment(utc);
+    const utcMoment = Moment(utc);
+    const startDay = utcMoment.clone().startOf('day').toDate();
+    const endDay = utcMoment.clone().endOf('day').toDate();
     const utcDate = ensureDate(utc);
-    const status = this.hasPair(base, quote);
+    let status = this.hasDayPrice(base, quote, utc);
+    console.log('findPrice', {status, base, quote, utc});
     if (status === 0) {
+      console.log('deriving')
       return this.derivePrice(utc, base, quote, transCurrencies, within);
     }
 
-    const pairColl = status === -1 ? this.getPair(quote, base)
-          : this.getPair(base, quote);
+    const dayPrices = this.priceCollection
+          .chain()
+          .find({'utc': {'$between': [startDay, endDay]}});
+
+    const pairColl1 = status === -1 ? dayPrices.branch().find({base: quote, quote: base})
+          : dayPrices.branch().find({base, quote});
+
+    const pairColl2 = pairColl1.branch();
 
     const possibles = R.flatten([
-      pairColl.find({'utc': {$gte, utc}}).simplesort('utc').limit(1),
-      pairColl.find({'utc': {$lte, utc}}).simplesort('utc', false).limit(1),
+      pairColl1.find({utc: {'$gte': utc}}).simplesort('utc').limit(1).data(),
+      pairColl2.find({utc: {'$lte': utc}}).simplesort('utc', false).limit(1).data(),
     ]);
-
+    console.log({possibles});
     let best = null;
 
     if (possibles.length === 1) {
       best = new PairPrice(possibles[0]);
     }
     if (possibles.length === 2) {
-      const diff0 = Math.abs(utcMoment.diff(ensureMoment(possibles[0].utc)));
-      const diff1 = Math.abs(utcMoment.diff(ensureMoment(possibles[1].utc)));
-      best = (diff0 < diff1) ? possibles[0] : possibles[1];
+      const diff0 = Math.abs(utcMoment.diff(Moment(possibles[0].utc)));
+      const diff1 = Math.abs(utcMoment.diff(Moment(possibles[1].utc)));
+      best = new PairPrice((diff0 < diff1) ? possibles[0] : possibles[1]);
     }
 
-    if (Math.abs(utcMoment.diff(ensureMoment(best.utc)) > (within * 1000))) {
-      this.log.debug(`Nearest price ${best} is farther than ${within} seconds from ${utc}, attempting to derive`);
+    console.log({best: best ? best.toObject({shallow: true}) : null});
+    if (Math.abs(utcMoment.diff(Moment(best.utc)) > (within * 1000))) {
+      log.debug(`Nearest price ${best} is farther than ${within} seconds from ${utc}, attempting to derive`);
+      console.log('derive 2');
       return this.derivePrice(utc, base, quote, transCurrencies, within);
     }
 
-    const price = new PairPrice(best);
     if (status === -1) {
-      return price.invert();
+      return best.invert();
     }
-    return price;
+    return best;
   }
 
   /**
@@ -193,6 +294,66 @@ class PriceHistory {
       return -1;
     }
     return 0;
+  }
+
+  /**
+   * Check for any price on the same day as this base/quote
+   * @param {String} base
+   * @param {String} quote
+   * @param {String} utc date
+   * @returns {int}  0 if not found, -1 if reversed, 1 if present
+   */
+  hasDayPrice(base, quote, utc) {
+    const day = Moment(utc);
+    const dayStart = day.clone().startOf('day').toDate();
+    const dayEnd = day.clone().endOf('day').toDate();
+    let status = 0;
+
+    const dayPrices = this.priceCollection
+          .chain()
+          .find({'utc': {'$between': [dayStart, dayEnd]}})
+          .simplesort('utc');
+
+    let prices = dayPrices
+        .branch()
+        .find({base, quote})
+        .limit(1)
+        .data();
+
+    if (prices.length > 0) {
+      status = 1;
+    } else {
+      // check for reverse
+      prices = dayPrices
+        .find({base: quote, quote: base})
+        .limit(1)
+        .data();
+      if (prices.length > 0) {
+        status = -1
+      }
+    }
+    return status;
+  }
+
+  /**
+   * Check for any price on the same day as this base/quote
+   * using translation currencies to do it.
+   * @param {String} base
+   * @param {String} quote
+   * @param {String} utc date
+   * @param {Array<String>} translations
+   * @returns {Maybe<String>}
+   */
+  hasTranslatedDayPrice(base, quote, utc, translations) {
+    let xlate;
+    for (let i=0; i<translations.length; i++) {
+      xlate = translations[i];
+      if (this.hasDayPrice(base, xlate, utc) &&
+          this.hasDayPrice(xlate, quote, utc)) {
+        return Maybe.Just(xlate);
+      }
+    }
+    return Maybe.Nothing();
   }
 
   /**

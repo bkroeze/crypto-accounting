@@ -7,7 +7,7 @@ let hasInit = false;
 function safeInitDB(filename, force) {
   if (!hasInit || force) {
     hasInit = true;
-    log.info({loading: filename});
+    log.debug({loading: filename});
     initDB(filename);
   }
 }
@@ -23,10 +23,13 @@ async function ensureCollection(collection, props) {
   if (!hasInit) {
     throw new Error('No DB loaded');
   }
-  var db = await getDB();
+  var db = await safeGetDB();
   if (R.indexOf(R.propEq('collection', collection), db.listCollections()) === -1) {
-    return db.addCollection(collection, props);
+    log.debug('Adding collection', collection);
+    const coll = db.addCollection(collection, props);
+    return coll;
   }
+  log.debug('returning collection', collection);
   return db.getCollection(collection);
 }
 

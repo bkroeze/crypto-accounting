@@ -40,6 +40,16 @@ class Trade {
     this.credit = credit;
   }
 
+  getSymbol() {
+    if (!this.isTrade()) {
+      throw new Error('Not a trade');
+    }
+    if (isDebit(this)) {
+      return `${this.currency}/${this.pair.currency}`;
+    }
+    return this.pair.getTradePairSymbol();
+  }
+
   toObject(props = {}) {
     return {
       shortcut: this.shortcut,

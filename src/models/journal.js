@@ -38,7 +38,7 @@ class Journal {
     this.accounts = new Accounts(merged.accounts);
     this.currencies = makeCurrencies(merged.currencies);
     this.transactions = Transaction.makeTransactions(merged.transactions);
-    this.pricedb = merged.pricedb ? merged.pricedb : `${this.id}.json`;
+    this.pricedb = merged.pricedb ? merged.pricedb : `${this.id}.db`;
     this.pricehistory = new PriceHistory(merged.pricehistory, this.pricedb);
     this.checkAndApply();
   }
@@ -210,6 +210,12 @@ class Journal {
       }
     });
     return lots;
+  }
+
+  getFiatDefault() {
+    const isFiatDefault = R.propEq('fiatDefault', true);
+    const fiat = R.find(isFiatDefault, Object.values(this.currencies));
+    return fiat ? fiat : this.journal.currencies.USD;
   }
 
   /**

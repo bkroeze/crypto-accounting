@@ -64,21 +64,24 @@ var acct = journal.getAccount('cb');
 const storage = require('./src/loaders/storage');
 const priceDB = require('./src/loaders/priceDB');
 const PairPrice = require('./src/models/pairprice');
-
-storage.initDB('pricedb.json');
-
+const PriceHistory = require('./src/models/pricehistory');
 const prices = [
   '2018-01-02 ETH/USD 400',
   '2018-01-02 BTC/USD 500',
   '2018-01-02 ETH/BTC 500',
   '2018-01-02 ETH/XRP 1000',
   '2018-01-01 ETH/XRP 1001',
+  '2018-06-16 ETH/USD 600',
+  '2018-06-17 BTC/USD 7000',
+  '2018-06-17 ETH/USD 650',
+  '2018-06-17 GIN/BTC 0.0001',
+  '2018-06-18 BTC/USD 6800',
+  '2018-06-18 ETH/USD 650',
+  '2018-06-18 GIN/BTC 0.00011',
+  '2018-06-19 ETH/USD 700',
+  '2018-06-20 ETH/USD 650',
 ];
 
-prices.forEach(p => priceDB.addPrice(new PairPrice(p)));
+let history = null;
 
-let pc;
-priceDB.getPriceCollection().then(coll => {
-  pc = coll;
-  console.log(`Got ${pc.count()}`);
-});
+PriceHistory.load(prices, 'test.db').then(p => history = p);

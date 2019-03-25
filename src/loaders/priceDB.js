@@ -11,7 +11,9 @@ async function getPriceCollection(filename) {
 
 async function addPrice(pairprice, collection = null) {
   const prices = collection ? collection : await getPriceCollection();
-  upsert(prices, 'id', pairprice.toObject({db: true}));
+  const record = pairprice.toObject({db: true});
+  // log.info('record', record);
+  upsert(prices, 'id', record);
 }
 
 module.exports = {
