@@ -180,7 +180,7 @@ test('getBalances can apply filters', (t) => {
   const total = acct.getBalances();
   t.is(total.ETH.toFixed(3), '0.005');
 
-  const day3 = Moment('2018-06-03');
+  const day3 = Moment.utc('2018-06-03');
   const threeDays = acct.getBalances(e => e.getUtc().isSameOrBefore(day3));
   t.is(threeDays.ETH.toFixed(3), '0.003');
 });

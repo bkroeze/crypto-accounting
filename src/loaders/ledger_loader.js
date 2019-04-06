@@ -70,7 +70,7 @@ function ledgerTransactionToObject(lines) {
 
   // has time?
   if (header[0].length > 1 && isTime(header[0])) {
-    utc = `${utc} ${header.shift()}`;
+    utc = `${utc}T${header.shift()}:000Z`;
   }
   if (header[0].length === 1 && header.length > 1) {
     status = header.shift();

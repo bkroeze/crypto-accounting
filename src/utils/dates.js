@@ -29,7 +29,10 @@ function ensureDate(work) {
   if (Moment.isMoment(work)) {
     return work.toDate();
   }
-  if (RA.isString(work) || RA.isNumber(work)) {
+  if (RA.isString(work)) {
+    return Moment.utc(work).toDate();
+  }
+  if (RA.isNumber(work)) {
     return Moment(work).toDate();
   }
   if (RA.isObj(work) && R.has('utc', work)) {

@@ -77,7 +77,7 @@ class PairPrice {
     KEYS.forEach((key) => {
       let val = merged[key];
       if (key === 'utc') {
-        val = Moment(val);
+        val = Moment.utc(val);
       }
       if (key === 'rate') {
         val = BigNumber(val);

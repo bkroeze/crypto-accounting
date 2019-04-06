@@ -49,7 +49,7 @@ class LedgerWrapper {
       id: `import-${moment().format('YYMMDD')}-${randomSeed}-${nextIndex()}`,
       ...props,
     };
-    this.utc = moment(props.utc);
+    this.utc = moment.utc(props.utc);
     this.props.utc = this.utc.toISOString();
   }
 
@@ -70,7 +70,7 @@ function printResults(results, base, credit, debit, descending, byDay, startDate
   let work = results;
   // console.log(work);
   if (startDate) {
-    const searchDate = moment(startDate);
+    const searchDate = moment.utc(startDate);
     console.log('filtering for startDate', results.length);
     work = results.filter(x => searchDate.isSameOrBefore(x.utc));
     console.log('trimmed to', results.length);

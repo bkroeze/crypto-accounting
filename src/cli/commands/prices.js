@@ -16,8 +16,8 @@ function getInfoByPair(prices, pair) {
         .simplesort('utc')
         .data();
 
-  const start = moment(coll[0].utc).toLocaleString();
-  const end = moment(coll[coll.length-1].utc).toLocaleString();
+  const start = moment.utc(coll[0].utc).toLocaleString();
+  const end = moment.utc(coll[coll.length-1].utc).toLocaleString();
   const gaps = PriceHistory.findGaps(coll);
 
   return (`${coll.length} ${pair} prices
@@ -55,7 +55,7 @@ function handler({db, action, pair, journal}) {
         if (!missing.length) {
           console.log('None');
         } else {
-          missing.forEach(({pair, utc}) => console.log(`${utc.format('YYYY-MM-DD')} ${pair}`));
+          missing.forEach(({pair, utc}) => console.log(`${utc.toISOString().substring(0,10)} ${pair}`));
         }
       }
 

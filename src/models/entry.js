@@ -213,8 +213,8 @@ class Entry {
   }
 
   compare(entry) {
-    const dateA = Moment(this.getUtc());
-    const dateB = Moment(entry.getUtc());
+    const dateA = Moment.utc(this.getUtc());
+    const dateB = Moment.utc(entry.getUtc());
     if (dateA.isBefore(dateB)) {
       return -1;
     }

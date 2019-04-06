@@ -74,7 +74,7 @@ test('getBalancesByAccount can apply filters', (t) => {
   const total = journal.getBalancesByAccount();
   t.is(total['assets:wallets:ETH'].ETH.toFixed(3), '0.005');
 
-  const day3 = Moment('2018-06-03');
+  const day3 = Moment.utc('2018-06-03');
   const threeDays = journal.getBalancesByAccount(e => e.getUtc().isSameOrBefore(day3));
   t.is(threeDays['assets:wallets:ETH'].ETH.toFixed(3), '0.003');
 });
@@ -95,7 +95,7 @@ test('getBalancesByCurrency is accurate for multiple accounts', (t) => {
 
 test('getBalancesByCurrency can use filters', (t) => {
   const journal = getJournalFromYaml('journal_mining.yaml');
-  const day3 = Moment('2018-06-03');
+  const day3 = Moment.utc('2018-06-03');
   const byCurrency = journal.getBalancesByCurrency((e) => {
     return e.getUtc().isSameOrBefore(day3) && !e.inAccount('revenue');
   });

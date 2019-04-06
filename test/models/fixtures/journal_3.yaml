@@ -1,0 +1,11 @@
+name: Test Fixture 3
+id: test_3
+accounts:
+  $ref: ./accounts.yaml
+currencies:
+  $ref: ./currencies.yaml
+transactions:
+  $ref: ./transactions_3.yaml
+pricedb: test_3.db
+pricehistory:
+  $ref: ./pricehistory_3.yaml

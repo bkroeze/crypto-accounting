@@ -67,7 +67,7 @@ class Transaction {
         'Invalid Transaction, must have a utc'
       );
     }
-    this.utc = Moment(this.utc);
+    this.utc = Moment.utc(this.utc);
 
     this.entries = [];
 
@@ -306,7 +306,7 @@ class Transaction {
       note: this.note,
       account: this.account,
       status: this.status,
-      utc: options.byDay ? this.utc.format('YYYY-MM-DD') : this.utc.toISOString(),
+      utc: options.byDay ? this.utc.toISOString().substring(0,10) : this.utc.toISOString(),
       address: this.address,
       party: this.party,
       tags: this.tags,

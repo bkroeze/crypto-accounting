@@ -76,7 +76,6 @@ test('Calculates gains', async (t) => {
       t.is(gains.length, 1);
       t.is(gains[0].quantity.toFixed(2), '1000.00');
       t.is(gains[0].currency, 'USD');
-      t.done();
     });
 });
 
@@ -93,7 +92,6 @@ test('getPurchasePrice direct-to-fiat', async t => {
       lot = lots[1];
       price = lot.getPurchasePriceEach(history, 'USD');
       t.is(price.toFixed(2), '550.00');
-      t.done();
     });
 });
 
@@ -108,7 +106,6 @@ test('getPurchasePrice from translation', async t => {
     .then(history => {
       let price = lot.getPurchasePriceEach(history, 'USD');
       t.is(price.toFixed(2), '465.00');
-      t.done();
     });
 });
 
@@ -126,7 +123,6 @@ test('getSalePrice direct-to-fiat', async t => {
       credit = lot.credits[1].credit;
       price = Lot.getSalePriceEach(credit, history, 'USD');
       t.is(price.toFixed(2), '600.00');
-      t.done();
     });
 });
 
@@ -148,7 +144,6 @@ test('getSalePrice from translation', async t => {
 
       price = Lot.getSalePriceEach(lot.credits[1].credit, history, 'USD');
       t.is(price.toFixed(2), '750.00');
-      t.done();
     });
 });
 
@@ -171,7 +166,6 @@ test('calculate gains with historical prices different than realized', async t =
       t.is(gains2.length, 2);
       t.is(gains2[0].quantity.toFixed(2), '50.00');
       t.is(gains2[1].quantity.toFixed(2), '900.00');
-      t.done();
     });
 });
 
@@ -195,7 +189,6 @@ test('calculates gains with non-fiat pair', async t => {
       //console.log(`totals: ${totals.map(t => t.toFixed(2))}`);
       const total = addBigNumbers(totals);
       t.is(total.toFixed(0), '195');
-      t.done();
     });
 });
 
@@ -207,7 +200,6 @@ test('Calculates unrealized gains', async t => {
     .then(history => {
       const unrealized = lot.getUnrealizedGains('2018-03-01', history, 'income:unrealized', 'USD');
       t.is(unrealized.quantity.toFixed(2), '-13605.00');
-      t.done();
     });
 });
 
@@ -227,7 +219,6 @@ test('Calculates gains, including fees', async t => {
       t.is(gains.length, 6); // includes 3 gains from the fees themselves
       const totalGains = addBigNumbers(gains.map(R.prop('quantity')));
       t.is(totalGains.toFixed(2), '301.85');
-      t.done();
     });
 });
 

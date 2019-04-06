@@ -72,7 +72,7 @@ function toYaml(data, byDay) {
           pushed = true;
         }
       } else if (key === 'utc') {
-        val = byDay ? val.format('YYYY-MM-DD') : val.toISOString();
+        val = byDay ? val.toISOString('YYYY-MM-DD').substring(0,10) : val.toISOString();
       }
       if (!pushed) {
         work.push(`${prefix} ${key}: ${val}`);
@@ -157,4 +157,3 @@ module.exports = {
   mergeTransactionLists,
   rowToYaml: toYaml,
 };
-

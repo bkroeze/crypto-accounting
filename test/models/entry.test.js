@@ -112,15 +112,15 @@ test('shortcut with tabs', (t) => {
 
 test('sorting entries', (t) => {
   const tx1 = new Transaction({
-    utc: '2018-01-01T00:00:00.000z',
+    utc: '2018-01-01T00:00:00.000Z',
     account: 'test',
   });
   const tx2 = new Transaction({
-    utc: '2018-01-01T12:00:00.000z',
+    utc: '2018-01-01T12:00:00.000Z',
     account: 'test',
   });
   const tx3 = new Transaction({
-    utc: '2018-01-02T00:00:00.000z',
+    utc: '2018-01-02T00:00:00.000Z',
     account: 'test',
   });
   let entries = [

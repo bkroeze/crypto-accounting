@@ -43,11 +43,11 @@ class PriceHistory {
   static findGaps(collection) {
     const gaps = [];
     if (collection.length > 0) {
-      let current = Moment(collection[0].utc);
+      let current = Moment.utc(collection[0].utc);
       let record;
       for (let i=1; i<collection.length; i++) {
         current.add(1, 'day');
-        record = Moment(collection[i].utc);
+        record = Moment.utc(collection[i].utc);
         while (!current.isSame(record, 'day')) {
           gaps.push(current.clone());
           current.add(1, 'day');
@@ -172,38 +172,45 @@ class PriceHistory {
     const isTranslation = (currency) => translations.indexOf(currency) > -1;
 
     journal.transactions.forEach(transaction => {
-      const utc = transaction.utc.format('YYYYMMDD');
+      const utc = Moment.utc(transaction.utc).toISOString().substring(0,10);
+      // console.log(`Transaction: id=${transaction.id} ${utc}`);
       transaction.forEach(entry => {
         if (entry.currency !== fiat) {
-          const status = isTranslation(entry.currency) ? TRANSLATE : NEED;
+          // console.log(`entry: ${JSON.stringify(entry.toObject({shallow:true}))}`);
+          const status = isTranslation(entry.currency) ? NEED : TRANSLATE;
           datesNeeded[`${entry.currency}/${fiat}@${utc}`] = status;
         }
       });
     });
 
     // see if we have dates for each;
-    Object.keys(datesNeeded).forEach(key => {
-      const status = datesNeeded[key];
-      const [symbol, utc] = key.split('@');
-      const [base, quote] = symbol.split('/');
+    const keys = Object.keys(datesNeeded)
+      .filter(key => {
+        const status = datesNeeded[key];
+        const [symbol, utc] = key.split('@');
+        const [base, quote] = symbol.split('/');
+        if (this.hasDayPrice(base, quote, utc)) {
+          return false;
+        }
+        if (status === TRANSLATE) {
+          const xlate = this.hasTranslatedDayPrice(base, quote, utc, translations).getOrElse(null);
+          if (xlate) {
+            return false;
+          }
+        }
+        return true;
+      });
 
-      if (this.hasDayPrice(base, quote, utc)) {
-        log.debug(`Found price for ${key}`)
-        delete datesNeeded[key];
-      }
-    });
-
-    // now we have removed all dates for which we have prices
-    // if they are "TRANSLATE" ones, we can check for translations
-
-
-    // get keys for dates not found
-    const keys = Object.keys(datesNeeded);
     keys.sort();
-    return keys.map(key => {
-      const [pair, utc] = key.split('@');
-      return {pair, utc: Moment(utc).startOf('day')};
-    });
+    return {
+      fiat,
+      translations,
+      isEmpty: keys.length === 0,
+      missing: keys.map(key => {
+        const [pair, utc] = key.split('@');
+        return {pair, utc: Moment.utc(utc).startOf('day')};
+      }),
+    };
   }
 
   /**
@@ -218,14 +225,12 @@ class PriceHistory {
    * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
    */
   findPrice(utc, base, quote, transCurrencies = ['BTC', 'ETH'], within = null) {
-    const utcMoment = Moment(utc);
+    const utcMoment = Moment.utc(utc);
     const startDay = utcMoment.clone().startOf('day').toDate();
     const endDay = utcMoment.clone().endOf('day').toDate();
     const utcDate = ensureDate(utc);
     let status = this.hasDayPrice(base, quote, utc);
-    console.log('findPrice', {status, base, quote, utc});
     if (status === 0) {
-      console.log('deriving')
       return this.derivePrice(utc, base, quote, transCurrencies, within);
     }
 
@@ -242,22 +247,19 @@ class PriceHistory {
       pairColl1.find({utc: {'$gte': utc}}).simplesort('utc').limit(1).data(),
       pairColl2.find({utc: {'$lte': utc}}).simplesort('utc', false).limit(1).data(),
     ]);
-    console.log({possibles});
     let best = null;
 
     if (possibles.length === 1) {
       best = new PairPrice(possibles[0]);
     }
     if (possibles.length === 2) {
-      const diff0 = Math.abs(utcMoment.diff(Moment(possibles[0].utc)));
-      const diff1 = Math.abs(utcMoment.diff(Moment(possibles[1].utc)));
+      const diff0 = Math.abs(utcMoment.diff(Moment.utc(possibles[0].utc)));
+      const diff1 = Math.abs(utcMoment.diff(Moment.utc(possibles[1].utc)));
       best = new PairPrice((diff0 < diff1) ? possibles[0] : possibles[1]);
     }
 
-    console.log({best: best ? best.toObject({shallow: true}) : null});
-    if (Math.abs(utcMoment.diff(Moment(best.utc)) > (within * 1000))) {
+    if (Math.abs(utcMoment.diff(Moment.utc(best.utc)) > (within * 1000))) {
       log.debug(`Nearest price ${best} is farther than ${within} seconds from ${utc}, attempting to derive`);
-      console.log('derive 2');
       return this.derivePrice(utc, base, quote, transCurrencies, within);
     }
 
@@ -304,7 +306,7 @@ class PriceHistory {
    * @returns {int}  0 if not found, -1 if reversed, 1 if present
    */
   hasDayPrice(base, quote, utc) {
-    const day = Moment(utc);
+    const day = Moment.utc(utc);
     const dayStart = day.clone().startOf('day').toDate();
     const dayEnd = day.clone().endOf('day').toDate();
     let status = 0;

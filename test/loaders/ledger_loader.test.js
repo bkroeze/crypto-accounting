@@ -90,7 +90,7 @@ test('converts an "equals" transaction', (t) => {
   account: Equity:Checking
   status: cleared
   party: Coinbase
-  utc: 2013-08-01T07:00:00.000Z
+  utc: 2013-08-01T00:00:00.000Z
   trades:
     - 0.96555 BTC Assets:Exchanges:Coinbase = 200 USD
 `);
@@ -124,7 +124,7 @@ test('Can load a simple set of ledger formatted entries', t => {
   account: income
   status: cleared
   party: Test
-  utc: 2018-01-01T08:00:00.000Z
+  utc: 2018-01-01T00:00:00.000Z
   debits:
     - 1 USD assets:test
   credits:
@@ -134,7 +134,7 @@ test('Can load a simple set of ledger formatted entries', t => {
   account: income
   status: cleared
   party: Test2
-  utc: 2018-01-02T08:00:00.000Z
+  utc: 2018-01-02T00:00:00.000Z
   trades:
     - 1 USD assets:test @ 1 GIN
 `);
@@ -142,7 +142,7 @@ test('Can load a simple set of ledger formatted entries', t => {
   account: exchange
   status: cleared
   party: Test3
-  utc: 2018-01-03T08:00:00.000Z
+  utc: 2018-01-03T00:00:00.000Z
   trades:
     - 10 ETH exchange @ 200 USD
 `);

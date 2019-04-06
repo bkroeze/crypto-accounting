@@ -12,3 +12,6 @@ package-lock.json
 TAGS
 .tern-project
 lib
+test_*db
+test_*db.*
+db
