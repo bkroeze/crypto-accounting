@@ -1,6 +1,6 @@
 {
   "name": "crypto-accounting",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Multi-currency/commodity accounting using human-readable text files",
   "main": "src/cli.js",
   "repository": "https://github.com/bkroeze/crypto-accounting.git",
@@ -17,7 +17,6 @@
     "js-logger": "^1.4.1",
     "js-yaml": "^3.12.0",
     "lokijs": "^1.5.6",
-    "lokijs-promise": "^1.0.4",
     "moment": "^2.22.2",
     "papaparse": "^4.6.3",
     "pino": "^5.11.1",

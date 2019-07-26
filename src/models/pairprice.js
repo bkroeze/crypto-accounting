@@ -76,7 +76,7 @@ class PairPrice {
 
     KEYS.forEach((key) => {
       let val = merged[key];
-      if (key === 'utc') {
+      if (key === 'utc' && !Moment.isMoment(val)) {
         val = Moment.utc(val);
       }
       if (key === 'rate') {

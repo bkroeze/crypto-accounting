@@ -9,12 +9,36 @@ const PairPrice = require('../../models/pairprice');
 const randomSeed = Math.floor(Math.random() * 10000);
 
 const FORMATS = {
+  coinmarketcap: {
+    header: true,
+    date: 'Date',
+    dateformat: 'MMM DD YYYY',
+    price: 'Close**',
+  },
   coinmetrics: {
     header: true,
     date: 'date',
     dateformat: 'YYYY-MM-DD',
     price: 'price(USD)',
   },
+  barchart: {
+    header: true,
+    date: 'Time',
+    dateformat: 'MM/DD/YY',
+    price: 'Open',
+  },
+  coingecko: {
+    header: true,
+    date: 'snapped_at',
+    dateformat: 'YYYY-MM-DD hh:mm:ssZ',
+    price: 'price',
+  },
+  manual: {
+    header: true,
+    date: 'date',
+    price: 'price',
+    dateformat: 'MM/DD/YYYY hh:mm',
+  }
 }
 
 function makePrefix(options) {
@@ -54,23 +78,27 @@ function handler(args) {
         if (results.data) {
           results.data.forEach((row) => {
             ct++;
-            console.log(`Adding #${ct}`);
             const record = {
               id: `${prefix}-${ct}`,
-              base: fields.base,
-              quote: fields.quote,
+              base: base,
+              quote: quote,
               rate: row[fields.price],
               utc:  moment.utc(row[fields.date], fields.dateformat),
             };
-            // console.log('REC', JSON.stringify(record));
-            const pair = new PairPrice(record);
-            // console.log({pair});
-            priceHistory.addPrice(pair)
-              .catch(e => {
-                console.error(e);
-                priceHistory.flushChanges();
-                process.exit(1);
-              });
+            if (!record.rate) {
+              console.log(`${record.utc} skip - no rate`)
+              ct--;
+            } else {
+              console.log('REC', JSON.stringify(record));
+              const pair = new PairPrice(record);
+              // console.log({pair});
+              //console.log(`#${ct}: ${record.utc.toISOString()} ${record.base}/${record.quote}`)
+              priceHistory.addPrice(pair)
+                .catch(e => {
+                  console.error(e);
+                  process.exit(1);
+                });
+            }
           });
         }
       };
@@ -80,8 +108,8 @@ function handler(args) {
         step,
         complete: () => {
           console.log(`Complete, processed ${ct} prices`);
-          priceHistory.flushChanges();
-          process.exit(0);
+          console.log(`Saved to DB`);
+          setTimeout(() => process.exit(0), 2000);
         }
       });
     });
@@ -91,7 +119,7 @@ function handler(args) {
 function builder(yargs) {
   return yargs
     .option('format', {
-      choices: ['coinmetrics'],
+      choices: Object.keys(FORMATS),
       default: 'coinmetrics',
     })
     .option('base', {

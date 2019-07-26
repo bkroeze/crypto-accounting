@@ -14,7 +14,7 @@ const { ensureDate, ensureMoment } = require('../utils/dates');
 const log = require('../utils/logging').get('models.pricehistory');
 
 const isPairPrice = R.is(PairPrice);
-
+const missingUTC = (rec) => { return !R.has('UTC'); };
 /**
  * A collection of prices for multiple currencies.
  */
@@ -106,6 +106,35 @@ class PriceHistory {
     if (this.isLoaded) {
       this.priceCollection.flushChanges();
     }
+  }
+
+  cleanPair(base, quote) {
+    const toRemove = [];
+    this.priceCollection
+      .find({base, quote})
+      .filter(missingUTC)
+      .forEach(rec => {
+        toRemove.push(rec);
+      });
+
+    if (toRemove.length > 0) {
+      this.priceCollection.findAndRemove({'$loki': {'$in': toRemove}});
+    }
+    return {removed: toRemove.length};
+  }
+
+  deletePair(base, quote) {
+    const toRemove = [];
+    this.priceCollection
+      .find({base, quote})
+      .forEach(rec => {
+        toRemove.push(rec);
+      });
+
+    if (toRemove.length > 0) {
+      this.priceCollection.findAndRemove({'$loki': {'$in': toRemove}});
+    }
+    return {removed: toRemove.length};
   }
 
   /**
@@ -224,7 +253,7 @@ class PriceHistory {
    * @throws {RangeError} with code "ERR_DISTANCE" if nearest is out of range
    * @throws {RangeError} with code "ERR_NOT_FOUND" if pair is not present and cannot be derived
    */
-  findPrice(utc, base, quote, transCurrencies = ['BTC', 'ETH'], within = null) {
+  findPrice(utc, base, quote, transCurrencies = ['BTC', 'ETH', 'USD'], within = null) {
     const utcMoment = Moment.utc(utc);
     const startDay = utcMoment.clone().startOf('day').toDate();
     const endDay = utcMoment.clone().endOf('day').toDate();

@@ -38,6 +38,7 @@ function loadYamlFromFilenameSync(fname, directory) {
   if (directory && isRelativePath(fname)) {
     link = path.normalize(`${directory}/${fname}`);
   }
+  link = link.replace('~', process.env.HOME);
   return loadRefs(safeLoad(getFS().readFileSync(link, 'utf-8')), directory);
 }
 

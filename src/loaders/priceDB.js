@@ -12,7 +12,7 @@ async function getPriceCollection(filename) {
 async function addPrice(pairprice, collection = null) {
   const prices = collection ? collection : await getPriceCollection();
   const record = pairprice.toObject({db: true});
-  // log.info('record', record);
+  console.log('record', record);
   upsert(prices, 'id', record);
 }
 
