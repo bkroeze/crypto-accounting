@@ -1,10 +1,10 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
-const R = require('ramda');
-const RA = require('ramda-adjunct');
-const utils = require('../utils/models');
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
+import * as utils from '../utils/models';
 
-const { ERRORS } = require('./constants');
-const { makeError } = require('../utils/errors');
+import { ERRORS } from './constants';
+import { makeError } from '../utils/errors';
 
 const DEFAULT_PROPS = {
   id: '',
@@ -22,7 +22,7 @@ const getProps = R.pick(KEYS);
 /**
  * Represents any currency or non-stock tradeable commodity.
  */
-class Currency {
+export class Currency {
   /**
    * Construct using a `props` object that must include "id", and may also
    * include "name" and "note"
@@ -97,5 +97,3 @@ class Currency {
     return `Currency: ${this.id}`;
   }
 }
-
-module.exports = Currency;

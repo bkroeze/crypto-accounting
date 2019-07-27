@@ -3,7 +3,7 @@ import { safeDump } from 'js-yaml';
 
 import { setMockFS } from '../../src/loaders/common';
 import { loadJournalFromFilenameSync } from '../../src/loaders/loader';
-import MockFS from '../mockfs';
+import { MockFS } from '../mockfs';
 
 test('Can load a journal with just a list of accounts', (t) => {
   const work = {

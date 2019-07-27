@@ -1,8 +1,8 @@
 import test from 'ava';
-
-import Transaction from '../../src/models/transaction';
-import { CREDIT, DEBIT } from '../../src/models/constants';
 import * as R from 'ramda';
+
+import { Transaction } from '../../src/models/transaction';
+import { CREDIT, DEBIT } from '../../src/models/constants';
 
 test('Transactions can be sorted', (t) => {
   const txs = [

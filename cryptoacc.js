@@ -5,4 +5,5 @@
   Copyright (c) 2018 Bruce Kroeze
 */
 
-require('./src/cli').execute();
+import { execute } from './src/cli';
+execute();

@@ -1,11 +1,12 @@
 import Moment from 'moment';
 import test from 'ava';
-import PairPrice from '../../src/models/pairprice';
-import PriceHistory from '../../src/models/pricehistory';
+import { PairPrice } from '../../src/models/pairprice';
+import { PriceHistory } from '../../src/models/pricehistory';
 import * as utils from '../../src/utils/models';
 import { ERRORS } from '../../src/models/constants';
 import { journalFinder } from '../utils';
 import { initDB } from '../../src/loaders/storage';
+
 const getJournalFromYaml = journalFinder(__dirname);
 
 test('Can check for presence of a price on a date for a symbol', async (t) => {
@@ -33,7 +34,7 @@ test('Can find day prices using translations', async (t) => {
     '2018-06-17 BTC/USD 7000',
     '2018-06-17 ETH/USD 650',
     '2018-06-17 GIN/BTC 0.0001',
-    '2018-06-18 BT    C/USD 6800',
+    '2018-06-18 BTC/USD 6800',
     '2018-06-18 ETH/USD 650',
     '2018-06-18 GIN/BTC 0.00011',
   ];

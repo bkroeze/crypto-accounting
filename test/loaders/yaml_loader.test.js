@@ -5,7 +5,7 @@ import { findRefs, loadRefs } from '../../src/loaders/yaml_loader';
 import { setMockFS } from '../../src/loaders/common';
 import { journalFinder } from '../utils';
 
-import MockFS from '../mockfs';
+import { MockFS } from '../mockfs';
 
 const getJournal = journalFinder(__dirname);
 

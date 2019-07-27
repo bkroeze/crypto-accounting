@@ -1,76 +1,79 @@
-const Loki = require('lokijs')
-const R = require('ramda');
-const log = require('../utils/logging').get('storage');
+import Loki from 'lokijs';
+import * as R from 'ramda';
+import { get as getLogger } from 'js-logger';
+
+const log = getLogger('storage');
 
 let hasInit = false;
-let isLoaded = false
-let db = null
+let isLoaded = false;
+let db = null;
 
-const initDB = (dbName, autosaveInterval) => {
+const _initDB = (dbName, autosaveInterval) => {
   db = new Loki(dbName, {
     autoload: true,
     autoloadCallback: () => {
-      isLoaded = true
+      isLoaded = true;
     },
     autosave: true,
-    autosaveInterval: autosaveInterval || 1000
-  })
-}
+    autosaveInterval: autosaveInterval || 1000,
+  });
+};
 
-function getDB () {
+function _getDB() {
   return new Promise((resolve, reject) => {
     try {
-      let interval = setInterval(() => {
+      const interval = setInterval(() => {
         if (isLoaded) {
-          clearInterval(interval)
-          resolve(db)
+          clearInterval(interval);
+          resolve(db);
         }
-      }, 100)
+      }, 100);
     } catch (error) {
-      reject(error)
+      reject(error);
     }
-  })
+  });
 }
 
-function getCollection (collectionName) {
+export function getCollection(collectionName) {
   return new Promise(async (resolve, reject) => {
     try {
-      let database = await getDB()
-      let collection = database.getCollection(collectionName) ? database.getCollection(collectionName) : database.addCollection(collectionName, { clone: true, disableMeta: true }) // Creates a new DB with `clone = true` so that db records cannot be directly modified from the result-set.
-      resolve(collection) // This returns a Promise since this entire function is declared with the async keyword
+      const database = await _getDB();
+      // Creates a new DB with `clone = true` so that db records cannot be directly modified from the result-set.
+      const collection = database.getCollection(collectionName) ? database.getCollection(collectionName) : database.addCollection(collectionName, { clone: true, disableMeta: true });
+      resolve(collection); // This returns a Promise since this entire function is declared with the async keyword
     } catch (error) {
-      reject(error)
+      reject(error);
     }
-  })
+  });
 }
 
-function safeInitDB(filename, force) {
+export function initDB(filename, force) {
   if (!hasInit || force) {
     hasInit = true;
-    log.debug({loading: filename});
-    initDB(filename);
+    log.debug({ loading: filename });
+    _initDB(filename);
   }
 }
 
-function safeGetDB() {
+export function getDB() {
   if (!hasInit) {
     throw new Error('No DB loaded');
   }
-  return getDB();
+  return _getDB();
 }
 
-async function ensureCollection(collection, props) {
+export async function ensureCollection(collection, props) {
   if (!hasInit) {
     throw new Error('No DB loaded');
   }
-  var db = await safeGetDB();
-  if (R.indexOf(R.propEq('collection', collection), db.listCollections()) === -1) {
+  const data = await getDB();
+  if (R.indexOf(R.propEq('collection', collection), data.listCollections()) === -1) {
     log.debug('Adding collection', collection);
-    const coll = db.addCollection(collection, props);
+    const coll = data.addCollection(collection, props);
     return coll;
   }
   log.debug('returning collection', collection);
-  return db.getCollection(collection);
+  return data.getCollection(collection);
 }
 
 /**
@@ -84,22 +87,13 @@ async function ensureCollection(collection, props) {
  * @param {object} record - The record to be upserted.
  * @depends lodash
  */
-function upsert(collection, idField, record) {
-  var query = {[idField]: record[idField]};
-  var existingRecord = collection.findOne(query);
+export function upsert(collection, idField, record) {
+  const query = { [idField]: record[idField] };
+  const existingRecord = collection.findOne(query);
   if (existingRecord) {
-    const updatedRecord = {...existingRecord, ...record}
+    const updatedRecord = { ...existingRecord, ...record };
     collection.update(updatedRecord);
   } else {
     collection.insert(record);
   }
 }
-
-
-module.exports = {
-  ensureCollection,
-  getCollection,
-  getDB: safeGetDB,
-  initDB: safeInitDB,
-  upsert,
-};

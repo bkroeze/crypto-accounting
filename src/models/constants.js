@@ -1,15 +1,13 @@
-const { union, derivations } = require('folktale/adt/union');
+import { union, derivations } from 'folktale/adt/union';
 
-const constants = {
-  CREDIT: 'credit',
-  DEBIT: 'debit',
-  INHERIT: '%INHERIT%',
-  CLEARED: 'cleared',
-  ERRORS: {},
-  LEDGER_LINE_COMMENT: ';',
-  LEDGER_COMMENTS: [';', '#', '|', '*'],
-  SYMBOL_MAP: new Map([['$', 'USD'], ['£', 'GBP'], ['€', 'EUR']]),
-};
+export const CREDIT = 'credit';
+export const DEBIT = 'debit';
+export const INHERIT = '%INHERIT%';
+export const CLEARED = 'cleared';
+export const ERRORS = {};
+export const LEDGER_LINE_COMMENT = ';';
+export const LEDGER_COMMENTS = [';', '#', '|', '*'];
+export const SYMBOL_MAP = new Map([['$', 'USD'], ['£', 'GBP'], ['€', 'EUR']]);
 
 [
   'EMPTY',
@@ -22,7 +20,7 @@ const constants = {
   'NOT_FOUND',
   'OUT_OF_RANGE',
 ].forEach((k) => {
-  constants.ERRORS[k] = `ERR_${k}`;
+  ERRORS[k] = `ERR_${k}`;
 });
 
 function InvalidShortcut(shortcut, message) {
@@ -33,13 +31,10 @@ function InvalidTrade(shortcut, message) {
   return { shortcut, message };
 }
 
-constants.ERRORS.ParseErrors = union('parse-errors', {
+ERRORS.ParseErrors = union('parse-errors', {
   InvalidShortcut,
   InvalidTrade,
 }).derive(
   derivations.equality,
   derivations.debugRepresentation
 );
-
-
-module.exports = constants;

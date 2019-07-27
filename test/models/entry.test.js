@@ -1,13 +1,8 @@
 import * as R from 'ramda';
 import test from 'ava';
 import { CREDIT, DEBIT } from '../../src/models/constants';
-import Entry, {
-  shortcutToEntries,
-  flexibleToEntries,
-  objectToEntries,
-  makeEntries,
-} from '../../src/models/entry';
-import Transaction from '../../src/models/transaction';
+import { Entry } from '../../src/models/entry';
+import { Transaction } from '../../src/models/transaction';
 
 const TX = new Transaction({
   utc: '2018-01-01',
@@ -52,7 +47,7 @@ test('Entry can instatiate via shortcut', (t) => {
 });
 
 test('Can load an object entry with shortcuts', (t) => {
-  const entries = objectToEntries({
+  const entries = Entry.objectToEntries({
     debits: ['100 ETH', '.01 ETH'],
     credits: [{
       quantity: 10000,

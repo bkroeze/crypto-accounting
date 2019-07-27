@@ -1,8 +1,8 @@
 import test from 'ava';
 import * as R from 'ramda';
-import Transaction from '../../src/models/transaction';
-import Lot from '../../src/models/lot';
-import PriceHistory from '../../src/models/pricehistory';
+import { Transaction } from '../../src/models/transaction';
+import { Lot } from '../../src/models/lot';
+import { PriceHistory } from '../../src/models/pricehistory';
 import { addBigNumbers } from '../../src/utils/numbers';
 import { journalFinder } from '../utils';
 

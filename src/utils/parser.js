@@ -1,16 +1,15 @@
-const Result = require('folktale/result');
-const R = require('ramda');
-const log = require('js-logger').get('cryptoaccounting.utils.parser');
+import Result from 'folktale/result';
+import * as R from 'ramda';
+import { get as getLogger } from 'js-logger';
+import * as utils from './models';
+import { ERRORS, SYMBOL_MAP, LEDGER_LINE_COMMENT } from '../models/constants';
+import { isNegativeString, positiveString } from './numbers';
 
-const utils = require('./models');
-const { ERRORS, SYMBOL_MAP, LEDGER_LINE_COMMENT } = require('../models/constants');
-const { isNegativeString, positiveString } = require('./numbers');
+const log = getLogger('utils.parser');
 
-const hasLeadingSymbol = (symbol, val) => {
-  return val.slice(0, symbol.length) === symbol && utils.looksNumeric(val.slice(symbol.length));
-};
+const hasLeadingSymbol = (symbol, val) => val.slice(0, symbol.length) === symbol && utils.looksNumeric(val.slice(symbol.length));
 
-const lineSpaces = new RegExp(/  /, 'g');
+const lineSpaces = new RegExp(/ {2}/, 'g');
 const tabRe = new RegExp(/\t/, 'g');
 
 function sanityCheckTokens(tokens) {
@@ -63,7 +62,7 @@ function fixLeadingSymbol(token, leadingSymbolMap) {
   return work;
 }
 
-class Parser {
+export class Parser {
   constructor(leadingSymbolMap = SYMBOL_MAP) {
     this.leadingSymbolMap = leadingSymbolMap;
   }
@@ -123,8 +122,8 @@ class Parser {
         shortcuts.push(accum);
 
         const errors = shortcuts
-              .map(sanityCheckTokens)
-              .filter(x => x instanceof Result.Error);
+          .map(sanityCheckTokens)
+          .filter(x => x instanceof Result.Error);
 
         if (errors.length > 0) {
           return Result.Error(errors);
@@ -160,8 +159,8 @@ class Parser {
         // have to pass over string twice, first time to clean up any
         // $100 style entries, converting to 100 USD
         const cleaned = utils.splitAndTrim(shortcut)
-              .map(work => fixLeadingSymbol(work, leadingSymbolMap))
-              .join(' ');
+          .map(work => fixLeadingSymbol(work, leadingSymbolMap))
+          .join(' ');
 
         // The second time, we want to tokenize the string
         const tokens = utils.splitAndTrim(cleaned);
@@ -178,5 +177,3 @@ class Parser {
       });
   }
 }
-
-module.exports = Parser;

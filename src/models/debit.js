@@ -1,7 +1,7 @@
-const { DEBIT, SYMBOL_MAP } = require('./constants');
-const Entry = require('./entry');
+import { DEBIT } from './constants';
+import { Entry } from './entry';
 
-class Debit extends Entry {
+export class Debit extends Entry {
   constructor(props = {}) {
     super({
       ...props,
@@ -9,5 +9,3 @@ class Debit extends Entry {
     });
   }
 }
-
-module.exports = Debit;

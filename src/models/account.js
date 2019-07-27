@@ -1,10 +1,10 @@
 /* eslint no-param-reassign: off */
-const R = require('ramda');
-const RA = require('ramda-adjunct');
-const utils = require('../utils/models');
-const { CREDIT, DEBIT, INHERIT, ERRORS } = require('./constants');
-const { makeError } = require('../utils/errors');
-const Lot = require('./lot');
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
+import * as utils from '../utils/models';
+import { CREDIT, DEBIT, INHERIT, ERRORS } from './constants';
+import { makeError } from '../utils/errors';
+import { Lot } from './lot';
 
 const DEFAULT_PROPS = {
   path: '',
@@ -54,7 +54,7 @@ function entrySorter(a, b) {
   return 0;
 }
 
-class Account {
+export class Account {
   /**
    * Construct using a `props` object that must include "path", and may also
    * include "name" and "notes"
@@ -348,10 +348,10 @@ class Account {
   }
 
   isExpense() {
-    return (this.parent && this.parent.isExpense()) ||
-      R.startsWith('expense', this.path.toLowerCase()) ||
-      R.has('fee', this.tags) ||
-      R.has('expense', this.tags);
+    return (this.parent && this.parent.isExpense())
+      || R.startsWith('expense', this.path.toLowerCase())
+      || R.has('fee', this.tags)
+      || R.has('expense', this.tags);
   }
 
   /**
@@ -397,5 +397,3 @@ class Account {
     return `Account: ${this.path}`;
   }
 }
-
-module.exports = Account;

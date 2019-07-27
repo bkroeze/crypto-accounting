@@ -1,8 +1,8 @@
-const loaders = require('./loaders');
-const models = require('./models');
-const utils = require('./utils');
+import * as loaders from './loaders';
+import * as models from './models';
+import * as utils from './utils';
 
-module.exports = {
+export {
   loaders,
   utils,
   models,

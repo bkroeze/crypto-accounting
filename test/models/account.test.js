@@ -1,8 +1,8 @@
 import test from 'ava';
 import Moment from 'moment';
 
-import Account from '../../src/models/account';
-import Transaction from '../../src/models/transaction';
+import { Account } from '../../src/models/account';
+import { Transaction } from '../../src/models/transaction';
 import { journalFinder } from '../utils';
 
 const getJournal = journalFinder(__dirname);

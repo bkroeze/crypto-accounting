@@ -1,8 +1,10 @@
-const Moment = require('moment');
-const RA = require('ramda-adjunct');
-const { makeError, ERRORS } = require('./errors');
+import Moment from 'moment';
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
+import { makeError } from './errors';
+import { ERRORS } from '../models/constants';
 
-function averageDates(date1, date2) {
+export function averageDates(date1, date2) {
   let d1;
   let d2;
   if (date1.isBefore(date2)) {
@@ -15,7 +17,7 @@ function averageDates(date1, date2) {
   return Moment(d1.add(d2.diff(d1) / 2), 'ms');
 }
 
-function compareByDate(a, b) {
+export function compareByDate(a, b) {
   if (a.utc.isBefore(b.utc)) {
     return -1;
   }
@@ -25,7 +27,7 @@ function compareByDate(a, b) {
   return 0;
 }
 
-function ensureDate(work) {
+export function ensureDate(work) {
   if (Moment.isMoment(work)) {
     return work.toDate();
   }
@@ -41,7 +43,7 @@ function ensureDate(work) {
   throw new Error(`Cannot parse date: ${work}`);
 }
 
-function ensureMoment(work) {
+export function ensureMoment(work) {
   if (Moment.isMoment(work)) {
     return work;
   } if (RA.isString(work)) {
@@ -51,11 +53,3 @@ function ensureMoment(work) {
   }
   throw makeError(TypeError, ERRORS.INVALID_TERM, `Invalid search term: ${work}`);
 }
-
-
-module.exports = {
-  averageDates,
-  compareByDate,
-  ensureDate,
-  ensureMoment,
-};

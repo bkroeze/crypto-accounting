@@ -1,18 +1,19 @@
 /* eslint no-unused-vars: off */
 
-const R = require('ramda');
-const Result = require('folktale/result');
-const { contained } = require('ramda-adjunct');
-const path = require('path');
-const log = require('js-logger').get('ledger_loader');
+import * as R from 'ramda';
+import * as Result from 'folktale/result';
+import { contained } from 'ramda-adjunct';
+import path from 'path';
+import * as Logger from 'js-logger';
+import { getFS } from './common';
+import { splitAndTrim, isTime, isConnector } from '../utils/models';
+import { Transaction } from '../models/transaction';
+import { isRelativePath } from '../utils/files';
+import { LEDGER_COMMENTS, LEDGER_LINE_COMMENT } from '../models/constants';
+import { Entry } from '../models/entry';
+import { Parser } from '../utils/parser';
 
-const { getFS } = require('./common');
-const { splitAndTrim, isTime, isConnector } = require('../utils/models');
-const Transaction = require('../models/transaction');
-const { isRelativePath } = require('../utils/files');
-const { LEDGER_COMMENTS, LEDGER_LINE_COMMENT } = require('../models/constants');
-const Entry = require('../models/entry');
-const Parser = require('../utils/parser');
+const log = Logger.get('ledger_loader');
 
 const trimRight = val => val.trimRight;
 const isCommentChar = contained(LEDGER_COMMENTS);
@@ -22,17 +23,17 @@ const isCommentLine = val => isCommentChar(val.trimLeft().slice(0, 1));
 const isNumeric = contained('0123456789');
 const isNewTransactionLine = val => isNumeric(val.slice(0, 1));
 const isAccountKey = contained(['id', 'account', 'note', 'status', 'address', 'party']);
-const lineCommentSpaces = /\; */;
+const lineCommentSpaces = /; */;
 const isCommentToken = R.startsWith(LEDGER_LINE_COMMENT);
-const lastTokenIsComment = (val) => isCommentToken(R.last(val));
+const lastTokenIsComment = val => isCommentToken(R.last(val));
 const findConnector = R.findIndex(isConnector);
 const isNegative = R.startsWith('-');
 const parser = new Parser();
 
-function shortcutFromLedgerLine(line) {
+export function shortcutFromLedgerLine(line) {
   const clean = line
-        .replace(lineCommentSpaces, ';')
-        .replace(/@@/g, '=');
+    .replace(lineCommentSpaces, ';')
+    .replace(/@@/g, '=');
   return parser.tokenizeShortcut(clean)
     .chain(({ tokens, comment }) => {
       let parts = R.clone(tokens);
@@ -62,7 +63,7 @@ function shortcutFromLedgerLine(line) {
     });
 }
 
-function ledgerTransactionToObject(lines) {
+export function ledgerTransactionToObject(lines) {
   const header = splitAndTrim(lines.shift());
   // get the utc, replacing / with -.
   let utc = header.shift().split('/').join('-');
@@ -155,7 +156,7 @@ function ledgerTransactionToObject(lines) {
   };
 }
 
-function convertLedgerTransaction(lines) {
+export function convertLedgerTransaction(lines) {
   return new Transaction(ledgerTransactionToObject(lines));
 }
 
@@ -183,29 +184,20 @@ function splitLedgerTransactions(raw) {
   return linesets;
 }
 
-function loadLedgerTransactions(raw) {
+export function loadLedgerTransactions(raw) {
   return splitLedgerTransactions(raw)
     .map(convertLedgerTransaction);
 }
 
-function loadObjectsFromString(raw) {
+export function loadObjectsFromString(raw) {
   return splitLedgerTransactions(raw)
     .map(ledgerTransactionToObject);
 }
 
-function loadTransactionsFromFilenameSync(fname, directory) {
+export function loadTransactionsFromFilenameSync(fname, directory) {
   let link = fname;
   if (directory && isRelativePath(fname)) {
     link = path.normalize(`${directory}/${fname}`);
   }
   return loadLedgerTransactions(getFS().readFileSync(link, 'utf-8'));
 }
-
-module.exports = {
-  shortcutFromLedgerLine,
-  ledgerTransactionToObject,
-  loadObjectsFromString,
-  loadTransactionsFromFilenameSync,
-  loadLedgerTransactions,
-  convertLedgerTransaction,
-};

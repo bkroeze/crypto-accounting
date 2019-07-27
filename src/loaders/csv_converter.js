@@ -1,14 +1,13 @@
 /* eslint no-unused-vars: off */
-const R = require('ramda');
-const RA = require('ramda-adjunct');
-const parse = require('csv-parse/lib/sync');
-const Moment = require('moment');
-const { safeDump } = require('js-yaml');
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
+import parse from 'csv-parse/lib/sync';
+import Moment from 'moment';
+import { safeDump } from 'js-yaml';
 
-const { CLEARED } = require('../models/constants');
-
-const utils = require('../utils/models');
-const { getFS } = require('./common');
+import { CLEARED } from '../models/constants';
+import * as utils from '../utils/models';
+import { getFS } from './common';
 
 const onlyConfirmed = R.propEq('Confirmed', 'true');
 const findAmount = R.find(R.startsWith('Amount'));
@@ -22,7 +21,7 @@ const getIds = R.map(R.prop('id'));
  * @param {String} credit account
  * @return {Array<Object>} List of transaction objects
  */
-function parseWalletCSV(data, currency, debit, credit) {
+export function parseWalletCSV(data, currency, debit, credit) {
   const parsed = parse(data, { columns: true });
   let amountField;
   const toObject = (row, ix) => {
@@ -54,7 +53,7 @@ const keys = ['id', 'account', 'utc', 'status', 'party', 'note', 'address'];
  * @param {Boolean} byDay if bucketed
  * @return {String} YAML representation
  */
-function toYaml(data, byDay) {
+export function rowToYaml(data, byDay) {
   const work = [];
   keys.forEach((key) => {
     if (R.has(key, data) && data[key]) {
@@ -65,14 +64,14 @@ function toYaml(data, byDay) {
         if (val.credit === val.debit) {
           val = val.credit;
         } else {
-          work.push(`${prefix} account:`)
+          work.push(`${prefix} account:`);
           Object.keys(val).forEach((acctKey) => {
             work.push(`    ${acctKey}: ${val[acctKey]}`);
           });
           pushed = true;
         }
       } else if (key === 'utc') {
-        val = byDay ? val.toISOString('YYYY-MM-DD').substring(0,10) : val.toISOString();
+        val = byDay ? val.toISOString('YYYY-MM-DD').substring(0, 10) : val.toISOString();
       }
       if (!pushed) {
         work.push(`${prefix} ${key}: ${val}`);
@@ -96,8 +95,8 @@ function toYaml(data, byDay) {
  * @param {Array<String>} data
  * @return {String} Joined output
  */
-function transactionsToYaml(data, byDay) {
-  return data.map(x => toYaml(x, byDay)).join('\n');
+export function transactionsToYaml(data, byDay) {
+  return data.map(x => rowToYaml(x, byDay)).join('\n');
 }
 
 /**
@@ -108,7 +107,7 @@ function transactionsToYaml(data, byDay) {
  * @param {String} credit account
  * @return {String} YAML representation
  */
-function walletCsvToYamlSync(filename, currency, debit, credit) {
+export function walletCsvToYamlSync(filename, currency, debit, credit) {
   const data = parseWalletCSV(getFS().readFileSync(filename), currency, debit, credit);
   return transactionsToYaml(data, false);
 }
@@ -119,7 +118,7 @@ function walletCsvToYamlSync(filename, currency, debit, credit) {
  * @param {String} date b
  * @return {Integer} 0 if equal, -1 if a is before b, 1 if a is after b
  */
-function byDate(a, b) {
+export function byDate(a, b) {
   const dateA = Moment(a.date);
   const dateB = Moment(b.date);
   if (dateA.isBefore(dateB)) {
@@ -137,9 +136,9 @@ function byDate(a, b) {
  * @param {Array<Object>} Transaction list b
  * @param {Array<Object>} Merged list
  */
-function mergeTransactionLists(a, b) {
+export function mergeTransactionLists(a, b) {
   const ids = new Set(getIds(a));
-  const work = a.map(a => a);
+  const work = a.map(x => x);
   b.forEach((tx) => {
     if (!ids.has(tx.id)) {
       work.push(tx);
@@ -148,12 +147,3 @@ function mergeTransactionLists(a, b) {
   work.sort(byDate);
   return work;
 }
-
-module.exports = {
-  parseWalletCSV,
-  transactionsToYaml,
-  walletCsvToYamlSync,
-  byDate,
-  mergeTransactionLists,
-  rowToYaml: toYaml,
-};

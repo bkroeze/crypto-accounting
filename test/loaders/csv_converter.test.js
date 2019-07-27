@@ -2,7 +2,7 @@ import test from 'ava';
 
 import { setMockFS } from '../../src/loaders/common';
 import * as csv from '../../src/loaders/csv_converter';
-import MockFS from '../mockfs';
+import { MockFS } from '../mockfs';
 
 const header = (currency) => `"Confirmed","Date","Type","Label","Address","Amount (${currency})","ID"`;
 

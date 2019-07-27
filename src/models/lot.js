@@ -1,27 +1,27 @@
-const Moment = require('moment');
-const R = require('ramda');
-const { DEBIT } = require('./constants');
-const Entry = require('./entry');
-const utils = require('../utils/models');
-const { addBigNumbers, BIG_0, BIG_1 } = require('../utils/numbers');
+import Moment from 'moment';
+import * as R from 'ramda';
+import { DEBIT } from './constants';
+import { Entry } from './entry';
+import * as utils from '../utils/models';
+import { addBigNumbers, BIG_0, BIG_1 } from '../utils/numbers';
 
 const getApplied = R.map(R.prop('applied'));
 
 function makeCreditObjects(wrappers) {
   return wrappers.map(wrapper => ({
-    ...wrapper.credit.toObject({shallow: true}),
+    ...wrapper.credit.toObject({ shallow: true }),
     applied: wrapper.applied.toFixed(8),
   }));
 }
 
 function makeDebitObjects(wrappers) {
   return wrappers.map(wrapper => ({
-    ...wrapper.debit.toObject({shallow: true}),
+    ...wrapper.debit.toObject({ shallow: true }),
     applied: wrapper.applied.toFixed(8),
   }));
 }
 
-class Lot {
+export class Lot {
   /**
    * Instantiate the lot with its first debit.
    * @param {Debit} debit
@@ -33,7 +33,7 @@ class Lot {
     this.credits = [];
     this.utc = debit.getUtc();
     this.addDebit(debit);
-    this.id = `lot-${debit.id}`
+    this.id = `lot-${debit.id}`;
   }
 
   /**
@@ -134,7 +134,7 @@ class Lot {
     const { debit, fees } = this.debits[0];
     const credit = debit.pair;
     const getRateForCurrency = currency => (currency === fiat ? BIG_1
-                                            : pricehistory.findPrice(this.utc, currency, fiat, transCurrencies, within).rate);
+      : pricehistory.findPrice(this.utc, currency, fiat, transCurrencies, within).rate);
 
     const getFiatPrice = entry => getRateForCurrency(entry.currency).times(entry.quantity);
 
@@ -298,5 +298,3 @@ class Lot {
     }, ['account']);
   }
 }
-
-module.exports = Lot;

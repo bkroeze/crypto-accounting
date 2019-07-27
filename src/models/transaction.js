@@ -1,17 +1,19 @@
 /* eslint no-console: ["error", { allow: ["error"] }] */
-const R = require('ramda');
-const RA = require('ramda-adjunct');
-const Moment = require('moment');
-const Result = require('folktale/result');
-const log = require('js-logger').get('models.transaction');
-const Credit = require('./credit');
-const Debit = require('./debit');
-const Trade = require('./trade');
-const utils = require('../utils/models');
-const Parser = require('../utils/parser');
-const { makeError } = require('../utils/errors');
-const { calcHashId } = require('../utils/numbers');
-const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } = require('./constants');
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
+import Moment from 'moment';
+import Result from 'folktale/result';
+import { get as getLogger } from 'js-logger';
+import { Credit } from './credit';
+import { Debit } from './debit';
+import { Trade } from './trade';
+import * as utils from '../utils/models';
+import { Parser } from '../utils/parser';
+import { makeError } from '../utils/errors';
+import { calcHashId } from '../utils/numbers';
+import { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } from './constants';
+
+const log = getLogger('models.transaction');
 
 const DEFAULT_PROPS = {
   id: '',
@@ -38,7 +40,7 @@ const getDebits = R.filter(R.propEq('type', DEBIT));
 const getCredits = R.filter(R.propEq('type', CREDIT));
 const getFees = R.filter(R.propEq('fee', true));
 
-class Transaction {
+export class Transaction {
   /**
    * Construct using a `props` object that must include "utc", and may also
    * include "notes", "tags", and a list of transactions
@@ -87,8 +89,8 @@ class Transaction {
 
     if (trades) {
       const [tradeSuccesses, tradeErrors] = this.makeTrades(trades);
-      tradeSuccesses.forEach(t => {
-        addEntryPair(t),
+      tradeSuccesses.forEach((t) => {
+        addEntryPair(t);
         this.trades.push(t);
       });
       if (tradeErrors.length > 0) {
@@ -250,18 +252,6 @@ class Transaction {
     const parser = new Parser(leadingSymbolMap);
     const trades = [];
     const errors = [];
-    const transaction = this;
-
-    const makeCredit = (value) => {
-      const [quantity, currency, account] = value.credit;
-      return new Credit({ quantity, currency, transaction, account });
-    };
-
-    const makeDebit = (value) => {
-      const [quantity, currency, account] = value.debit;
-      return new Debit({ quantity, currency, transaction, account, note: value.comment });
-    };
-
     const tx = this;
 
     rawArray.forEach((shortcut) => {
@@ -306,7 +296,7 @@ class Transaction {
       note: this.note,
       account: this.account,
       status: this.status,
-      utc: options.byDay ? this.utc.toISOString().substring(0,10) : this.utc.toISOString(),
+      utc: options.byDay ? this.utc.toISOString().substring(0, 10) : this.utc.toISOString(),
       address: this.address,
       party: this.party,
       tags: this.tags,
@@ -330,7 +320,7 @@ class Transaction {
   toYaml(byDay) {
     const data = this.toObject({ byDay });
     const work = [];
-    const {trades} = this;
+    const { trades } = this;
     const credits = this.getCredits().filter(entry => !entry.isTrade());
     const debits = this.getDebits().filter(entry => !entry.isTrade());
 
@@ -380,5 +370,3 @@ class Transaction {
     return work.join('\n');
   }
 }
-
-module.exports = Transaction;

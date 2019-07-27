@@ -1,8 +1,8 @@
-const { loadYamlFromFilenameSync } = require('./yaml_loader');
-const { loadTransactionsFromFilenameSync } = require('./ledger_loader');
-const { walletCsvToYamlSync } = require('./csv_converter');
+import { loadYamlFromFilenameSync } from './yaml_loader';
+import { loadTransactionsFromFilenameSync } from './ledger_loader';
+import { walletCsvToYamlSync } from './csv_converter';
 
-module.exports = {
+export {
   loadTransactionsFromFilenameSync,
   loadYamlFromFilenameSync,
   walletCsvToYamlSync,

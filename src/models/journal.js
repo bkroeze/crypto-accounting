@@ -1,12 +1,11 @@
-const R = require('ramda');
-
-const Accounts = require('./accounts');
-const PriceHistory = require('./pricehistory');
-const Transaction = require('./transaction');
-const { makeCurrencies } = require('./currency');
-const utils = require('../utils/models');
-const { BIG_0 } = require('../utils/numbers');
-const sets = require('../utils/sets');
+import * as R from 'ramda';
+import { Accounts } from './accounts';
+import { PriceHistory } from './pricehistory';
+import { Transaction } from './transaction';
+import { Currency } from './currency';
+import * as utils from '../utils/models';
+import { BIG_0 } from '../utils/numbers';
+import * as sets from '../utils/sets';
 
 /**
  * Default properties for new Journal instances
@@ -25,7 +24,7 @@ const DEFAULT_PROPS = {
 const KEYS = R.keysIn(DEFAULT_PROPS);
 const getProps = R.pick(KEYS);
 
-class Journal {
+export class Journal {
   /**
    * Construct using a `props` object.
    * @param {object} props
@@ -36,7 +35,7 @@ class Journal {
     this.name = merged.name;
     this.note = merged.note;
     this.accounts = new Accounts(merged.accounts);
-    this.currencies = makeCurrencies(merged.currencies);
+    this.currencies = Currency.makeCurrencies(merged.currencies);
     this.transactions = Transaction.makeTransactions(merged.transactions);
     this.pricedb = merged.pricedb ? merged.pricedb : `${this.id}.db`;
     this.pricehistory = new PriceHistory(merged.pricehistory, this.pricedb);
@@ -117,7 +116,7 @@ class Journal {
   findPrice(utc, base, quote, transCurrencies = null, within = null) {
     const translations = transCurrencies || this.getTranslationCurrencies().map(R.prop('id'));
     return this.pricehistory.waitForLoad()
-      .then(history =>  history.findPrice(utc, base, quote, translations, within));
+      .then(history => history.findPrice(utc, base, quote, translations, within));
   }
 
   /**
@@ -178,10 +177,12 @@ class Journal {
 
   getEntries() {
     return R.sort((a, b) => a.compare(b),
-                  R.flatten(
-                    R.map(
-                      R.prop('entries'),
-                      this.transactions)));
+      R.flatten(
+        R.map(
+          R.prop('entries'),
+          this.transactions
+        )
+      ));
   }
 
   /**
@@ -215,7 +216,7 @@ class Journal {
   getFiatDefault() {
     const isFiatDefault = R.propEq('fiatDefault', true);
     const fiat = R.find(isFiatDefault, Object.values(this.currencies));
-    return fiat ? fiat : this.journal.currencies.USD;
+    return fiat || this.journal.currencies.USD;
   }
 
   /**
@@ -242,5 +243,3 @@ class Journal {
     });
   }
 }
-
-module.exports = Journal;

@@ -4,7 +4,7 @@ import { CREDIT, DEBIT } from '../../src/models/constants';
 import { loadLedgerTransactions, convertLedgerTransaction, ledgerTransactionToObject, shortcutFromLedgerLine } from '../../src/loaders/ledger_loader';
 import { rowToYaml } from '../../src/loaders/csv_converter';
 
-import MockFS from '../mockfs';
+import { MockFS } from '../mockfs';
 
 test('converts a ledger line to a debit shortcut', (t) => {
   const result = shortcutFromLedgerLine('test 1 ETH');

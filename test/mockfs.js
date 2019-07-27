@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 import path from 'path';
 
-export default class MockFS {
+export class MockFS {
   constructor(mocks) {
     this.mocks = mocks;
   }

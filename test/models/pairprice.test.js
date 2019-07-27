@@ -1,5 +1,5 @@
 import test from 'ava';
-import PairPrice from '../../src/models/pairprice';
+import { PairPrice } from '../../src/models/pairprice';
 import * as utils from '../../src/utils/models';
 
 test('sorts dates correctly', (t) => {

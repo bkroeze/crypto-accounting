@@ -1,21 +1,21 @@
 {
   "presets": [
-    "env",
-    "stage-3"
+    "@babel/preset-env"
   ],
   "env": {
-    "targets" : {
-      "node": "current"
-    },
     "development": {
       "sourceMaps": "inline",
-      "plugins": ["source-map-support"]
+      "plugins": [
+        "source-map-support",
+        "@babel/plugin-transform-regenerator"
+      ]
     }
   },
   "plugins": [
-    "transform-es2015-destructuring",
-    ["transform-runtime", {
-      "polyfill": false,
-      "regenerator": true
-    }]]
+    "@babel/plugin-transform-destructuring",
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-syntax-import-meta",
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-json-strings"
+  ]
 }

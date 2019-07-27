@@ -1,6 +1,5 @@
-
-const Credit = require('./credit');
-const Debit = require('./debit');
+import { Credit } from './credit';
+import { Debit } from './debit';
 
 const makeCredit = (value, transaction) => {
   const [quantity, currency, account] = value.credit;
@@ -12,15 +11,14 @@ const makeDebit = (value, transaction) => {
   return new Debit({ quantity, currency, transaction, account, note: value.comment });
 };
 
-class Trade {
-
+export class Trade {
   /**
    * Construct using the output of the Parser helper.
    * @param {Object} parsed value
    * @param {Transaction} transaction
    */
   constructor(value, transaction) {
-    const {connector, reversed, shortcut} = value;
+    const { connector, reversed, shortcut } = value;
     this.connector = connector;
     const credit = makeCredit(value, transaction);
     const debit = makeDebit(value, transaction);
@@ -44,9 +42,9 @@ class Trade {
     if (!this.isTrade()) {
       throw new Error('Not a trade');
     }
-    if (isDebit(this)) {
-      return `${this.currency}/${this.pair.currency}`;
-    }
+    // if (isDebit(this)) {
+    //   return `${this.currency}/${this.pair.currency}`;
+    // }
     return this.pair.getTradePairSymbol();
   }
 
@@ -55,8 +53,6 @@ class Trade {
       shortcut: this.shortcut,
       debit: this.debit.toObject(props),
       credit: this.credit.toObject(props),
-    }
+    };
   }
 }
-
-module.exports = Trade;

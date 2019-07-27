@@ -1,9 +1,7 @@
-const dates = require('./dates');
-const errors = require('./errors');
-const models = require('./models');
-const numbers = require('./numbers');
-const sets = require('./sets');
+import * as dates from './dates';
+import * as errors from './errors';
+import * as models from './models';
+import * as numbers from './numbers';
+import * as sets from './sets';
 
-module.exports = {
-  dates, errors, models, numbers, sets,
-};
+export { dates, errors, models, numbers, sets };

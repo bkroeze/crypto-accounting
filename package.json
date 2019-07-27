@@ -2,12 +2,18 @@
   "name": "crypto-accounting",
   "version": "0.0.5",
   "description": "Multi-currency/commodity accounting using human-readable text files",
-  "main": "src/cli.js",
+  "main": [
+    "lib/index.js"
+  ],
   "repository": "https://github.com/bkroeze/crypto-accounting.git",
   "author": "Bruce Kroeze <coindev@mytx.io>",
   "license": "MIT",
   "private": false,
+  "files": [
+    "lib"
+  ],
   "dependencies": {
+    "@babel/cli": "^7.5.5",
     "bignumber.js": "^7.2.1",
     "csv-parse": "^2.5.0",
     "csvtojson": "^2.0.8",
@@ -27,33 +33,40 @@
     "yargs": "^12.0.1"
   },
   "devDependencies": {
-    "ava": "^0.25.0",
-    "babel-cli": "^6.26.0",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-decorators": "^7.0.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.0.0",
+    "@babel/plugin-proposal-function-sent": "^7.0.0",
+    "@babel/plugin-proposal-json-strings": "^7.0.0",
+    "@babel/plugin-proposal-numeric-separator": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+    "@babel/plugin-proposal-throw-expressions": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-syntax-import-meta": "^7.0.0",
+    "@babel/plugin-transform-destructuring": "^7.0.0",
+    "@babel/plugin-transform-regenerator": "^7.4.5",
+    "@babel/plugin-transform-runtime": "^7.0.0",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "ava": "^2.2.0",
     "babel-compile": "^2.0.0",
-    "babel-core": "^6.26.3",
     "babel-plugin-source-map-support": "^2.0.1",
-    "babel-plugin-transform-decorators-legacy": "^1.3.5",
-    "babel-plugin-transform-es2015-destructuring": "^6.23.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "babel-preset-stage-3": "^6.24.1",
-    "babel-register": "^6.26.0",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb-base": "^13.0.0",
-    "eslint-plugin-ava": "^4.5.1",
-    "eslint-plugin-import": "^2.13.0",
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-ava": "^7.1.0",
+    "eslint-plugin-import": "^2.17.2",
     "loki-db-cli": "^1.0.2",
     "pino-pretty": "^2.5.0",
     "source-map-support": "^0.5.6"
   },
   "scripts": {
-    "compile": "babel-compile -p stage-3 src:lib",
+    "compile": "babel src --out-dir=lib",
     "prepublish": "yarn compile",
     "test": "ava",
     "watch": "ava -v --watch",
-    "eslint": "eslint"
+    "lint": "eslint src/**"
   },
   "ava": {
     "files": [
@@ -69,9 +82,12 @@
     "failWithoutAssertions": false,
     "tap": false,
     "compileEnhancements": false,
+
     "require": [
-      "babel-register",
-      "source-map-support"
+      "source-map-support",
+      "@babel/register",
+      "@babel/plugin-transform-regenerator",
+      "@babel/polyfill"
     ],
     "sourceMaps": true
   }

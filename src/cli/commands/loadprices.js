@@ -1,10 +1,9 @@
-const log = require('js-logger').get('cli.commands.prices');
-const fs = require('graceful-fs');
-const Papa = require('papaparse');
-const moment = require('moment');
-const path = require('path');
-const PriceHistory = require('../../models/pricehistory');
-const PairPrice = require('../../models/pairprice');
+import fs from 'graceful-fs';
+import Papa from 'papaparse';
+import moment from 'moment';
+import path from 'path';
+import { PriceHistory } from '../../models/pricehistory';
+import { PairPrice } from '../../models/pairprice';
 
 const randomSeed = Math.floor(Math.random() * 10000);
 
@@ -38,11 +37,11 @@ const FORMATS = {
     date: 'date',
     price: 'price',
     dateformat: 'MM/DD/YYYY hh:mm',
-  }
-}
+  },
+};
 
 function makePrefix(options) {
-  let {prefix} = options;
+  const { prefix } = options;
   return prefix
     .replace(/%R/g, randomSeed)
     .replace(/%F/g, path.parse(options.filename).name)
@@ -50,7 +49,7 @@ function makePrefix(options) {
 }
 
 function handler(args) {
-  const {filename, format, base, quote} = args;
+  const { filename, format, base, quote } = args;
   if (!FORMATS[format]) {
     console.log(`Invalid choice of format: ${format}`);
     process.exit(1);
@@ -74,27 +73,27 @@ function handler(args) {
   PriceHistory
     .load([], args.db)
     .then((priceHistory) => {
-      const step = (results, parser) => {
+      const step = (results) => {
         if (results.data) {
           results.data.forEach((row) => {
             ct++;
             const record = {
               id: `${prefix}-${ct}`,
-              base: base,
-              quote: quote,
+              base,
+              quote,
               rate: row[fields.price],
-              utc:  moment.utc(row[fields.date], fields.dateformat),
+              utc: moment.utc(row[fields.date], fields.dateformat),
             };
             if (!record.rate) {
-              console.log(`${record.utc} skip - no rate`)
+              console.log(`${record.utc} skip - no rate`);
               ct--;
             } else {
               console.log('REC', JSON.stringify(record));
               const pair = new PairPrice(record);
               // console.log({pair});
-              //console.log(`#${ct}: ${record.utc.toISOString()} ${record.base}/${record.quote}`)
+              // console.log(`#${ct}: ${record.utc.toISOString()} ${record.base}/${record.quote}`)
               priceHistory.addPrice(pair)
-                .catch(e => {
+                .catch((e) => {
                   console.error(e);
                   process.exit(1);
                 });
@@ -108,9 +107,9 @@ function handler(args) {
         step,
         complete: () => {
           console.log(`Complete, processed ${ct} prices`);
-          console.log(`Saved to DB`);
+          console.log('Saved to DB');
           setTimeout(() => process.exit(0), 2000);
-        }
+        },
       });
     });
 }
@@ -122,12 +121,10 @@ function builder(yargs) {
       choices: Object.keys(FORMATS),
       default: 'coinmetrics',
     })
-    .option('base', {
-      desc: 'Base currency (price is for each of this currency)'
-    })
+    .option('base', { desc: 'Base currency (price is for each of this currency)' })
     .option('quote', {
       desc: 'Quote currency (how many of these to buy 1 base)',
-      default: 'USD'
+      default: 'USD',
     })
     .option('prefix', {
       desc: 'ID prefix, defaulting to filename-date-, use %R for a random, %D for date, and %F for the filename',
@@ -138,16 +135,14 @@ function builder(yargs) {
       default: 'prices.db',
     })
     .demandOption(['base'])
-    .positional('filename', {
-      type: 'string', desc: 'File to read'
-    });
+    .positional('filename', { type: 'string', desc: 'File to read' });
 }
 
-module.exports = {
+export default {
   command: {
     command: 'loadprices <filename>',
     desc: 'Load prices from a CSV file',
     builder,
     handler,
-  }
+  },
 };

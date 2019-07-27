@@ -1,14 +1,17 @@
 /* eslint prefer-destructuring: ["error", { array: false }] */
-const R = require('ramda');
-const RA = require('ramda-adjunct');
-const Moment = require('moment');
-const BigNumber = require('bignumber.js');
-const log = require('js-logger').get('cryptoaccounting.models.entry');
-const utils = require('../utils/models');
-const Parser = require('../utils/parser');
-const { makeError } = require('../utils/errors');
-const { BIG_0, addBigNumbers, calcHashId } = require('../utils/numbers');
-const { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } = require('./constants');
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
+import Moment from 'moment';
+import BigNumber from 'bignumber.js';
+
+import { get as getLogger } from 'js-logger';
+import * as utils from '../utils/models';
+import { Parser } from '../utils/parser';
+import { makeError } from '../utils/errors';
+import { BIG_0, addBigNumbers, calcHashId } from '../utils/numbers';
+import { CREDIT, DEBIT, ERRORS, SYMBOL_MAP } from './constants';
+
+const log = getLogger('cryptoaccounting.models.entry');
 
 const commaRe = new RegExp(/,/, 'g');
 
@@ -51,7 +54,7 @@ function getLotCredits(currency, lots) {
     .map(R.prop('applied'));
 }
 
-class Entry {
+export class Entry {
   /**
    * Construct using a `props` object that must include the parent transaction
    * @param {String|Object} shortcut string, or full object
@@ -461,5 +464,3 @@ class Entry {
     return `Entry (${this.type}): ${this.quantity.toFixed(8)} ${this.currency} ${this.getAccount()}`;
   }
 }
-
-module.exports = Entry;

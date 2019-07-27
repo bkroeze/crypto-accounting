@@ -1,23 +1,18 @@
-const pino = require('pino');
+import pino from 'pino';
 
-let level = process.env.CRYPTOACCOUNTING_LOGLEVEL || process.env.CRYPTOACCOUNTING_LOGLEVEL || 'info';
+const level = process.env.CRYPTOACCOUNTING_LOGLEVEL || process.env.CRYPTOACCOUNTING_LOGLEVEL || 'info';
 
 let LOGGER = pino({
   application: 'apiserver',
   level: level.toLowerCase(),
 });
 
-function getLogger(module) {
+export function get(module) {
   return LOGGER.child({ module });
 }
 
-function setLogger(logger) {
+export function setLogger(logger) {
   LOGGER = logger;
   LOGGER.warn('Set custom logger');
   return LOGGER;
 }
-
-module.exports = {
-  setLogger: setLogger,
-  get: getLogger,
-};

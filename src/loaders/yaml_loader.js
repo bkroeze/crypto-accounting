@@ -1,11 +1,12 @@
 /* eslint no-use-before-define: off */
-const R = require('ramda');
-const path = require('path');
-const { safeLoad } = require('js-yaml');
-const { isRelativePath } = require('../utils/files');
-const loadLedgerTransactions = require('./ledger_loader').loadTransactionsFromFilenameSync;
-const { getFS } = require('./common');
+import * as R from 'ramda';
+import * as path from 'path';
+import { safeLoad } from 'js-yaml';
+import { isRelativePath } from '../utils/files';
+import { loadTransactionsFromFilenameSync } from './ledger_loader';
+import { getFS } from './common';
 
+const loadLedgerTransactions = loadTransactionsFromFilenameSync;
 const hasRef = R.has('$ref');
 const isObjectByKey = (obj, key) => R.is(Object, R.prop(key, obj));
 const objectTester = R.curry(isObjectByKey);
@@ -17,7 +18,7 @@ const objectTester = R.curry(isObjectByKey);
  * @return {Array<Object<Array<String>, String>>} An array of paths, given as
  *   {path: array, link: string}
  */
-function findRefs(work, refPath = []) {
+export function findRefs(work, refPath = []) {
   let refs = [];
 
   if (hasRef(work)) {
@@ -33,7 +34,7 @@ function findRefs(work, refPath = []) {
   return refs;
 }
 
-function loadYamlFromFilenameSync(fname, directory) {
+export function loadYamlFromFilenameSync(fname, directory) {
   let link = fname;
   if (directory && isRelativePath(fname)) {
     link = path.normalize(`${directory}/${fname}`);
@@ -42,7 +43,7 @@ function loadYamlFromFilenameSync(fname, directory) {
   return loadRefs(safeLoad(getFS().readFileSync(link, 'utf-8')), directory);
 }
 
-function flexibleLoadByExtSync(fname, directory) {
+export function flexibleLoadByExtSync(fname, directory) {
   const ext = path.extname(fname).toLowerCase();
   if (ext === '.dat' || ext === '.ledger' || ext === '.ldr') {
     return loadLedgerTransactions(fname, directory);
@@ -69,7 +70,7 @@ function loadRef(work, reference, directory) {
   return R.assocPath(reference.path, child, merged);
 }
 
-function loadRefs(work, directory) {
+export function loadRefs(work, directory) {
   let merged = work;
   findRefs(work).forEach((ref) => {
     // and merge in the result of loading the link
@@ -77,11 +78,3 @@ function loadRefs(work, directory) {
   });
   return merged;
 }
-
-module.exports = {
-  findRefs,
-  flexibleLoadByExtSync,
-  loadRef,
-  loadRefs,
-  loadYamlFromFilenameSync,
-};

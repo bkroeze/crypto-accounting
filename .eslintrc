@@ -1,5 +1,12 @@
 {
-	"extends": "airbnb-base",
+  "env": {
+    "es6": true,
+    "browser": false
+  },
+	"extends": [
+    "airbnb-base",
+    "plugin:import/warnings"
+  ],
 	"plugins": [
 		"ava"
 	],
@@ -38,6 +45,14 @@
 		"ava/use-t": "error",
 		"ava/use-test": "error",
 		"ava/use-true-false": "error",
+    "import/named": 2,
+    "import/namespace": 2,
+    "import/default": 2,
+    "import/export": 2,
+    "import/no-unresolved": [2, {"commonjs": false, "amd": false}],
+    "import/no-unused-modules": "on",
+    "import/prefer-default-export": "off",
+    "no-commonjs": "on",
 		"no-plusplus": "off",
 		"no-bitwise": "off",
 		"no-console": "off",

@@ -1,11 +1,11 @@
 /* eslint import/prefer-default-export: off */
-const { loadYamlFromFilenameSync } = require('./yaml_loader');
-const { makeError } = require('../utils/errors');
-const { ERRORS } = require('../models/constants');
-const Journal = require('../models/journal');
-const path = require('path');
+import path from 'path';
+import { loadYamlFromFilenameSync } from './yaml_loader';
+import { makeError } from '../utils/errors';
+import { ERRORS } from '../models/constants';
+import { Journal } from '../models/journal';
 
-function loadJournalFromFilenameSync(fname, directory = null) {
+export function loadJournalFromFilenameSync(fname, directory = null) {
   if (!fname) {
     throw makeError(ERRORS.MISSING_PARAMETER, 'Missing filename');
   }
@@ -20,7 +20,3 @@ function loadJournalFromFilenameSync(fname, directory = null) {
   const journal = new Journal(data);
   return journal;
 }
-
-module.exports = {
-  loadJournalFromFilenameSync,
-};

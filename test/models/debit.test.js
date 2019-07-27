@@ -1,6 +1,6 @@
 import test from 'ava';
-import Transaction from '../../src/models/transaction';
-import Debit from '../../src/models/debit';
+import { Transaction } from '../../src/models/transaction';
+import { Debit } from '../../src/models/debit';
 
 const TX = new Transaction({
   utc: '2018-01-01',

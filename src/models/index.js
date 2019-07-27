@@ -1,14 +1,14 @@
-const Account = require('./account');
-const constants = require('./constants');
-const Currency = require('./currency');
-const Entry = require('./entry');
-const Journal = require('./journal');
-const Lot = require('./lot');
-const PairPrice = require('./pairprice');
-const PriceHistory = require('./pricehistory');
-const Transaction = require('./transaction');
+import { Account } from './account';
+import * as constants from './constants';
+import { Currency } from './currency';
+import { Entry } from './entry';
+import { Journal } from './journal';
+import { Lot } from './lot';
+import { PairPrice } from './pairprice';
+import { PriceHistory } from './pricehistory';
+import { Transaction } from './transaction';
 
-module.exports = {
+export {
   Account,
   Currency,
   Entry,
@@ -17,6 +17,5 @@ module.exports = {
   PairPrice,
   PriceHistory,
   Transaction,
-  ...constants,
+  constants,
 };
-

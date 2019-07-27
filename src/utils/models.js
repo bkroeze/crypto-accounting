@@ -1,6 +1,6 @@
 /* eslint no-underscore-dangle: off */
-const R = require('ramda');
-const RA = require('ramda-adjunct');
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
 
 /**
  * Returns a copy of an object, with all members having falsy values removed,
@@ -32,7 +32,7 @@ function stripFalsy(toStrip) {
  */
 function toObject(work) {
   try {
-    return work.toObject()
+    return work.toObject();
   } catch (e) {
     return work;
   }
@@ -48,7 +48,7 @@ function arrayToObjects(work, options) {
  * @return {Object} work.toObject() results;
  */
 function toShallowObject(work) {
-  return (work && R.has(toObject, work)) ? work.toObject({shallow: true}) : null;
+  return (work && R.has(toObject, work)) ? work.toObject({ shallow: true }) : null;
 }
 
 function objectValsToObject(obj, options) {
@@ -67,13 +67,13 @@ const looksNumeric = val => val.search(numberRe) > -1;
 const startsWithCarat = R.startsWith('^');
 const isConnector = R.contains(R.__, ['@', '=']);
 const timeRE = new RegExp('^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]?$');
-const isTime = (val) => timeRE.test(val);
+const isTime = val => timeRE.test(val);
 
 function splitAndTrim(work) {
   return filterEmpty(mapTrim(splitSpace(work)));
 }
 
-module.exports = {
+export {
   arrayToObjects,
   filterEmpty,
   isConnector,

@@ -1,5 +1,5 @@
 import test from 'ava';
-import Accounts from '../../src/models/accounts';
+import { Accounts } from '../../src/models/accounts';
 import { journalFinder } from '../utils';
 
 const getJournal = journalFinder(__dirname);

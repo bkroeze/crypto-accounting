@@ -1,12 +1,12 @@
-const Moment = require('moment');
-const BigNumber = require('bignumber.js');
-const R = require('ramda');
-const RA = require('ramda-adjunct');
+import Moment from 'moment';
+import BigNumber from 'bignumber.js';
+import * as R from 'ramda';
+import * as RA from 'ramda-adjunct';
 
-const utils = require('../utils/models');
-const { BIG_0, BIG_1 } = require('../utils/numbers');
-const { ERRORS } = require('./constants');
-const { makeError } = require('../utils/errors');
+import * as utils from '../utils/models';
+import { BIG_0, BIG_1 } from '../utils/numbers';
+import { ERRORS } from './constants';
+import { makeError } from '../utils/errors';
 
 const DEFAULT_PROPS = {
   id: null,
@@ -63,7 +63,7 @@ function parseProps(props) {
 /**
  * Represents a price for a pair at a specific date
  */
-class PairPrice {
+export class PairPrice {
   /**
    * Flexibly create using either a shortcut or an object.
    * @param {String|Object} props object or shortcut string
@@ -143,7 +143,7 @@ class PairPrice {
    * @return {Object<String, *>}
    */
   toObject(options = {}) {
-    const {shallow, yaml, db} = options;
+    const { shallow, yaml, db } = options;
     const props = {
       id: this.id,
       pair: this.pair,
@@ -167,5 +167,3 @@ class PairPrice {
     return `PairPrice: ${this.utc.toISOString()} ${this.pair} ${this.rate}`;
   }
 }
-
-module.exports = PairPrice;

@@ -1,4 +1,4 @@
-const R = require('ramda');
+import * as R from 'ramda';
 
 const requireCommands = R.map((cmd) => {
   try {
@@ -9,10 +9,8 @@ const requireCommands = R.map((cmd) => {
   }
 });
 
-const commands = requireCommands([
+export const commands = requireCommands([
   'convert',
   'prices',
   'loadprices',
 ]);
-
-module.exports = commands;

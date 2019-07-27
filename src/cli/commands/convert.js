@@ -1,16 +1,13 @@
-const R = require('ramda');
-const BigNumber = require('bignumber.js');
-const path = require('path');
-const moment = require('moment');
-const fs = require('graceful-fs');
-const log = require('js-logger').get('cli.commands.convert');
-const { safeLoad, safeDump } = require('js-yaml');
+import * as R from 'ramda';
+import BigNumber from 'bignumber.js';
+import moment from 'moment';
+import fs from 'graceful-fs';
 
-const Transaction = require('../../models/transaction');
-const { stripFalsy } = require('../../utils/models');
-const { parseWalletCSV, rowToYaml, mergeTransactionLists } = require('../../loaders/csv_converter');
-const ledgerLoader = require('../../loaders/ledger_loader');
-const { flexibleLoadByExtSync } = require('../../loaders/yaml_loader');
+import { safeLoad, safeDump } from 'js-yaml';
+
+import { stripFalsy } from '../../utils/models';
+import { parseWalletCSV, mergeTransactionLists } from '../../loaders/csv_converter';
+import { loadObjectsFromString } from '../../loaders/ledger_loader';
 
 const ascendingDate = R.ascend(R.prop('utc'));
 const descendingDate = R.descend(R.prop('utc'));
@@ -26,7 +23,7 @@ function readCSV(raw, currency, debit, credit) {
   );
 }
 
-function readJSON(raw, base, cb) {
+function readJSON(raw, base) {
   const work = JSON.parse(raw);
   const results = work.map(row => ({
     date: moment(row.time * 1000),
@@ -61,7 +58,7 @@ class LedgerWrapper {
 const ledgerWrapFactory = props => new LedgerWrapper(props);
 
 function readLedger(raw) {
-  return ledgerLoader.loadObjectsFromString(raw)
+  return loadObjectsFromString(raw)
     .map(ledgerWrapFactory);
 }
 
@@ -78,9 +75,9 @@ function printResults(results, base, credit, debit, descending, byDay, startDate
   const sorter = descending ? descendingDate : ascendingDate;
   let sorted = R.sort(sorter, work);
   if (byDay) {
-    const work = [];
+    work = [];
     let current;
-    sorted.forEach(row => {
+    sorted.forEach((row) => {
       if (!current) {
         current = R.clone(row);
         current.date = current.utc.startOf('day');
@@ -98,14 +95,14 @@ function printResults(results, base, credit, debit, descending, byDay, startDate
     work.push(current);
     sorted = work;
   }
-  sorted.forEach(row => {
+  sorted.forEach((row) => {
     console.log(row.toYaml(byDay));
   });
   return true;
 }
 
 function handler(args) {
-  const {merge, filename, currency, credit, descending, conversion} = args;
+  const { merge, filename, currency, credit, descending, conversion } = args;
   if (!fs.existsSync(filename)) {
     console.log(`File not found: ${filename}`);
     process.exit(1);
@@ -168,22 +165,22 @@ function handler(args) {
 
 function builder(yargs) {
   return yargs
-    .option('credit', {default: 'Income:Crypto:MN'})
-    .option('debit', {default: 'Assets:Crypto:Wallets:{CURRENCY}'})
-    .option('descending', {type: 'boolean', desc: 'Sort in descending date order', default: false})
-    .option('byDay', {type: 'boolean', desc: 'Bucket similar transactions by day', default: false})
-    .option('start', {type: 'string', desc: 'Starting date', default: false})
-    .option('currency', {type: 'string', desc: 'Which symbol for this conversion. EX: BTC'})
-    .option('merge', {type: 'string', desc: 'Merge with existing YAML file'})
-    .option('conversion', {type: 'string', desc: 'Yaml file for account conversions'})
-    .positional('filename', {type: 'string', desc: 'File to read'});
+    .option('credit', { default: 'Income:Crypto:MN' })
+    .option('debit', { default: 'Assets:Crypto:Wallets:{CURRENCY}' })
+    .option('descending', { type: 'boolean', desc: 'Sort in descending date order', default: false })
+    .option('byDay', { type: 'boolean', desc: 'Bucket similar transactions by day', default: false })
+    .option('start', { type: 'string', desc: 'Starting date', default: false })
+    .option('currency', { type: 'string', desc: 'Which symbol for this conversion. EX: BTC' })
+    .option('merge', { type: 'string', desc: 'Merge with existing YAML file' })
+    .option('conversion', { type: 'string', desc: 'Yaml file for account conversions' })
+    .positional('filename', { type: 'string', desc: 'File to read' });
 }
 
-module.exports = {
+export default {
   command: {
     command: 'convert <filename>',
     desc: 'Convert CSV, Ledger or JSON to Yaml-Transaction format',
     builder,
     handler,
-  }
+  },
 };

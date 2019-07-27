@@ -1,6 +1,6 @@
 import test from 'ava';
 import Result from 'folktale/result';
-import Parser from '../../src/utils/parser';
+import { Parser } from '../../src/utils/parser';
 import { ERRORS } from '../../src/models/constants';
 
 const parser = new Parser();

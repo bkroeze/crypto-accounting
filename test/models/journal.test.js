@@ -1,7 +1,7 @@
 import test from 'ava';
 import Moment from 'moment';
 import * as R from 'ramda';
-import Journal from '../../src/models/journal';
+import { Journal } from '../../src/models/journal';
 import { BIG_0 } from '../../src/utils/numbers';
 import { journalFinder } from '../utils';
 

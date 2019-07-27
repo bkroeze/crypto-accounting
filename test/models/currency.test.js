@@ -1,6 +1,5 @@
 import test from 'ava';
-
-import Currency from '../../src/models/currency';
+import { Currency } from '../../src/models/currency';
 
 test('Currency can instantiate via props', (t) => {
   const c = new Currency({ id: 'test' });
