@@ -62,11 +62,12 @@ export class Lot {
 
   /**
    * Tests a debit to see if it is a "lot" type entry.
+   * @param {Accounts} accounts
    * @param {Object<String,Currency>} currencies
    * @param {Debit} debit
    * @return {Boolean} true if the debit should be in a lot
    */
-  static isLot(currencies, debit) {
+  static isLot(accounts, currencies, debit) {
     if (!debit.isDebit()) {
       return false;
     }
@@ -79,6 +80,12 @@ export class Lot {
       return true;
     }
 
+    // Also is a lot if the debit was received from an income account
+    const creditAccount = accounts.get(debit.pair.getAccount());
+    if (creditAccount.isIncome()) {
+      return true;
+    }
+
     return false;
   }
 
@@ -88,8 +95,8 @@ export class Lot {
    * @param {Array<Debit>} debits
    * @return {Array<Lot>} lots
    */
-  static makeLots(currencies, debits) {
-    const isLot = lot => Lot.isLot(currencies, lot);
+  static makeLots(accounts, currencies, debits) {
+    const isLot = lot => Lot.isLot(accounts, currencies, lot);
     return debits
       .filter(isLot)
       .map(d => new Lot(d));

@@ -256,13 +256,13 @@ export class Account {
    * @param {Boolean} force recalculation if true
    * @return {Array<Lot>} lots
    */
-  getLots(currencies, force) {
+  getLots(accounts, currencies, force) {
     if (this.isVirtual() || this.isExpense()) {
       return [];
     }
     if (this.dirty.lots || force) {
       const debits = this.getEntries(DEBIT);
-      this.lots = Lot.makeLots(currencies, debits);
+      this.lots = Lot.makeLots(accounts, currencies, debits);
       // console.log('made lots:', this.lots.map(l => l.toObject({shallow: true})));
     }
     return this.lots;
@@ -352,6 +352,11 @@ export class Account {
       || R.startsWith('expense', this.path.toLowerCase())
       || R.has('fee', this.tags)
       || R.has('expense', this.tags);
+  }
+
+  isIncome() {
+    return R.startsWith('income', this.path.toLowerCase())
+      || R.has('income', this.tags);
   }
 
   /**

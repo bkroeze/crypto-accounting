@@ -166,7 +166,7 @@ export class Accounts {
   getLots(currencies, force, lifo) {
     const search = lifo ? lifoSearch : fifoSearch;
     if (force || this.lots.length === 0) {
-      const lots = R.flatten(this.map(a => a.getLots(currencies, force)));
+      const lots = R.flatten(this.map(a => a.getLots(this, currencies, force)));
       lots.sort(Lot.compare);
       // we've got lots, now go through credits for all accounts and apply
 
@@ -184,28 +184,40 @@ export class Accounts {
       };
 
       const applyCreditToLots = (c) => {
+        // if (c.currency === 'LTC') {
+        //   console.log(`Starting applyCredit ${c.quantity.toFixed(8)} ${c.transaction.utc}`);
+        // }
         const findLot = l => (l.currency === c.currency && l.isOpen());
         let qty = c.quantity;
         while (qty.gt(BIG_0)) {
-          // console.log('-- qty now', qty.toFixed(2));
+          // if (c.currency === 'LTC') {
+          //   console.log('-- qty now', qty.toFixed(8));
+          // }
           const lot = search(findLot, lots);
           if (!lot) {
             throw makeError(RangeError, `${ERRORS.EXHAUSTED}, Ran out of lots looking for ${qty.toFixed(8)} ${c.currency}`, lots);
           }
-          // console.log('going to add to', lot.toObject());
+          // if (c.currency === 'LTC') {
+          //   console.log('going to add to', JSON.stringify(lot.toObject(), null, 2));
+          // }
           const applied = lot.addCredit(c, qty);
-          // console.log(`applied ${applied.toFixed(2)}`);
+          // if (c.currency === 'LTC') {
+          //   console.log(`applied ${applied.toFixed(8)}`);
+          //   console.log(`remaining ${lot.getRemaining().toFixed(8)}`);
+          // }
           qty = qty.minus(applied);
         }
       };
 
-      this.asList()
-        .filter(Account.isNotVirtualAccount)
-        .forEach((a) => {
-          a.getEntries(CREDIT)
-            .filter(isTradeOrFee)
-            .forEach(applyCreditToLots);
-        });
+      const credits = R.flatten(
+        this.asList()
+          .filter(Account.isNotVirtualAccount)
+          .map(a => a.getEntries(CREDIT).filter(isTradeOrFee))
+      );
+
+      credits.sort((a, b) => a.compare(b));
+      credits.forEach(applyCreditToLots);
+
       this.lots = lots;
     }
     return this.lots;
