@@ -84,6 +84,7 @@ export class PriceHistory {
 
   async addPrices(pricelist) {
     const prices = await getPriceCollection();
+    log.info({msg: "got prices", prices});
     this.priceCollection = prices;
     if (pricelist) {
       if (RA.isArray(pricelist)) {
@@ -186,6 +187,8 @@ export class PriceHistory {
         return price;
       }
     }
+
+    console.error(`Cannot find price for ${base}/${quote} on ${utc.toISOString()}`);
 
     throw makeError(RangeError, ERRORS.NOT_FOUND, `${base}/${quote}`);
   }

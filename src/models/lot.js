@@ -206,6 +206,50 @@ export class Lot {
   }
 
   /**
+   * Calculate capital gains entries from exercised credits, including all transactional details for reports.
+   * @param {PriceHistory} pricehistory
+   * @param {String} currency for the price
+   * @param {Array<String>} list of currencies to use as translations
+   * @param {Integer} seconds to search for dates within
+   * @param {Moment} endDate to stop adding details
+   * @return {Array<Debit>} list of debits representing capital gains
+   */
+  getCapitalGainsDetails(pricehistory, fiat, transCurrencies = ['BTC', 'ETH'], within = null, startDate = null, endDate = null) {
+    console.log('get cap gains details');
+    const purchasePrice = this.getPurchasePriceEach(pricehistory, fiat, transCurrencies, within);
+    let credits = this.credits;
+    if (startDate) {
+      credits = credits.filter(c => c.credit.getUtc().isSameOrAfter(startDate));
+    }
+    if (endDate) {
+      credits = credits.filter(c => c.credit.getUtc().isSameOrBefore(endDate));
+    }
+    return credits.map((creditWrapper, ix) => {
+      const { credit, applied } = creditWrapper;
+      console.log(`${ix}: ${JSON.stringify(credit.toObject({shallow: true}), null, 2)}`);
+      const salePrice = Lot.getSalePriceEach(
+        credit, pricehistory, fiat, transCurrencies, within
+      );
+      const profitEach = salePrice.minus(purchasePrice);
+
+      const rv = {
+        applied,
+        transaction: credit.transaction.id,
+        creditAccount: credit.getAccount(),
+        creditCurrency: credit.currency,
+        currency: fiat,
+        proceeds: salePrice.times(applied),
+        cost: purchasePrice.times(applied),
+        dateAcquired: this.utc,
+        dateSold: credit.getUtc(),
+        profit: profitEach.times(applied)
+      };
+      console.log({...rv, applied: rv.applied.toFixed(8)});
+      return rv;
+    });
+  }
+
+  /**
    * Get the remaining part of this lot not yet applied to credits.
    * @return {BigNumber} quantity remaining
    */

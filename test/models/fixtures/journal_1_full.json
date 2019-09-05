@@ -1,0 +1,185 @@
+{
+  "name": "Test Fixture",
+  "accounts": {
+    "assets": {
+      "children": {
+        "banks": {
+          "children": {
+            "checking": {
+              "tags": [
+                "fiat"
+              ]
+            }
+          }
+        },
+        "exchanges": {
+          "balancing_account": "equity:internet",
+          "children": {
+            "binance": {
+              "aliases": [
+                "binance"
+              ],
+              "tags": [
+                "crypto"
+              ]
+            },
+            "coinbase": {
+              "balancing_account": "equity:test",
+              "aliases": [
+                "cb"
+              ],
+              "tags": [
+                "crypto"
+              ]
+            }
+          }
+        },
+        "wallets": {
+          "children": {
+            "BTC": {
+              "tags": [
+                "crypto"
+              ]
+            },
+            "ETH": {
+              "tags": [
+                "crypto"
+              ]
+            },
+            "USD": {
+              "tags": [
+                "fiat"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "expenses": {
+      "children": {
+        "exchanges": {
+          "note": "Exchange fees",
+          "tags": [
+            "exchange",
+            "fee"
+          ]
+        },
+        "txfee": {
+          "note": "Crypto transaction fees",
+          "tags": [
+            "crypto",
+            "fee"
+          ]
+        }
+      }
+    },
+    "revenue": {
+      "note": "Revenue accounts",
+      "children": {
+        "mining": {
+          "note": "Income from mining activities",
+          "portfolio": "passive",
+          "tags": [
+            "mining",
+            "crypto",
+            "dividend",
+            "regular-income"
+          ]
+        }
+      }
+    },
+    "equity": {
+      "note": "This is a virtual account, and will not show up on reports unless explicitly requested.",
+      "virtual": true,
+      "children": {
+        "internet": {
+          "note": "Where crypto lives"
+        },
+        "test": {
+          "note": "for tests"
+        },
+        "testNotVirtual": {
+          "virtual": false
+        }
+      }
+    }
+  },
+  "currencies": {
+    "BTC": {
+      "name": "Bitcoin",
+      "tags": [
+        "crypto"
+      ],
+      "translation": true
+    },
+    "CAN": {
+      "name": "Canya",
+      "tags": [
+        "crypto",
+        "erc-20",
+        "ICO"
+      ],
+      "portfolio": "long"
+    },
+    "ETH": {
+      "name": "Ethereum",
+      "tags": [
+        "crypto"
+      ],
+      "translation": true
+    },
+    "GIN": {
+      "name": "GIN",
+      "tags": [
+        "crypto",
+        "mn"
+      ],
+      "portfolio": "passive"
+    },
+    "MARCO": {
+      "name": "Marblecoin",
+      "tags": [
+        "crypto"
+      ]
+    },
+    "USD": {
+      "name": "US Dollar",
+      "tags": [
+        "fiat"
+      ],
+      "fiatDefault": true,
+      "base": true,
+      "aliases": [
+        "$"
+      ]
+    }
+  },
+  "transactions": [
+    {
+      "account": "assets:exchanges:coinbase",
+      "utc": "2018-06-15T00:00:00.000Z",
+      "trades": [
+        "1 ETH @ 500 USD assets:banks:checking"
+      ]
+    },
+    {
+      "account": "assets:exchanges:coinbase",
+      "utc": "2018-06-16T00:00:00.000Z",
+      "trades": [
+        "2 ETH @ 400 USD assets:banks:checking"
+      ]
+    },
+    {
+      "account": "assets:exchanges:binance",
+      "utc": "2018-06-17T00:00:00.000Z",
+      "credits": [
+        "2 ETH assets:exchanges:coinbase"
+      ]
+    }
+  ],
+  "pricehistory": [
+    "2018-06-15 BTC/USD 550",
+    "2018-06-16 ETH/USD 600",
+    "2018-06-17 ETH/USD 650"
+  ]
+}

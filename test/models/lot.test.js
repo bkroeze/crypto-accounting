@@ -69,14 +69,52 @@ test('Calculates gains', async (t) => {
     '2018-07-04 ETH/USD 400',
     '2018-07-14 ETH/USD 600',
   ];
-  PriceHistory.load(prices)
-    .then(history => {
-      const gains = lot.getCapitalGains(history, 'income:capitalgains', 'USD');
-      //console.log(gains.map(g => g.toObject()));
-      t.is(gains.length, 1);
-      t.is(gains[0].quantity.toFixed(2), '1000.00');
-      t.is(gains[0].currency, 'USD');
-    });
+  const history = await PriceHistory.load(prices);
+  const gains = lot.getCapitalGains(history, 'income:capitalgains', 'USD');
+  // console.log(gains.map(g => g.toObject()));
+  t.is(gains.length, 1);
+  t.is(gains[0].quantity.toFixed(2), '1000.00');
+  t.is(gains[0].currency, 'USD');
+
+});
+
+test('Calculates gains details', async (t) => {
+  const transaction = new Transaction({
+    account: 'test',
+    utc: '2018-07-04',
+    trades: [
+      '10 ETH @ 400 USD exchange',
+    ]
+  });
+
+  const sale = new Transaction({
+    account: 'test',
+    utc: '2018-07-04',
+    trades: [
+      '-5 ETH @ 600 USD exchange',
+    ]
+  });
+
+  const debits = transaction.getDebits();
+  const lot = new Lot(debits[0]);
+  const credits = sale.getCredits();
+  t.is(credits[0].currency, 'ETH');
+  lot.addCredit(credits[0], credits[0].quantity);
+  const prices = [
+    '2018-07-04 ETH/USD 400',
+    '2018-07-14 ETH/USD 600',
+  ];
+  const history = await PriceHistory.load(prices);
+  const gains = lot.getCapitalGainsDetails(history, 'USD');
+  // console.log(JSON.stringify(gains, null, 2));
+  t.is(gains.length, 1);
+  const g = gains[0];
+  t.is(g.creditCurrency, 'ETH');
+  t.is(g.currency, 'USD');
+  t.is(g.proceeds.toFixed(2), '3000.00');
+  t.is(g.cost.toFixed(2), '2000.00');
+  t.is(g.dateAcquired.format('MM-DD-YY'), '07-04-18');
+  t.is(g.profit.toFixed(2), '1000.00');
 });
 
 test('getPurchasePrice direct-to-fiat', async t => {

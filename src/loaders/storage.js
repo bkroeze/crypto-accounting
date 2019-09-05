@@ -1,4 +1,3 @@
-import Loki from 'lokijs';
 import * as R from 'ramda';
 import { get as getLogger } from 'js-logger';
 
@@ -8,15 +7,26 @@ let hasInit = false;
 let isLoaded = false;
 let db = null;
 
+function isNode() {
+  return ((typeof process !== 'undefined') && process && process.release && process.release.name === 'node')
+}
+
 const _initDB = (dbName, autosaveInterval) => {
-  db = new Loki(dbName, {
+  const Loki = require('lokijs');
+  const persistenceMethod = isNode() ? 'fs' : 'memory';
+  const params = {
     autoload: true,
     autoloadCallback: () => {
+      console.log(`${persistenceMethod} db is loaded`)
       isLoaded = true;
     },
     autosave: true,
     autosaveInterval: autosaveInterval || 1000,
-  });
+    persistenceMethod,
+  };
+  console.log(`Using Loki DB with ${params.persistenceMethod} "${dbName}"`);
+  db = new Loki(dbName, params);
+  return db;
 };
 
 function _getDB() {
@@ -38,9 +48,8 @@ export function getCollection(collectionName) {
   return new Promise(async (resolve, reject) => {
     try {
       const database = await _getDB();
-      // Creates a new DB with `clone = true` so that db records cannot be directly modified from the result-set.
       const collection = database.getCollection(collectionName) ? database.getCollection(collectionName) : database.addCollection(collectionName, { clone: true, disableMeta: true });
-      resolve(collection); // This returns a Promise since this entire function is declared with the async keyword
+      resolve(collection);
     } catch (error) {
       reject(error);
     }
