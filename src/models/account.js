@@ -237,6 +237,7 @@ export class Account {
       this.dirty.lots = true;
       this.lots = null;
     }
+    // console.log(`entries before filter for ${ofType}`, this.entries.map(e => e.toObject({shallow: true})));
     const { entries } = this;
     if (!entries) {
       return [];
@@ -261,7 +262,9 @@ export class Account {
       return [];
     }
     if (this.dirty.lots || force) {
+      // console.log(`getLots ${this.path}`);
       const debits = this.getEntries(DEBIT);
+      // console.log(`getLots ${this.path}, ${debits.map(d => d.toObject({shallow: true}))}`);
       this.lots = Lot.makeLots(accounts, currencies, debits);
       // console.log('made lots:', this.lots.map(l => l.toObject({shallow: true})));
     }

@@ -211,11 +211,11 @@ export class Lot {
    * @param {String} currency for the price
    * @param {Array<String>} list of currencies to use as translations
    * @param {Integer} seconds to search for dates within
+   * @param {Moment} startDate to begin compiling
    * @param {Moment} endDate to stop adding details
    * @return {Array<Debit>} list of debits representing capital gains
    */
   getCapitalGainsDetails(pricehistory, fiat, transCurrencies = ['BTC', 'ETH'], within = null, startDate = null, endDate = null) {
-    console.log('get cap gains details');
     const purchasePrice = this.getPurchasePriceEach(pricehistory, fiat, transCurrencies, within);
     let credits = this.credits;
     if (startDate) {
@@ -226,14 +226,14 @@ export class Lot {
     }
     return credits.map((creditWrapper, ix) => {
       const { credit, applied } = creditWrapper;
-      console.log(`${ix}: ${JSON.stringify(credit.toObject({shallow: true}), null, 2)}`);
+      // console.log(`${ix}: ${JSON.stringify(credit.toObject({shallow: true}), null, 2)}`);
       const salePrice = Lot.getSalePriceEach(
         credit, pricehistory, fiat, transCurrencies, within
       );
       const profitEach = salePrice.minus(purchasePrice);
 
       const rv = {
-        applied,
+        quantity: applied,
         transaction: credit.transaction.id,
         creditAccount: credit.getAccount(),
         creditCurrency: credit.currency,
@@ -244,7 +244,7 @@ export class Lot {
         dateSold: credit.getUtc(),
         profit: profitEach.times(applied)
       };
-      console.log({...rv, applied: rv.applied.toFixed(8)});
+      // console.log({...rv, applied: applied.toFixed(8)});
       return rv;
     });
   }

@@ -57,7 +57,7 @@ function handler({ db, action, pair, journal, date }) {
           const queryDate = moment.utc(date);
           const [base, quote] = pair.split('/');
           const price = prices.findPrice(queryDate, base, quote);
-          console.log(price.toObject());
+          console.log('price on date: ', price.toObject());
           break;
         }
         case 'missing': {

@@ -7,7 +7,6 @@ Copyright (c) 2018 Bruce Kroeze
 
 import yargs from 'yargs';
 import dotenv from 'dotenv';
-import * as R from 'ramda';
 import commands from './commands';
 // import { getVal } from '../utils/env';
 
@@ -22,7 +21,7 @@ export function execute() {
 
   const makeCmd = cmd => args.command(cmd);
 
-  R.map(makeCmd, commands);
+  commands.forEach(makeCmd);
 
   args.showHelpOnFail(false, 'Specify --help for available options')
     .demandCommand(1, `${USAGE}\n\nI need at least one command, such as "adduser"`)

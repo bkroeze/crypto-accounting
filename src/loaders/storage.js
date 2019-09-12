@@ -101,8 +101,10 @@ export function upsert(collection, idField, record) {
   const existingRecord = collection.findOne(query);
   if (existingRecord) {
     const updatedRecord = { ...existingRecord, ...record };
+    console.log('updating');
     collection.update(updatedRecord);
   } else {
+    console.log('inserting');
     collection.insert(record);
   }
 }

@@ -5,5 +5,5 @@
   Copyright (c) 2018 Bruce Kroeze
 */
 
-import { execute } from './src/cli';
-execute();
+var cli = require('./lib/cli');
+cli.execute();

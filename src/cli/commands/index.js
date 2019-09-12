@@ -1,16 +1,15 @@
 import * as R from 'ramda';
+import convert from './convert';
+import prices from './prices';
+import loadprices from './loadprices';
+import capitalgains from './capitalgains';
 
-const requireCommands = R.map((cmd) => {
-  try {
-    return require(`./${cmd}`).command;
-  } catch (e) {
-    console.log(`Error while loading: ${cmd}`);
-    throw e;
-  }
-});
+const commands = [
+  convert.command,
+  prices.command,
+  loadprices.command,
+  capitalgains.command,
+];
 
-export const commands = requireCommands([
-  'convert',
-  'prices',
-  'loadprices',
-]);
+
+export default commands;

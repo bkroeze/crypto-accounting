@@ -44,12 +44,13 @@
     "@babel/plugin-proposal-throw-expressions": "^7.0.0",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "@babel/plugin-syntax-import-meta": "^7.0.0",
-    "@babel/plugin-transform-destructuring": "^7.0.0",
+    "@babel/plugin-transform-destructuring": "^7.6.0",
     "@babel/plugin-transform-regenerator": "^7.4.5",
     "@babel/plugin-transform-runtime": "^7.0.0",
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
+    "@babel/runtime": "^7.6.0",
     "ava": "^2.2.0",
     "babel-compile": "^2.0.0",
     "babel-plugin-source-map-support": "^2.0.1",
@@ -82,7 +83,6 @@
     "failWithoutAssertions": false,
     "tap": false,
     "compileEnhancements": false,
-
     "require": [
       "source-map-support",
       "@babel/register",

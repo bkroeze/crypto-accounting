@@ -73,10 +73,13 @@ export class PriceHistory {
   }
 
   safeAddPrice(price, prices) {
+    console.log('sap');
     if (!this.isLoaded) {
+      console.log('db not loaded');
       throw new Error('DB not yet loaded.');
     }
     if (!prices) {
+      console.log('no price collection');
       throw new Error('No price collection');
     }
     return addPrice(new PairPrice(price), prices);
@@ -187,10 +190,12 @@ export class PriceHistory {
         return price;
       }
     }
+    const collLen = this.priceCollection.chain().find({pair: `${base}/${quote}`}).data().length;
 
-    console.error(`Cannot find price for ${base}/${quote} on ${utc.toISOString()}`);
+    console.error(`Cannot find price for ${base}/${quote} on ${utc.toISOString()} in ${collLen} entries`);
 
-    throw makeError(RangeError, ERRORS.NOT_FOUND, `${base}/${quote}`);
+
+    throw makeError(RangeError, ERRORS.NOT_FOUND, `${base}/${quote}`)
   }
 
   /**
@@ -294,7 +299,7 @@ export class PriceHistory {
       best = new PairPrice((diff0 < diff1) ? possibles[0] : possibles[1]);
     }
 
-    if (Math.abs(utcMoment.diff(Moment.utc(best.utc)) > (within * 1000))) {
+    if (within && Math.abs(utcMoment.diff(Moment.utc(best.utc)) > (within * 1000))) {
       log.debug(`Nearest price ${best} is farther than ${within} seconds from ${utc}, attempting to derive`);
       return this.derivePrice(utcDate, base, quote, transCurrencies, within);
     }

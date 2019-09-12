@@ -4,6 +4,7 @@ import moment from 'moment';
 import path from 'path';
 import { PriceHistory } from '../../models/pricehistory';
 import { PairPrice } from '../../models/pairprice';
+import { addPrice } from '../../loaders/priceDB';
 
 const randomSeed = Math.floor(Math.random() * 10000);
 
@@ -90,9 +91,12 @@ function handler(args) {
             } else {
               console.log('REC', JSON.stringify(record));
               const pair = new PairPrice(record);
-              // console.log({pair});
-              // console.log(`#${ct}: ${record.utc.toISOString()} ${record.base}/${record.quote}`)
-              priceHistory.addPrice(pair)
+              console.log({pair});
+              console.log(`#${ct}: ${record.utc.toISOString()} ${record.base}/${record.quote}`)
+              addPrice(pair, priceHistory.priceCollection)
+                .then(() => {
+                  console.log(`#${ct} added`);
+                })
                 .catch((e) => {
                   console.error(e);
                   process.exit(1);

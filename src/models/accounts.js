@@ -167,6 +167,7 @@ export class Accounts {
     const search = lifo ? lifoSearch : fifoSearch;
     if (force || this.lots.length === 0) {
       const lots = R.flatten(this.map(a => a.getLots(this, currencies, force)));
+      // console.log({lots});
       lots.sort(Lot.compare);
       // we've got lots, now go through credits for all accounts and apply
 

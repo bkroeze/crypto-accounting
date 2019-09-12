@@ -10,6 +10,5 @@ export async function getPriceCollection() {
 export async function addPrice(pairprice, collection = null) {
   const prices = collection || await getPriceCollection();
   const record = pairprice.toObject({ db: true });
-  // console.log('record', record);
   upsert(prices, 'id', record);
 }
